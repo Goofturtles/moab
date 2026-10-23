@@ -1,0 +1,255 @@
+/* Settings page (settings-page.js) and the small pieces the settings add to other pages.
+   Mobbin references (web):
+   - Quo, Preferences ............ https://mobbin.com/screens/3bac6bb7-602e-434b-a05e-83b414de3a78
+       -> a menu list beside the page; each row is a label with a grey line of help on the left and the control on the right, hairline dividers.
+   - Snowflake, Preferences ....... https://mobbin.com/screens/ba951441-1223-4c92-8ea2-6f2314d2968f
+       -> rows grouped under a 16px heading, each group in a bordered rounded card; selects sit right-aligned.
+   - AirOps, Notification preferences https://mobbin.com/screens/a33cf381-5620-42a5-8533-afa05089d716
+       -> a list of switches with a short description under each name.
+   - Asana, Display settings ...... https://mobbin.com/screens/f58886af-a9e6-4a95-9e25-bfbb1b6f044a
+       -> plain selects and checkboxes, no decoration. */
+
+/* ---------- layout: menu list left, the open menu right ---------- */
+.settings-view.page { padding: 0; }
+.settings-view.page > .st { max-width: none; }
+.st { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100%; }
+.st-nav { position: sticky; top: 0; align-self: start; padding: 24px 12px 24px 20px; border-right: 1px solid var(--line); min-height: calc(100vh - var(--appbar-h) - 16px); }
+.st-title { font-size: 20px; font-weight: 600; line-height: 1.4; color: var(--ink); padding: 0 8px; }
+.st-mode { margin: 2px 8px 16px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+.st-menu { display: flex; flex-direction: column; gap: 2px; }
+.st-menu a {
+  display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 6px 8px; border-radius: var(--r-md);
+  font-size: 14px; line-height: 1.4; color: var(--ink-2); text-decoration: none; transition: background-color var(--t-fast) ease;
+}
+.st-menu a .ic { color: var(--muted); }
+.st-menu a .chev { display: none; margin-left: auto; }
+.st-menu a:hover { background: var(--hover); color: var(--ink); }
+.st-menu a[aria-current="page"] { background: var(--accent-bg); color: var(--accent); font-weight: 500; }
+.st-menu a[aria-current="page"] .ic { color: var(--accent); }
+.st-menu-l { min-width: 0; }
+
+.st-panel { min-width: 0; max-width: 760px; padding: 24px 32px 96px; }
+.st-head { margin-bottom: 8px; }
+.st-back { display: none; margin: 0 0 8px -8px; }
+.st-head-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.st-h { font-size: 20px; font-weight: 600; line-height: 1.4; }
+.st-h:focus { outline: none; }
+.st-sub { margin-top: 4px; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.st-intro { padding-top: 32px; }
+.st-saved { display: inline-flex; align-items: center; gap: 4px; min-height: 22px; font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--muted); }
+.st-saved .ic { width: 14px; height: 14px; }
+.st-saved.ok { color: var(--accent); }
+.st-saved.err { color: var(--danger); }
+
+/* ---------- groups and rows ---------- */
+.st-group { margin-top: 28px; }
+.st-group-h { font-size: 15px; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.st-group-note { margin-top: 4px; font-size: 13px; color: var(--muted); line-height: 1.5; max-width: 620px; }
+.st-group-note b { color: var(--ink-2); font-weight: 600; }
+.st-card { margin-top: 10px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
+.st-row { display: flex; align-items: center; gap: 16px 24px; min-height: 60px; padding: 12px 16px; border-top: 1px solid var(--line); }
+.st-card > .st-row:first-child, .st-card > :first-child .st-row:first-child { border-top: 0; }
+.st-row-tight { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+.st-row-text { flex: 1 1 260px; min-width: 0; }
+.st-label { display: block; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink); cursor: default; }
+label.st-label { cursor: pointer; }
+.st-help { display: block; margin-top: 2px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.st-ctl { flex: 0 1 auto; display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.st-pad { padding: 14px 16px 16px; }
+.st-tag { display: inline-flex; margin-left: 4px; padding: 0 6px; border-radius: var(--r-sm); background: var(--tag-gray-bg); color: var(--tag-gray-ink); font-size: 12px; line-height: 1.5; }
+.st-empty { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.st-actions { display: flex; gap: 8px; margin-top: 12px; }
+.st-foot { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+/* Switch (role="switch" on a real checkbox, so Space toggles it and a screen reader says on or off). */
+.st-switch {
+  appearance: none; -webkit-appearance: none; position: relative; flex: none; width: 36px; height: 20px; margin: 0; border-radius: 999px;
+  background: var(--field); cursor: pointer; transition: background-color var(--t-fast) ease;
+}
+.st-switch::after {
+  content: ""; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); transition: transform var(--t-fast) var(--ease);
+}
+:root[data-theme="dark"] .st-switch::after { background: #f2f2f4; }
+.st-switch:checked { background: var(--accent-fill); }
+.st-switch:checked::after { transform: translateX(16px); }
+.st-switch:disabled { opacity: 0.45; cursor: not-allowed; }
+.st-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 999px; }
+.st-check { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--accent-fill); cursor: pointer; }
+
+/* Segmented control: real radio buttons (arrow keys move between them). */
+.st-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; border-radius: var(--r-md); background: var(--press); }
+.st-seg-opt { position: relative; display: inline-flex; }
+.st-seg-opt input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.st-seg-opt span {
+  display: inline-flex; align-items: center; min-height: 28px; padding: 3px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; line-height: 1.45;
+  color: var(--ink-2); white-space: nowrap; transition: background-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.st-seg-opt:hover span { color: var(--ink); }
+.st-seg-opt input:checked + span { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--line); }
+.st-seg-opt input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+.st-select { width: auto; min-width: 120px; }
+.st-num { width: 92px; }
+.st-time { width: 120px; }
+.input.xs { height: 26px; padding: 0 26px 0 8px; font-size: 13px; background-position: right 6px center; }
+.st-inline { display: inline-block; width: auto; vertical-align: middle; margin: 0 2px; }
+.st-inline-l { font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+/* Reorderable list: drag the row, or use the arrow buttons. */
+.st-order { display: flex; flex-direction: column; }
+.st-order-item { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 10px 8px 8px; border-top: 1px solid var(--line); background: var(--surface); }
+.st-order-item:first-child { border-top: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.st-order-item:last-child { border-radius: 0 0 var(--r-lg) var(--r-lg); }
+.st-order-item.dragging { opacity: 0.55; background: var(--accent-bg); }
+.st-order-item.off .st-order-label { color: var(--muted); }
+.st-grip { display: inline-grid; place-items: center; width: 20px; color: var(--faint); cursor: grab; }
+.st-order-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.st-order-label { font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink); cursor: pointer; }
+.st-order-text .st-help { margin-top: 0; }
+.st-order-pos { min-width: 18px; font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; line-height: 1.45; }
+.icon-btn.sm { width: 28px; height: 28px; }
+.icon-btn:disabled { opacity: 0.35; cursor: default; background: transparent; }
+.st-preview { padding: 12px 16px 16px; border-top: 1px solid var(--line); }
+.st-preview-cap { font-size: 12px; font-weight: 600; color: var(--muted); line-height: 1.45; }
+.st-preview blockquote { margin-top: 6px; padding-left: 12px; border-left: 3px solid var(--accent-line); font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+
+/* Lists you add to (target accounts, blocked sites). */
+.st-chips-wrap { padding: 14px 16px 16px; }
+.st-group .st-pad .st-chips-wrap { padding: 0; }
+.st-add { display: flex; gap: 8px; max-width: 480px; }
+.st-add .input { flex: 1; min-width: 0; }
+.st-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.st-chip { display: inline-flex; align-items: center; gap: 2px; min-height: 28px; padding: 2px 4px 2px 10px; border-radius: var(--r-full); background: var(--chip); font-size: 13px; line-height: 1.45; color: var(--ink); max-width: 100%; }
+.st-chip span { min-width: 0; overflow-wrap: anywhere; }
+.st-chip-x { display: inline-grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; flex: none; }
+.st-chip-x:hover { background: var(--press); color: var(--ink); }
+.st-chip-x .ic { width: 13px; height: 13px; }
+.st-chips-wrap .st-empty { margin-top: 10px; }
+.st-fold { margin-top: 14px; }
+.st-fold summary { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer; list-style: none; line-height: 1.45; }
+.st-fold summary::-webkit-details-marker { display: none; }
+.st-fold .chev { width: 14px; height: 14px; transition: transform var(--t-fast) ease; }
+.st-fold[open] .chev { transform: rotate(90deg); }
+.st-builtin { margin-top: 8px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+
+/* Priority preview. */
+.st-prio { display: flex; flex-direction: column; }
+.st-prio li { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-height: 44px; padding: 8px 16px; border-top: 1px solid var(--line); }
+.st-prio li:first-child { border-top: 0; }
+.st-prio-name { font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink); }
+.st-prio .st-help { margin: 0; flex-basis: 100%; }
+.st-rule .st-ctl { flex-wrap: nowrap; }
+
+/* Templates. */
+.st-types { margin-bottom: 4px; }
+.st-tpl-body { height: auto; padding: 10px 12px; line-height: 1.55; resize: vertical; min-height: 200px; }
+.st-fills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.st-fill { height: 26px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink-2); font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; line-height: 1.45; cursor: pointer; }
+.st-fill:hover { border-color: var(--accent-line); color: var(--accent); }
+.st-mail { margin: 8px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); font-family: inherit; font-size: 13px; line-height: 1.6; color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Swatches. */
+.st-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.st-swatch { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 3px 10px 3px 6px; border: 1px solid var(--line-2); border-radius: var(--r-full); cursor: pointer; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.st-swatch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.st-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+.st-swatch:has(input:checked) { border-color: var(--accent); background: var(--accent-bg); color: var(--ink); }
+.st-swatch:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Keyboard shortcuts. */
+.st-keys { display: grid; grid-template-columns: minmax(150px, auto) minmax(0, 1fr); }
+.st-keys dt, .st-keys dd { display: flex; align-items: center; gap: 4px; min-height: 44px; padding: 8px 16px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.45; }
+.st-keys dt:first-of-type, .st-keys dt:first-of-type + dd { border-top: 0; }
+.st-keys dd { color: var(--ink-2); }
+.st-or { font-size: 12px; color: var(--muted); }
+
+/* ---------- phones: the menu list, then the menu (with a Back link) ---------- */
+@media (max-width: 760px) {
+  .st { grid-template-columns: minmax(0, 1fr); }
+  .st-nav { position: static; min-height: 0; border-right: 0; padding: 20px 16px 8px; }
+  .st.has-menu .st-nav { display: none; }
+  .st:not(.has-menu) .st-panel { display: none; }
+  .st-menu a { min-height: 48px; border-bottom: 1px solid var(--line); border-radius: 0; }
+  .st-menu a .chev { display: inline-block; }
+  .st-panel { padding: 16px 16px 80px; }
+  .st-back { display: inline-flex; }
+  .st-row { flex-wrap: wrap; }
+  .st-ctl { justify-content: flex-start; flex-basis: 100%; }
+  .st-rule .st-ctl { flex-wrap: wrap; }
+  .st-keys { grid-template-columns: minmax(0, 1fr); }
+  .st-keys dd { border-top: 0; padding-top: 0; }
+}
+
+/* ---------- pieces the settings add to other pages ---------- */
+/* Account priorities badge (Home, Calls, Companies, the brief). */
+.pill.prio { margin-left: 2px; }
+.co-name .pill.prio { position: relative; z-index: 1; margin-left: 8px; }
+.prio-list { display: flex; flex-direction: column; gap: 10px; max-width: 760px; margin-top: 16px; }
+.prio-item { display: flex; flex-direction: column; gap: 6px; }
+.prio-why { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-left: 4px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.cal-views { margin-left: 8px; }
+
+/* Alerts: quiet hours and the daily digest. */
+.quiet-note { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.45; color: var(--muted); }
+.quiet-note .ic { width: 14px; height: 14px; flex: none; }
+.ib-digest + .ib-digest { border-top: 1px solid var(--line); }
+.ib-digest-h { display: flex; align-items: center; gap: 8px; padding: 12px 16px 6px; font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink-2); }
+
+/* Follow-up email (After the call). */
+.fu-help { margin: 0 0 12px; }
+.fu-form .field-label:first-child { margin-top: 4px; }
+.fu-body { height: auto; padding: 10px 12px; line-height: 1.55; resize: vertical; }
+.fu-actions { margin-top: 12px; align-items: center; }
+.fu-said { font-size: 13px; color: var(--accent); line-height: 1.45; }
+
+/* The avatar menu in the top bar. */
+.me-btn { display: inline-grid; place-items: center; padding: 2px; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+.me-btn:hover .avatar { box-shadow: 0 0 0 3px var(--chrome-active); }
+.me-btn:focus-visible { outline: 2px solid var(--chrome-focus); outline-offset: 2px; border-radius: 50%; }
+.me-menu {
+  position: absolute; right: 0; top: calc(100% - 4px); z-index: 30; min-width: 220px; padding: 6px; border: 1px solid var(--line);
+  border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-pop); display: flex; flex-direction: column; gap: 2px;
+}
+.me-menu[hidden] { display: none; }
+.me-menu [role^="menuitem"] {
+  display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 6px 10px; border: 0; border-radius: var(--r-md); background: transparent;
+  font-size: 14px; line-height: 1.4; color: var(--ink); text-decoration: none; text-align: left; cursor: pointer; width: 100%;
+}
+.me-menu [role^="menuitem"] .ic { color: var(--muted); }
+.me-menu [role^="menuitem"]:hover, .me-menu [role^="menuitem"]:focus-visible { background: var(--hover); outline: none; }
+.me-menu [aria-checked="true"] { color: var(--accent); }
+/* Who is signed in (top of the menu) and Sign out (bottom, after a divider). */
+.me-who { display: grid; gap: 1px; padding: 8px 10px 10px; margin-bottom: 4px; border-bottom: 1px solid var(--line); min-width: 0; }
+.me-who-l { font-size: 12px; line-height: 1.45; color: var(--muted); }
+.me-who-e { font-size: 13.5px; font-weight: 600; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere; }
+.me-sep { height: 1px; margin: 4px 2px; background: var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  .st-switch, .st-switch::after, .st-seg-opt span, .st-menu a, .st-fold .chev { transition: none; }
+}
+/* ==================== Spotify theme (dark, the default): Settings ====================
+   Spotify's settings page: a big bold title, bold section names, #b3b3b3 descriptions, flat #181818 cards, green
+   switches, and pill choices where the chosen one is white with black text. */
+:root[data-theme="dark"] :is(.st-title, .st-h) { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+:root[data-theme="dark"] .st-group-h { font-size: 16px; font-weight: 700; }
+:root[data-theme="dark"] .st-menu a[aria-current="page"] { background: var(--chip); color: var(--ink); font-weight: 700; }
+:root[data-theme="dark"] .st-card { border-color: transparent; }
+:root[data-theme="dark"] .st-row { border-top-color: var(--line); }
+:root[data-theme="dark"] .st-seg { border-radius: var(--r-full); background: var(--chip); box-shadow: none; }
+:root[data-theme="dark"] .st-seg-opt span { border-radius: var(--r-full); }
+:root[data-theme="dark"] .st-seg-opt input:checked + span { background: var(--ink); color: #000000; font-weight: 700; box-shadow: none; }
+:root[data-theme="dark"] .st-switch:not(:checked) { background: #535353; }
+:root[data-theme="dark"] .st-swatch { border-color: transparent; background: var(--chip); }
+:root[data-theme="dark"] .st-swatch:has(input:checked) { border-color: var(--ink); background: var(--chip); }
+/* The swatches show this theme's real colours; indigo is retired in this theme (it shows Spotify green), so it is hidden. */
+:root[data-theme="dark"] .st-swatch:has(input[value="green"]) .st-dot { background: #1ed760; }
+:root[data-theme="dark"] .st-swatch:has(input[value="indigo"]) { display: none; }
+:root[data-theme="dark"] .st-fill { border-radius: var(--r-full); }
+
+/* Claude API key box */
+.st-key { display: flex; flex-direction: column; gap: 10px; }
+.st-key-state { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.st-key-state.ok { color: var(--ink); font-weight: 500; }
+.st-key-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.st-key-row .input { flex: 1; min-width: 220px; font-family: ui-monospace, Consolas, monospace; }
+.st-key-help { font-size: 13px; line-height: 1.5; color: var(--muted); }

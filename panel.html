@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOAB · In-call panel</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="map.css">
+  <link rel="stylesheet" href="panel.css">
+  <link rel="stylesheet" href="profile.css">
+  <script>
+    // Settings > Appearance before the first paint (settings.js keeps this copy up to date).
+    try { var a = JSON.parse(localStorage.getItem(/[?&]demo=1(&|$)/.test(location.search) ? "centralize:appearance:demo" : "centralize:appearance") || "null"); if (a) { var r = document.documentElement; r.dataset.theme = a.theme; r.dataset.accent = a.accent; r.dataset.density = a.density; r.style.colorScheme = a.theme; } } catch (e) {}
+  </script>
+  <script>
+    // Fill these in when you register the add-on (see docs/IN-CALL.md). Empty values keep the panel in picker mode.
+    window.CENTRALIZE_CONFIG = { meetCloudProjectNumber: "" };
+  </script>
+</head>
+<body>
+  <!-- One document on purpose: Google Meet needs its meet_sdk URL parameter and a session on every page load,
+       and Zoom ties its SDK token to the page URL, so the panel never navigates. -->
+  <main id="app" aria-label="MOAB in-call panel"></main>
+  <div id="announce" class="sr-only" role="status" aria-live="polite"></div>
+  <script src="data/snapshot.js"></script>
+  <script src="data/sample.js"></script>
+  <script src="data/live.js"></script><!-- server.py: your calendar + MOAB records, or null -->
+  <script src="settings.js"></script>
+  <script src="core.js"></script>
+  <script src="profile.js"></script>
+  <script src="map.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>

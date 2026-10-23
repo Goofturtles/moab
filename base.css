@@ -1,0 +1,476 @@
+/* MOAB design system, shared by the app (index.html) and the in-call panel (panel.html).
+   Default look (data-theme="dark", accent "green"): Spotify-style. #000 frame and rail, #121212 page, #181818 cards that
+   lighten to #282828, white text, #b3b3b3 secondary text, one green (#1ed760, black text on green fills), pill buttons,
+   bold tight headings in Figtree. Spotify's own logo and fonts are not used.
+   Mobbin refs: Spotify web player library/playlist/home/settings, Vercel dark dashboard (see the end of this file).
+   The light theme (Settings > Appearance) keeps the earlier Asana look: round photo avatars, circle checks, Lucide icons. */
+:root {
+  /* Chrome: Asana's dark L, top bar + sidebar */
+  --chrome: #f1f0ef;
+  --chrome-hover: rgba(23, 24, 26, 0.06);
+  --chrome-active: rgba(23, 24, 26, 0.09);
+  --chrome-line: #e2e1df;
+  --chrome-field: #ffffff;
+  --chrome-field-hover: #ffffff;
+  --chrome-ink: #1e1f21;
+  --chrome-muted: #5f6166;
+  --chrome-focus: #4f46e5;
+
+  /* Surfaces */
+  --bg: #ffffff;
+  --canvas: #f6f5f4;
+  --rail: #f9f8f8;          /* legacy name = light grey surface, NOT the sidebar */
+  --surface-2: #f9f8f8;
+  --hover: #f9f8f8;
+  --press: #f1f0ef;
+  --chip: #efedec;
+  --selected: #edf6f0;
+  --line: #edeae9;
+  --line-2: #e0dcdb;
+  --btn-line: #cfcbcb;
+  --field: #8c8a89;
+  --field-hover: #6d6e6f;
+  --dot: #c9c6c5;
+
+  /* Text */
+  --ink: #1e1f21;
+  --ink-2: #48494b;
+  --muted: #6d6e6f;
+  --faint: #a2a0a2;
+
+  /* Accent */
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-press: #3730a3;
+  --accent-bg: #eef0ff;
+  --accent-line: #c7c9fb;
+  --accent-fill: var(--accent);        /* solid fills under white text (buttons, badges, checks); lighter --accent is for text in dark */
+  --accent-fill-hover: var(--accent-hover);
+  --accent-fill-press: var(--accent-press);
+  --on-accent: #ffffff;
+  --surface: #ffffff;                  /* cards, fields, dialogs: the white surfaces (dark theme redefines it) */
+  --frame-bg: rgba(255, 255, 255, 0.5);
+  --danger: #b42318;
+  --danger-bg: #fde0e0;
+
+  /* Tag tints (same values as C.tint) */
+  --tag-gray-bg: #e6e4e2;   --tag-gray-ink: #3a3b3d;
+  --tag-green-bg: #a6e2c3;  --tag-green-ink: #0d4a2a;
+  --tag-blue-bg: #a8ccf6;   --tag-blue-ink: #103a6b;
+  --tag-purple-bg: #d3c1f9; --tag-purple-ink: #3b1784;
+  --tag-orange-bg: #f8c897; --tag-orange-ink: #642b04;
+  --tag-yellow-bg: #f7dc7b; --tag-yellow-ink: #533e00;
+  --tag-pink-bg: #f5b6de;   --tag-pink-ink: #67124a;
+  --tag-teal-bg: #9ce1db;   --tag-teal-ink: #0b4541;
+  --tag-red-bg: #f5a6a6;    --tag-red-ink: #731212;
+
+  /* Elevation: neutral only */
+  --scrim: rgba(30, 31, 33, 0.40);
+  --shadow-card: 0 1px 2px rgba(30, 31, 33, 0.06);
+  --shadow-raise: 0 1px 2px rgba(30, 31, 33, 0.06), 0 4px 12px rgba(30, 31, 33, 0.08);
+  --shadow-pop: 0 0 0 1px rgba(30, 31, 33, 0.06), 0 6px 20px rgba(30, 31, 33, 0.14);
+  --shadow-modal: 0 0 0 1px rgba(30, 31, 33, 0.06), 0 16px 48px rgba(30, 31, 33, 0.22);
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-full: 999px;
+
+  /* Layout */
+  --appbar-h: 48px;
+  --rail-w: 240px;
+  --col: 720px;
+  --page: 1280px;
+  --home: 1040px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-fast: 120ms;
+  --t-med: 200ms;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Figtree", "Helvetica Neue", Helvetica, Arial, sans-serif; /* Figtree: the closest free face to Spotify's */
+  font-size: 14px; line-height: 1.5; font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p, dl, dd, figure, blockquote { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+button, input, textarea, select { font: inherit; color: inherit; }
+a { color: var(--accent); text-underline-offset: 3px; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-md); }
+::placeholder { color: var(--muted); opacity: 1; }
+.grow { flex: 1; min-width: 0; }
+.muted { color: var(--muted); }
+
+.ic { width: 16px; height: 16px; flex: none; stroke-width: 1.75px; }
+.ic.fill { fill: currentColor; stroke: none; }
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.num { font-variant-numeric: tabular-nums; }
+.muted-line { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.help { font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 8px; }
+
+/* Brand mark */
+.mark { width: 24px; height: 24px; border-radius: var(--r-md); background: var(--ink); display: grid; place-items: center; flex: none; }
+.mark svg { width: 24px; height: 24px; }
+.mark.sm { width: 22px; height: 22px; }
+.mark.sm svg { width: 22px; height: 22px; }
+
+/* ---------- tags (Asana custom-field tags) ---------- */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 500; line-height: 1.5; white-space: nowrap; flex: none;
+  background: var(--tag-gray-bg); color: var(--tag-gray-ink);
+}
+.pill .ic { width: 12px; height: 12px; }
+.tag-gray { background: var(--tag-gray-bg); color: var(--tag-gray-ink); }
+.tag-green { background: var(--tag-green-bg); color: var(--tag-green-ink); }
+.tag-blue { background: var(--tag-blue-bg); color: var(--tag-blue-ink); }
+.tag-purple { background: var(--tag-purple-bg); color: var(--tag-purple-ink); }
+.tag-orange { background: var(--tag-orange-bg); color: var(--tag-orange-ink); }
+.tag-yellow { background: var(--tag-yellow-bg); color: var(--tag-yellow-ink); }
+.tag-pink { background: var(--tag-pink-bg); color: var(--tag-pink-ink); }
+.tag-teal { background: var(--tag-teal-bg); color: var(--tag-teal-ink); }
+.tag-red { background: var(--tag-red-bg); color: var(--tag-red-ink); }
+.pill.accent { background: var(--accent-bg); color: var(--accent); }
+.pill.critical { background: var(--danger); color: #fff; }
+
+/* Status pills ("● On track") */
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px 0 7px; border-radius: var(--r-full);
+  font-size: 12px; font-weight: 500; line-height: 1.5; white-space: nowrap; flex: none;
+}
+.status-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+.status-pill.no-dot::before { display: none; }
+.status-pill .ic { width: 12px; height: 12px; }
+
+/* Source marker: filled green dot = real public data, hollow ring = made-up sample data, no dot = the agent's own guess */
+.src { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); line-height: 1.45; white-space: nowrap; }
+.src::before { content: ""; width: 7px; height: 7px; border-radius: 50%; flex: none; box-sizing: border-box; }
+.src.public::before { background: #1f9d55; } /* green = real public data */
+.src.sample::before { border: 1.5px solid var(--muted); }
+.src.guess::before { display: none; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 32px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid transparent;
+  font-size: 14px; font-weight: 500; line-height: 1.4; cursor: pointer; white-space: nowrap; text-decoration: none;
+  transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.btn.primary { background: var(--accent-fill); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-fill-hover); }
+.btn.primary:active { background: var(--accent-fill-press); }
+.btn.secondary { background: var(--surface); border-color: var(--btn-line); color: var(--ink); }
+.btn.secondary:hover { background: var(--hover); border-color: var(--field); }
+.btn.secondary:active { background: var(--press); }
+.btn.ghost { background: transparent; color: var(--ink-2); padding: 0 10px; }
+.btn.ghost:hover { background: var(--press); color: var(--ink); }
+.btn.ghost:active { background: var(--line); }
+.btn.sm { height: 28px; padding: 0 10px; font-size: 13px; }
+.btn.sm .ic { width: 14px; height: 14px; }
+.btn.big { height: 40px; padding: 0 16px; font-size: 15px; }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.btn.primary:disabled:hover { background: var(--accent-fill); }
+.btn.secondary:disabled:hover { background: var(--surface); border-color: var(--btn-line); }
+.link-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none;
+  color: var(--accent); font-size: inherit; font-weight: 500; cursor: pointer; text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); text-underline-offset: 3px;
+}
+.link-btn:hover { text-decoration-color: currentColor; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--r-md);
+  background: transparent; color: var(--ink-2); cursor: pointer; flex: none;
+  transition: background-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.icon-btn:hover { background: var(--press); color: var(--ink); }
+
+/* ---------- avatars: initials on a tint, photo on top (C.avatar) ---------- */
+.avatar {
+  position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: clip; flex: none;
+  display: inline-grid; place-items: center; background: var(--chip); color: var(--ink-2);
+  font-size: 12px; font-weight: 600; line-height: 1.3;
+}
+.avatar-ini { pointer-events: none; }
+.avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; pointer-events: none; -webkit-user-drag: none; }
+.avatar.xs { width: 20px; height: 20px; font-size: 9px; }
+.avatar.sm { width: 24px; height: 24px; font-size: 10px; }
+.avatar.md { width: 32px; height: 32px; font-size: 12px; }
+.avatar.lg { width: 40px; height: 40px; font-size: 14px; }
+.avatar.xl { width: 64px; height: 64px; font-size: 22px; }
+.avatar.me { background: var(--ink); color: var(--bg); }
+.stack { display: inline-flex; isolation: isolate; flex: none; }
+.stack .avatar { box-shadow: 0 0 0 2px var(--surface); }
+.stack .avatar + .avatar { margin-left: -6px; }
+.stack .avatar.md + .avatar.md, .stack .avatar.lg + .avatar.lg { margin-left: -8px; }
+.stack .avatar:nth-child(1) { z-index: 3; }
+.stack .avatar:nth-child(2) { z-index: 2; }
+.stack .avatar:nth-child(3) { z-index: 1; }
+
+/* ---------- circle checks (Asana subtasks) ---------- */
+.todo-item input, .todos input, .p-points input {
+  appearance: none; -webkit-appearance: none; flex: none; width: 18px; height: 18px; margin: 1px 0 0;
+  border: 1.5px solid var(--muted); border-radius: 50%; background: var(--surface); display: grid; place-items: center; cursor: pointer;
+  transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease;
+}
+.todo-item input::after, .todos input::after, .p-points input::after {
+  content: ""; width: 7px; height: 4px; border-left: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted);
+  transform: translateY(-1px) rotate(-45deg);
+}
+.todo-item input:hover, .todos input:hover, .p-points input:hover { border-color: var(--accent); background: var(--accent-bg); }
+.todo-item input:hover::after, .todos input:hover::after, .p-points input:hover::after { border-color: var(--accent); }
+.todo-item input:checked, .todos input:checked, .p-points input:checked { background: var(--accent-fill); border-color: var(--accent-fill); }
+.todo-item input:checked::after, .todos input:checked::after, .p-points input:checked::after { border-color: var(--on-accent); }
+
+/* ---------- agent checks (live list and the folded log) ---------- */
+.steps { margin-top: 8px; }
+.step { display: grid; grid-template-columns: 20px 236px minmax(0, 1fr); gap: 10px; align-items: start; padding: 8px 0; }
+.step + .step { border-top: 1px solid var(--line); }
+.step-ic { height: 21px; display: grid; place-items: center; color: var(--ink-2); }
+.step-ic .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dot); }
+.step.done .step-ic { color: var(--accent); }
+.step.skip .step-ic { color: var(--muted); }
+.step.fail .step-ic { color: var(--danger); }
+.step-label { font-size: 14px; font-weight: 500; line-height: 1.5; }
+.step.wait .step-label { color: var(--muted); font-weight: 400; }
+.step-label a { color: inherit; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
+.step-label a:hover { text-decoration-color: currentColor; }
+.step-detail { font-size: 13px; color: var(--muted); line-height: 1.5; padding-top: 1px; }
+
+/* ---------- Fields table (.kv) and property list (.kv.small, .props) ---------- */
+.kv { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: var(--r-lg); overflow: clip; }
+.kv dt { padding: 8px 12px; font-size: 13px; font-weight: 500; color: var(--muted); line-height: 1.5; border-right: 1px solid var(--line); }
+.kv dd { padding: 8px 12px; font-size: 14px; line-height: 1.5; display: flex; gap: 8px; align-items: flex-start; min-width: 0; }
+.kv dt:not(:first-of-type), .kv dt:not(:first-of-type) + dd { border-top: 1px solid var(--line); }
+.kv dd .ic { margin-top: 2px; }
+.kv dd .ok { color: var(--accent); }
+.kv dd .warn { color: var(--muted); }
+.kv dd a { color: var(--ink); }
+.kv.small, .props { grid-template-columns: 140px minmax(0, 1fr); gap: 0 16px; border: 0; border-radius: 0; overflow: visible; }
+.kv.small dt, .kv.small dd, .props dt, .props dd { padding: 6px 0; border: 0 !important; }
+.kv.small dt, .props dt { font-size: 13px; font-weight: 500; color: var(--muted); }
+.kv.small dd, .props dd { font-size: 14px; color: var(--ink); }
+.props { display: grid; grid-template-columns: 120px minmax(0, 1fr); margin-top: 16px; }
+.props dt, .props dd { min-height: 36px; display: flex; align-items: center; }
+.props dd { flex-wrap: wrap; gap: 6px 8px; }
+.props .who-chip { display: inline-flex; align-items: center; gap: 6px; margin-right: 6px; color: var(--ink-2); }
+
+/* ---------- fields ---------- */
+.field-label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); line-height: 1.45; margin: 20px 0 6px; }
+.field-title { font-size: 14px; font-weight: 600; line-height: 1.45; }
+.input, .sheet textarea, .sheet input, .sheet select {
+  width: 100%; height: 36px; border: 1px solid var(--field); border-radius: var(--r-md); background: var(--surface); color: var(--ink);
+  padding: 0 12px; font-size: 14px; line-height: 1.5;
+  transition: border-color var(--t-fast) ease;
+}
+.input.sm { height: 32px; font-size: 13px; }
+select.input { appearance: none; -webkit-appearance: none; padding-right: 32px; cursor: pointer; background-repeat: no-repeat; background-position: right 10px center; background-size: 16px 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236d6e6f' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+.input:hover, .sheet textarea:hover, .sheet input:hover { border-color: var(--field-hover); }
+.input:focus, .input:focus-visible, .sheet textarea:focus, .sheet input:focus, .sheet select:focus {
+  outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ---------- dialogs ---------- */
+dialog { padding: 0; border: 0; color: var(--ink); background: var(--surface); box-shadow: var(--shadow-modal); }
+dialog::backdrop { background: var(--scrim); }
+.sheet { display: flex; flex-direction: column; max-height: 100%; }
+.sheet-head { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 12px 0 24px; border-bottom: 1px solid var(--line); flex: none; }
+.sheet-head h2 { font-size: 20px; font-weight: 600; line-height: 1.4; flex: 1; min-width: 0; }
+.sheet-body { padding: 24px; overflow-y: auto; }
+.sheet-foot { display: flex; flex-direction: row-reverse; justify-content: flex-start; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--line); flex: none; }
+.sheet-body > .field-label:first-child { margin-top: 0; }
+.field-label + .help { margin: -2px 0 8px; }
+.sheet hr { border: 0; border-top: 1px solid var(--line); margin: 24px 0; }
+.sheet textarea { height: auto; padding: 10px 12px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; line-height: 1.6; resize: vertical; }
+
+/* ---------- small bits ---------- */
+kbd {
+  display: inline-flex; align-items: center; height: 18px; padding: 0 5px; font-family: inherit; font-size: 11px; font-weight: 500; line-height: 1.45;
+  border: 1px solid var(--line-2); border-radius: var(--r-sm); background: var(--surface); color: var(--muted); white-space: nowrap;
+}
+.badge, .count.strong {
+  display: inline-grid; place-items: center; min-width: 20px; height: 18px; padding: 0 6px; border-radius: var(--r-full);
+  background: var(--accent-fill); color: var(--on-accent); font-size: 11px; font-weight: 600; line-height: 1.45; font-variant-numeric: tabular-nums;
+}
+.progress { height: 6px; border-radius: var(--r-full); background: var(--line); }
+.progress span { display: block; height: 100%; border-radius: var(--r-full); background: var(--accent); transition: width 200ms ease; }
+code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 5px; overflow-wrap: anywhere; }
+.page-icon { width: 28px; height: 28px; border-radius: var(--r-md); display: inline-grid; place-items: center; flex: none; }
+.page-icon .ic { width: 16px; height: 16px; }
+
+@media (forced-colors: active) {
+  .src.public::before { background: CanvasText; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin { animation: none; }
+  .btn, .icon-btn, .input, .todo-item input, .todos input, .p-points input, .progress span { transition: none; }
+}
+
+/* MOAB logo: the bot blinks now and then, and its green "working" dot breathes. */
+.logo { width: 28px; height: 28px; flex: none; overflow: visible; }
+.logo.sm { width: 26px; height: 26px; }
+.logo-eyes { transform-box: fill-box; transform-origin: center; } /* blinks only while the brand is hovered (motion.css) */
+.logo-dot { transform-box: fill-box; transform-origin: center; }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@keyframes breathe { 50% { transform: scale(0.78); } }
+@media (prefers-reduced-motion: reduce) { .logo-eyes, .logo-dot { animation: none; } }
+
+/* Live mode: data from your own calendar and MOAB's records (a filled dark dot, next to Public's green and Sample's ring). */
+.src.yours::before { background: var(--ink-2); }
+
+/* ---------- invitee research: what MOAB found automatically about a guest (brief people list and in-call panel) ---------- */
+.rs { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--ink-2); min-width: 0; }
+.rs-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.rs-wait { color: var(--muted); }
+.rs-wait .ic { width: 14px; height: 14px; }
+.rs-src, .rs-note, .rs-local { color: var(--muted); overflow-wrap: anywhere; }
+.rs-src a { color: var(--accent); }
+.rs-src .ext { width: 12px; height: 12px; margin-left: 3px; vertical-align: -1px; color: currentColor; }
+.rs-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.rs .link-btn { font-size: 13px; }
+
+/* ==================== Settings > Appearance: accent colour, dark theme, density ====================
+   settings.js puts data-theme, data-accent and data-density on <html> (index.html and panel.html set them before the first paint).
+   Light accents keep white text at 4.6:1 or better; in dark, --accent is a lighter shade for text and rings (5:1 or better on the
+   page) and --accent-fill a deeper one for buttons and badges under white text. */
+:root[data-accent="green"] { --accent: #15803d; --accent-hover: #166534; --accent-press: #14532d; --accent-bg: #e8f5ec; --accent-line: #b4dfc2; --chrome-focus: #15803d; }
+:root[data-accent="blue"] { --accent: #2563eb; --accent-hover: #1d4ed8; --accent-press: #1e40af; --accent-bg: #eaf1fe; --accent-line: #bcd2fb; --chrome-focus: #2563eb; }
+:root[data-accent="pink"] { --accent: #db2777; --accent-hover: #be185d; --accent-press: #9d174d; --accent-bg: #fdeef5; --accent-line: #f5c0d8; --chrome-focus: #db2777; }
+:root[data-accent="orange"] { --accent: #c2410c; --accent-hover: #9a3412; --accent-press: #7c2d12; --accent-bg: #fff0e6; --accent-line: #f7c9a7; --chrome-focus: #c2410c; }
+
+/* Dark = the Spotify theme, and the default (settings.js). :not([data-theme]) covers the first paint of a first visit,
+   before settings.js has run. Layers: #000 frame, #121212 page, #181818 cards, #1f1f1f raised, #282828 hover. */
+:root[data-theme="dark"], :root:not([data-theme]) {
+  color-scheme: dark;
+  --chrome: #000000; --chrome-hover: #1a1a1a; --chrome-active: #1f1f1f; --chrome-line: #1f1f1f;
+  --chrome-field: #242424; --chrome-field-hover: #2a2a2a; --chrome-ink: #ffffff; --chrome-muted: #b3b3b3;
+  --bg: #121212; --surface: #181818; --canvas: #121212; --rail: #181818; --surface-2: #1f1f1f; --hover: #282828; --press: #2a2a2a;
+  --chip: #2a2a2a; --selected: #1a2e21; --line: #282828; --line-2: #333333; --btn-line: #727272; --field: #727272; --field-hover: #b3b3b3; --dot: #535353;
+  --ink: #ffffff; --ink-2: #dedede; --muted: #b3b3b3; --faint: #818181;
+  /* Spotify green, and the dark theme's accent for "indigo" too (the old default; indigo is retired here):
+     #1ed760, #1fdf64 on hover, black text on every green fill (11:1). */
+  --accent: #1ed760; --accent-hover: #1fdf64; --accent-press: #1db954; --accent-bg: #133b23; --accent-line: #1f6e3d; --chrome-focus: #1ed760;
+  --accent-fill: #1ed760; --accent-fill-hover: #1fdf64; --accent-fill-press: #1db954; --on-accent: #000000;
+  --danger: #f3727f; --danger-bg: #3a1619;
+  /* Tags are neutral chips; green is the one coloured state, red is kept only for risk (Hot, security). */
+  --tag-gray-bg: #2a2a2a;   --tag-gray-ink: #ffffff;
+  --tag-green-bg: #133b23;  --tag-green-ink: #1ed760;
+  --tag-blue-bg: #2a2a2a;   --tag-blue-ink: #ffffff;
+  --tag-purple-bg: #2a2a2a; --tag-purple-ink: #ffffff;
+  --tag-orange-bg: #2a2a2a; --tag-orange-ink: #ffffff;
+  --tag-yellow-bg: #2a2a2a; --tag-yellow-ink: #ffffff;
+  --tag-pink-bg: #2a2a2a;   --tag-pink-ink: #ffffff;
+  --tag-teal-bg: #2a2a2a;   --tag-teal-ink: #ffffff;
+  --tag-red-bg: #3a1619;    --tag-red-ink: #ff9aa2;
+  --scrim: rgba(0, 0, 0, 0.7);
+  --shadow-card: none;
+  --shadow-raise: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-pop: 0 16px 24px rgba(0, 0, 0, 0.3), 0 6px 8px rgba(0, 0, 0, 0.2);
+  --shadow-modal: 0 0 0 1px #282828, 0 16px 48px rgba(0, 0, 0, 0.7);
+  --frame-bg: rgba(255, 255, 255, 0.03);
+  --r-lg: 8px; --r-xl: 8px;    /* Spotify cards and panels: 8px corners */
+  --t-card: 300ms;             /* card lighten on hover */
+}
+/* Other accents in the dark theme: a light shade for text and rings, a deeper fill under white text. */
+:root[data-theme="dark"][data-accent="blue"] { --accent: #6aa2f7; --accent-hover: #80b1f8; --accent-press: #96bff9; --accent-bg: #1c3150; --accent-line: #335a96; --chrome-focus: #6aa2f7; --accent-fill: #2b63e0; --accent-fill-hover: #3b72ea; --accent-fill-press: #4a80f0; --on-accent: #ffffff; }
+:root[data-theme="dark"][data-accent="pink"] { --accent: #f06aa8; --accent-hover: #f382b6; --accent-press: #f59ac4; --accent-bg: #46202f; --accent-line: #7d3556; --chrome-focus: #f06aa8; --accent-fill: #c92a72; --accent-fill-hover: #d63a80; --accent-fill-press: #e04b8d; --on-accent: #ffffff; }
+:root[data-theme="dark"][data-accent="orange"] { --accent: #f2894a; --accent-hover: #f49a63; --accent-press: #f6ab7c; --accent-bg: #45281a; --accent-line: #7c4628; --chrome-focus: #f2894a; --accent-fill: #b8460f; --accent-fill-hover: #c8531a; --accent-fill-press: #d46026; --on-accent: #ffffff; }
+
+/* Dark: the few places that drew their own light greys. (The People map, Home hero and profile map have their own
+   dark rules at the end of map.css, home.css and profile.css.) */
+:root[data-theme="dark"] body { background: var(--bg); }
+:root[data-theme="dark"] .hs-result.ok, :root[data-theme="dark"] .mn-done { color: var(--accent); }
+:root[data-theme="dark"] .rel-kind.moved, :root[data-theme="dark"] .rel-kind.works { border-top-color: #535353; }
+:root[data-theme="dark"] select.input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+:root[data-theme="dark"] .palette::backdrop { background: rgba(0, 0, 0, 0.4); }
+
+/* Compact: tighter rows and gaps everywhere (text sizes stay; line heights stay at 1.3 or more). */
+:root[data-density="compact"] .sec { margin-top: 28px; }
+:root[data-density="compact"] .row { min-height: 36px; padding-top: 5px; padding-bottom: 5px; }
+:root[data-density="compact"] .page-head { padding-top: 14px; padding-bottom: 12px; margin-bottom: 14px; }
+:root[data-density="compact"] .col { padding-top: 20px; }
+:root[data-density="compact"] .btn { height: 30px; }
+:root[data-density="compact"] .btn.sm { height: 26px; }
+:root[data-density="compact"] .home-grid { gap: 12px; }
+:root[data-density="compact"] .kv dt, :root[data-density="compact"] .kv dd { padding-top: 5px; padding-bottom: 5px; }
+:root[data-density="compact"] .props dt, :root[data-density="compact"] .props dd { min-height: 30px; }
+:root[data-density="compact"] .step { padding: 5px 0; }
+:root[data-density="compact"] .ib-row { padding-top: 8px; padding-bottom: 8px; }
+:root[data-density="compact"] .p-sec { margin-top: 14px; }
+:root[data-density="compact"] .st-row { min-height: 48px; padding-top: 8px; padding-bottom: 8px; }
+/* Dark: calendar blocks keep their company colour as a dim fill and a bright edge, so the pastel never glares. */
+:root[data-theme="dark"] :is(.cal-ev, .ag-ev) { background: color-mix(in srgb, var(--ev-bg) 16%, var(--surface)); box-shadow: inset 3px 0 0 var(--ev-bg); }
+:root[data-theme="dark"] :is(.cal-ev, .ag-ev):hover { box-shadow: inset 3px 0 0 var(--ev-bg), var(--shadow-raise); }
+:root[data-theme="dark"] .ev-co, :root[data-theme="dark"] .ev-when .ic { color: var(--ev-bg); }
+:root[data-theme="dark"] .ev-in > .stack .avatar { box-shadow: 0 0 0 1.5px var(--surface); }
+
+/* ==================== Spotify theme (dark, the default): shared components ====================
+   Mobbin references, looked at before building (web unless marked):
+   - Spotify, playlist page: #121212 panels set in #000, round green play button, track rows that light up on hover
+       https://mobbin.com/screens/802255eb-4140-4001-b7db-30aa91a96a88
+   - Spotify, Today's Top Hits: selected row #2a2a2a, the playing title in green, everything else white / #b3b3b3
+       https://mobbin.com/screens/102ff41d-2683-484c-afea-58b3a5df2006
+   - Spotify, home shelves: pill filter chips, 24px bold shelf titles, "Show all" in bold #b3b3b3
+       https://mobbin.com/screens/a46c1e01-5a6b-47d5-8d32-6688d86f0694
+   - Spotify, settings: big bold title, bold section names, #b3b3b3 descriptions, outlined pill button, green switches
+       https://mobbin.com/screens/45bf2e35-7949-49c2-b19d-9fb6c2cf53cf
+   - Spotify, account: rounded #242424 cards on #121212 with bold card titles
+       https://mobbin.com/screens/416bdb05-a4a0-42b4-865b-7b43fadb4f5b
+   - Spotify iOS, browse: saturated colour tiles are the only colour next to the green
+       https://mobbin.com/screens/7d1d7f6f-e8d8-4569-8ff4-401b84695a0a
+   - Vercel, dark overview: hairline cards on near-black, one accent used sparingly
+       https://mobbin.com/screens/9b397b77-fd80-4157-9867-2ae4010133a4
+   What came from them: no card shadows, depth by fill; green only for the main action, the current/next state and
+   selection, with black text on it; outlined pills for second actions; 700-800 headings with tight tracking; quick
+   motion with no bounce: cards lighten over 300ms, pill buttons grow to 1.04 and press to 0.96. */
+:root[data-theme="dark"] h1 { font-weight: 800; letter-spacing: -0.02em; }
+:root[data-theme="dark"] .btn {
+  border-radius: var(--r-full); font-weight: 700;
+  transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease, color var(--t-fast) ease, transform var(--t-fast) ease;
+}
+:root[data-theme="dark"] .btn.primary:hover { transform: scale(1.04); }
+:root[data-theme="dark"] .btn.primary:active { transform: scale(0.96); }
+:root[data-theme="dark"] .btn.secondary { background: transparent; border-color: var(--btn-line); color: var(--ink); }
+:root[data-theme="dark"] .btn.secondary:hover { background: transparent; border-color: var(--ink); transform: scale(1.04); }
+:root[data-theme="dark"] .btn.secondary:active { background: transparent; border-color: var(--muted); transform: scale(0.96); }
+:root[data-theme="dark"] .btn.ghost { color: var(--muted); }
+:root[data-theme="dark"] .btn.ghost:hover { background: var(--press); color: var(--ink); }
+:root[data-theme="dark"] .btn.big:hover { transform: scale(1.02); }  /* wide buttons grow less, so the edge moves as little */
+:root[data-theme="dark"] .btn.big:active { transform: scale(0.98); }
+:root[data-theme="dark"] .btn:disabled, :root[data-theme="dark"] .btn[aria-disabled="true"] { transform: none; }
+:root[data-theme="dark"] .btn.secondary:disabled:hover { background: transparent; border-color: var(--btn-line); }
+:root[data-theme="dark"] .icon-btn { border-radius: var(--r-full); color: var(--muted); }
+:root[data-theme="dark"] .icon-btn:hover { background: var(--press); color: var(--ink); }
+
+/* Tags: rounded chips, neutral; green (and the accent pill) is the one coloured state. */
+:root[data-theme="dark"] .pill { border-radius: var(--r-full); padding: 0 8px; font-weight: 600; }
+:root[data-theme="dark"] .pill.critical { color: #000000; }
+:root[data-theme="dark"] .src.public::before { background: var(--accent); }
+
+/* Focus and selection: the accent ring with a soft green halo. Not on headings the router focuses (tabindex -1), and not
+   on text fields: a field shows focus on its own box (or its search pill's ring), never a second box inside it. */
+:root[data-theme="dark"] :focus-visible:not([tabindex="-1"], input, textarea, select) { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent); }
+:root[data-theme="dark"] :is(.input, .sheet textarea, .sheet input, .sheet select):focus {
+  border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+:root[data-theme="dark"] .progress span { background: linear-gradient(90deg, var(--accent-press), var(--accent)); }
+
+/* MOAB's own bot, recoloured: green body, black eyes, white "working" dot. (Not Spotify's logo.) */
+:root[data-theme="dark"] .logo > path { fill: #1ed760; }
+:root[data-theme="dark"] .logo-eyes { fill: #000000; }
+:root[data-theme="dark"] .logo-dot { fill: #ffffff; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dark"] .btn, :root[data-theme="dark"] .icon-btn { transition: none; }
+  :root[data-theme="dark"] .btn { transform: none !important; } /* beats every :hover/:active scale above, however specific */
+}

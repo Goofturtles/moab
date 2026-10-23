@@ -1,0 +1,218 @@
+/* inbox.css: the Alerts page as an inbox (#/alerts, #/alerts/<id>). Loads after styles.css.
+   Markup: inboxRow(), ibListPane(), ibPane(), drawAlerts() in app.js.
+
+   Mobbin references (what each one decided):
+   - Linear, Inbox + open update: https://mobbin.com/screens/8337813e-f0dd-4415-8a29-87c114b0442b
+       ~360px list beside the reading pane, 2-line rows, inset rounded selected row, dot before unread titles.
+   - Linear, Inbox + issue pane: https://mobbin.com/screens/beb9d6b3-ec34-46d7-9332-320fcb32a338
+       reading pane = title, then properties; relative time column ("13min") at the row's right.
+   - Linear, filter chips All issues / Active / Backlog: https://mobbin.com/screens/97ac166b-44cc-41ce-9113-43b3491ab809
+   - Superhuman, Important inbox: https://mobbin.com/screens/fdcc6981-35ec-4489-b155-142754a66dfd
+       bold sender + subject for unread, grey preview on the same line, small dot in a left gutter, date right.
+   - Superhuman, hover row: https://mobbin.com/screens/0b759723-9e52-4b49-9cb5-788a40df0d35
+       on hover the date is replaced by the row's actions (done, remind).
+   - Superhuman, shortcut hint bar: https://mobbin.com/screens/67b64e53-c74b-4c83-a570-fc7ae5250809
+       "Hit E to mark done, H to set a reminder" strip at the bottom: our J / K / U hint.
+   - Superhuman, selected row: https://mobbin.com/screens/f3db6d1b-66ed-4be0-b6aa-82f75f30a762
+   - Front, Open inbox: https://mobbin.com/screens/ca886cf9-1312-40e6-a0bc-e7a20dc8973c
+       All / Tasks / Discussions segmented filter over the list; message as a bordered card with a sender row.
+   - Front, conversation + Archive button: https://mobbin.com/screens/a25fd5f3-a74a-4abc-b5f5-11b38cb684fa
+       one text action at the right of the reading pane's top bar (our Mark read / Mark unread).
+   - Front, conversation list: https://mobbin.com/screens/56a6c388-47b3-4e0f-93e2-5850816bd4ef
+   - Notion Mail, inbox + reading pane: https://mobbin.com/screens/6cbf9d6c-b0d2-4d89-9ee5-57bbd6fec0cf
+       up/down arrows at the top-left of the reading pane, big subject, label chips under it, then the message card.
+   - Notion Mail, hover actions: https://mobbin.com/screens/3fb77e99-6a43-44a2-87a7-7801e5149562
+       row hover shows read/unread + archive icons where the date was.
+   - Notion Mail, forwarded message: https://mobbin.com/screens/786accc1-462f-4428-a534-fccef775c354
+       sender row = avatar, name, address, time at the right.
+   - Asana, Inbox: https://mobbin.com/screens/f026c775-b399-4a14-86ef-4fa8a8318333
+       sentence-case tabs, quiet filter row, unread dot, hover actions (bookmark, archive) on the card.
+   - Intercom, inbox: https://mobbin.com/screens/b1a806f1-b212-45a8-b525-fea3fa01b961
+       sender faces / initial tiles at the left of each row.
+   - Cloaked, mark as read: https://mobbin.com/screens/e1c8d483-d2d2-40d4-8c84-317f37aa723d
+*/
+
+/* ---------- frame: list pane + reading pane, each scrolls on its own ---------- */
+.alerts-view { height: 100%; }
+.ib { display: grid; grid-template-columns: 380px minmax(0, 1fr); height: 100%; }
+.ib-list { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--line); background: var(--surface); }
+
+/* ---------- list head: title, Mark all read, All / Unread ---------- */
+.ib-head { flex: none; padding: 16px 16px 12px; border-bottom: 1px solid var(--line); }
+.ib-head-row { display: flex; align-items: center; gap: 8px; min-height: 32px; }
+.ib-head .page-title { font-size: 20px; line-height: 1.4; }
+.ib-sub { margin-top: 2px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.ib-seg { display: inline-flex; gap: 2px; margin-top: 12px; padding: 2px; border-radius: var(--r-md); background: var(--press); }
+.ib-seg-btn {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 0; border-radius: var(--r-sm);
+  background: transparent; color: var(--ink-2); font-size: 13px; font-weight: 500; line-height: 1.45; cursor: pointer;
+  transition: background-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.ib-seg-btn:hover { color: var(--ink); }
+.ib-seg-btn[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line), var(--shadow-card); }
+.ib-n { font-size: 12px; font-weight: 400; color: var(--ink-2); font-variant-numeric: tabular-nums; } /* --muted is 4.49:1 on the grey track */
+.ib-seg-btn:focus-visible { outline-offset: 0; }
+
+/* ---------- rows: dot, face, title + preview, date (actions on hover) ---------- */
+.ib-rows { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+.ib-row {
+  position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 12px; align-items: start;
+  padding: 12px 10px 12px 20px; border-radius: var(--r-md); transition: background-color var(--t-fast) ease;
+}
+.ib-row + .ib-row { margin-top: 2px; }
+.ib-row:hover { background: var(--hover); }
+.ib-row.is-open { background: var(--selected); }
+.ib-dot { position: absolute; left: 6px; top: 25px; width: 8px; height: 8px; border-radius: 50%; }
+.ib-row.unread .ib-dot { background: var(--accent); }
+.ib-row > .avatar, .ib-row > .ib-tile { margin-top: 1px; }
+.ib-tile { display: inline-grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: var(--r-lg); font-size: 13px; font-weight: 600; line-height: 1.3; }
+.ib-tile.lg { width: 40px; height: 40px; font-size: 16px; }
+.ib-text { min-width: 0; }
+/* The title link covers the whole row (::after), so the row is one click target; the actions sit above it. */
+.ib-link {
+  display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-size: 14px; font-weight: 400; line-height: 1.45; color: var(--ink-2); text-decoration: none;
+}
+.ib-link::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-md); }
+.ib-link:focus-visible { outline: none; }
+.ib-link:focus-visible::after { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ib-row.unread .ib-link { font-weight: 600; color: var(--ink); }
+.ib-prev { display: block; margin-top: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.ib-kind { font-weight: 500; color: var(--ink-2); }
+.ib-side { position: relative; display: flex; justify-content: flex-end; }
+.ib-date { padding-top: 1px; font-size: 12px; line-height: 1.45; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; transition: opacity var(--t-fast) ease; }
+.ib-row.unread .ib-date { font-weight: 500; color: var(--ink); }
+/* Actions take the date's place and cover the end of the title on a solid chip of the row's colour (no fades). */
+.ib-acts {
+  position: absolute; z-index: 1; top: -5px; right: -4px; display: flex; gap: 2px; padding-left: 8px;
+  background: var(--hover); opacity: 0; pointer-events: none; transition: opacity var(--t-fast) ease;
+}
+.ib-row.is-open .ib-acts { background: var(--selected); }
+.ib-row:hover .ib-acts { opacity: 1; pointer-events: auto; }
+.ib-row:hover .ib-date { opacity: 0; }
+/* Separate rules: a browser without :has() drops only these, not the hover ones. */
+.ib-row:has(:focus-visible) .ib-acts { opacity: 1; pointer-events: auto; }
+.ib-row:has(:focus-visible) .ib-date { opacity: 0; }
+.ib-act {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--r-md);
+  background: transparent; color: var(--ink-2); cursor: pointer; text-decoration: none;
+  transition: background-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.ib-act:hover { background: var(--line); color: var(--ink); }
+.ib-row.is-open .ib-act:hover { background: var(--accent-line); }
+
+/* Empty Unread view (Asana's archive empty state: title, one line, one button). */
+.ib-empty { flex: 1; padding: 48px 24px; text-align: center; }
+.ib-empty h2 { font-size: 16px; font-weight: 600; line-height: 1.5; }
+.ib-empty p { margin-top: 4px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.ib-empty .btn { margin-top: 16px; }
+
+/* Keyboard hint strip (Superhuman). */
+.ib-keys { flex: none; display: flex; align-items: center; gap: 4px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.45; color: var(--muted); }
+.ib-keys span:not(.ib-sep) { margin-left: 4px; }
+.ib-sep { width: 1px; height: 12px; margin: 0 8px; background: var(--line-2); }
+
+/* ---------- reading pane ---------- */
+.ib-read { min-width: 0; min-height: 0; overflow-y: auto; background: var(--surface); scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+.ib-bar {
+  position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 2px; height: 48px; padding: 0 16px 0 12px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.ib-bar .back { display: none; }
+.ib-bar .icon-btn:disabled { opacity: 0.4; cursor: default; background: transparent; }
+.ib-pos { margin-left: 8px; font-size: 13px; line-height: 1.45; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ib-bar .btn kbd { margin-left: 4px; }
+.ib-body { max-width: 760px; padding: 28px 40px 96px; }
+.ib-body .alert-h { font-size: 24px; font-weight: 600; line-height: 1.33; letter-spacing: -0.01em; }
+.ib-labels { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 10px; }
+
+/* The alert as a message card: who it is from, what changed, why it matters, what to do. */
+.ib-msg { margin-top: 20px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-card); }
+.ib-from { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.ib-from-who { min-width: 0; }
+.ib-from-name { font-size: 14px; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.ib-from-sub { font-size: 13px; line-height: 1.45; color: var(--muted); }
+.ib-when { font-size: 13px; line-height: 1.45; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ib-msg-body { padding: 20px; }
+.ib-msg-body section + section { margin-top: 24px; }
+.ib-msg-body h3 { margin-bottom: 8px; font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.ib-diff { border: 1px solid var(--line); border-radius: var(--r-lg); }
+.ib-diff-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 10px 12px; font-size: 14px; line-height: 1.45; }
+.ib-diff-row + .ib-diff-row { border-top: 1px solid var(--line); }
+.ib-diff-row .k { font-size: 13px; color: var(--muted); }
+.ib-diff-row .v { font-weight: 500; color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+.ib-diff-row .old { font-weight: 400; color: var(--muted); text-decoration: line-through; }
+.ib-diff-row .arrow { margin: 0 6px; font-weight: 400; color: var(--muted); }
+.ib-why p { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+.ib-why p + p { margin-top: 8px; color: var(--ink); font-weight: 500; }
+.ib-msg-foot { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 20px; border-top: 1px solid var(--line); }
+.ib-body .sec { margin-top: 32px; }
+.ib-prov { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.5; color: var(--muted); }
+
+/* ---------- motion: only while hovered ---------- */
+/* Hovering a row rings its bell for as long as the pointer stays; hovering a call action rings the phone. */
+.ib-bell { transform-origin: 50% 10%; }
+.ib-ring { transform-origin: 50% 50%; }
+.ib-row:hover .ib-bell { animation: ib-swing 1.2s ease-in-out infinite; }
+.ib-act:hover .ib-ring, .btn:hover .ib-ring { animation: ib-ring 1.1s ease-in-out infinite; }
+@keyframes ib-swing {
+  0%, 70%, 100% { transform: rotate(0); }
+  10% { transform: rotate(16deg); }
+  22% { transform: rotate(-13deg); }
+  34% { transform: rotate(9deg); }
+  46% { transform: rotate(-6deg); }
+  58% { transform: rotate(3deg); }
+}
+@keyframes ib-ring {
+  0%, 45%, 100% { transform: rotate(0); }
+  5%, 15%, 25%, 35% { transform: rotate(-12deg); }
+  10%, 20%, 30%, 40% { transform: rotate(12deg); }
+}
+
+/* ---------- widths ---------- */
+@media (max-width: 1239px) {
+  .ib { grid-template-columns: 340px minmax(0, 1fr); }
+  .ib-body { padding: 24px 32px 80px; }
+}
+/* Under 1100px (IB_WIDE in app.js): the list, then the alert with a back link. */
+@media (max-width: 1099px) {
+  .alerts-view, .ib { height: auto; }
+  .ib { display: block; }
+  .ib-list { border-right: 0; }
+  .ib-rows { overflow: visible; padding: 8px 8px 24px; }
+  .ib.has-detail .ib-list { display: none; }
+  .ib-read { overflow: visible; }
+  .ib-bar .back { display: inline-flex; }
+  .ib-keys { display: none; }
+}
+@media (max-width: 999px) {
+  .ib-bar { top: var(--appbar-h); padding: 0 12px 0 8px; }
+  .ib-body { padding: 20px 16px 64px; }
+}
+@media (max-width: 640px) {
+  .ib-body .alert-h { font-size: 22px; line-height: 1.35; }
+  .ib-from { grid-template-columns: 40px minmax(0, 1fr); padding: 16px; }
+  .ib-when { grid-column: 2; margin-top: -8px; }
+  .ib-msg-body { padding: 16px; }
+  .ib-msg-foot { padding: 16px; }
+  .ib-diff-row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .ib-bar .btn kbd { display: none; }
+}
+@media (hover: none) {
+  .ib-acts { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ib-row:hover .ib-bell, .ib-act:hover .ib-ring, .btn:hover .ib-ring { animation: none; }
+  .ib-row, .ib-acts, .ib-date, .ib-act, .ib-seg-btn { transition: none; }
+}
+
+/* ==================== Spotify theme (dark, the default): Alerts ====================
+   All / Unread are pill chips (the chosen one white); rows light to #2a2a2a like track rows; the open alert keeps the
+   green-tinted selection. */
+:root[data-theme="dark"] .ib-seg { gap: 8px; padding: 0; background: transparent; }
+:root[data-theme="dark"] .ib-seg-btn { height: 32px; padding: 0 14px; border-radius: var(--r-full); background: var(--chip); color: var(--ink); font-size: 14px; }
+:root[data-theme="dark"] .ib-seg-btn:hover { background: #333333; }
+:root[data-theme="dark"] .ib-seg-btn[aria-pressed="true"] { background: var(--ink); color: #000000; box-shadow: none; font-weight: 700; }
+:root[data-theme="dark"] .ib-seg-btn[aria-pressed="true"] .ib-n { color: #000000; }
+:root[data-theme="dark"] .ib-seg-btn:focus-visible { border-radius: var(--r-full); outline-offset: 2px; }
+:root[data-theme="dark"] .ib-row:hover { background: #2a2a2a; }

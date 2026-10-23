@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOAB</title>
+  <meta name="description" content="MOAB, the Multi Organizational Agentic Bot: a call-prep agent for Spotify Backstage sales.">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Loaded without blocking the first paint, so slow venue Wi-Fi never leaves a blank page; system fonts show until Inter arrives. -->
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="map.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="motion.css">
+  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="calendar.css">
+  <link rel="stylesheet" href="inbox.css">
+  <link rel="stylesheet" href="live.css">
+  <link rel="stylesheet" href="companies.css">
+  <link rel="stylesheet" href="mentions.css">
+  <link rel="stylesheet" href="settings.css">
+  <link rel="stylesheet" href="profile.css">
+  <link rel="stylesheet" href="guides.css">
+  <script>
+    // Settings > Appearance before the first paint (settings.js keeps this copy up to date), so a dark page never flashes white.
+    try { var a = JSON.parse(localStorage.getItem(/[?&]demo=1(&|$)/.test(location.search) ? "centralize:appearance:demo" : "centralize:appearance") || "null"); if (a) { var r = document.documentElement; r.dataset.theme = a.theme; r.dataset.accent = a.accent; r.dataset.density = a.density; r.style.colorScheme = a.theme; } } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="appbar">
+    <button type="button" class="icon-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="rail" data-icon="menu"></button>
+    <a class="brand" href="#/home" aria-label="MOAB, Multi Organizational Agentic Bot. Home">
+      <svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><defs><mask id="moabCut"><rect width="48" height="48" fill="#fff"/><circle cx="38.5" cy="9.5" r="8" fill="#000"/></mask></defs><path d="M24 5c11 0 19 4.2 19 17.5S36 43 24 43 5 35.8 5 22.5 13 5 24 5z" fill="#1ED760" mask="url(#moabCut)"/><g class="logo-eyes" fill="#000"><rect x="15.5" y="18" width="5.5" height="11" rx="2.75"/><rect x="27" y="18" width="5.5" height="11" rx="2.75"/></g><circle class="logo-dot" cx="38.5" cy="9.5" r="5" fill="#22C55E"/></svg>
+      <span class="brand-text"><span class="brand-name">MOAB</span><span class="brand-sub">Multi Organizational Agentic Bot</span></span>
+    </a>
+    <span class="appbar-title" id="appbarTitle">Home</span>
+    <div id="openPalette" class="search-trigger search-field" role="search"></div>
+    <button type="button" class="icon-btn" id="appbarSearch" aria-label="Search" data-icon="search"></button>
+    <span class="appbar-me" id="appbarMe" title="Chris (you)"><button type="button" class="ask-btn" id="askBtn" aria-label="Ask MOAB"><span data-icon="sparkle" aria-hidden="true"></span><span>Ask MOAB</span></button><span class="pill demo-pill" id="demoPill">Demo</span><button type="button" class="me-btn" id="meBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="meMenu" aria-label="Your menu"><span class="avatar sm me" aria-hidden="true"><span class="avatar-ini">C</span></span></button><span class="sr-only" id="meLabel">Signed in as Chris</span>
+      <div class="me-menu" id="meMenu" role="menu" aria-label="Your menu" hidden></div></span>
+  </header>
+
+  <div class="shell">
+    <aside id="rail" class="rail" aria-label="Main">
+      <div class="rail-head">
+        <a class="brand rail-brand" href="#/home" aria-label="MOAB, Multi Organizational Agentic Bot. Home">
+          <svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><defs><mask id="moabCutRail"><rect width="48" height="48" fill="#fff"/><circle cx="38.5" cy="9.5" r="8" fill="#000"/></mask></defs><path d="M24 5c11 0 19 4.2 19 17.5S36 43 24 43 5 35.8 5 22.5 13 5 24 5z" fill="#1ED760" mask="url(#moabCutRail)"/><g class="logo-eyes" fill="#000"><rect x="15.5" y="18" width="5.5" height="11" rx="2.75"/><rect x="27" y="18" width="5.5" height="11" rx="2.75"/></g><circle class="logo-dot" cx="38.5" cy="9.5" r="5" fill="#22C55E"/></svg>
+          <span class="brand-text"><span class="brand-name">MOAB</span><span class="brand-sub">Multi Organizational Agentic Bot</span></span>
+        </a>
+        <button type="button" class="rail-search" id="railSearch" aria-haspopup="dialog" aria-controls="palette" aria-keyshortcuts="Control+K Meta+K /"><span data-icon="search" aria-hidden="true"></span><span class="rs-text">Search</span><kbd class="rs-kbd">Ctrl K</kbd></button>
+      </div>
+      <nav class="rail-scroll" aria-label="Pages">
+        <ul class="nav" id="navMain" role="list"></ul>
+        <h2 class="rail-label">Records</h2>
+        <ul class="nav" id="navRecords" role="list"></ul>
+        <h2 class="rail-label" id="navWeekLabel">This week</h2>
+        <ul class="nav nav-week" id="navWeek" role="list"></ul>
+      </nav>
+      <div class="rail-foot">
+        <ul class="nav" id="navFoot" role="list"></ul>
+        <div class="rail-me"><span class="avatar sm me" aria-hidden="true"><span class="avatar-ini">C</span></span><span class="rail-me-name">Chris</span><span class="pill demo-pill">Demo</span></div>
+        <p class="legend" id="legend"><span class="src public">Public = real</span><span class="src sample">Sample = made up</span></p>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+
+    <main class="main" id="main">
+      <section data-view="home" class="home" hidden></section>
+      <section data-view="calls" class="page" hidden></section>
+      <section data-view="call" hidden>
+        <div class="topbar" id="topbar">
+          <div class="topbar-inner">
+            <a class="back" href="#/calls" id="backLink"></a>
+            <div class="tabs" role="tablist" aria-label="Views" id="callTabs" hidden>
+              <button type="button" role="tab" id="tabBrief" aria-controls="panelBrief" aria-selected="true">Brief</button>
+              <button type="button" role="tab" id="tabAfter" aria-controls="panelAfter" aria-selected="false" tabindex="-1">After the call<span class="tab-count" id="afterCount" hidden></span></button>
+            </div>
+            <span class="topbar-spacer"></span>
+            <a class="btn ghost sm" id="openInCall" href="#/live"></a>
+            <button id="runAgain" type="button" class="btn secondary sm" hidden></button>
+          </div>
+        </div>
+        <div class="col">
+          <div id="panelBrief" role="tabpanel" aria-labelledby="tabBrief"></div>
+          <div id="panelAfter" role="tabpanel" aria-labelledby="tabAfter" hidden>
+            <div id="afterHead"></div>
+            <section class="sec">
+              <div class="sec-head"><h2>Call notes</h2><span class="src sample" data-src="records">Sample data</span><span class="notes-saved" id="notesSaved" role="status"></span></div>
+              <label for="afterNotes" class="sr-only">Call notes</label>
+              <textarea id="afterNotes" class="notes-box" rows="6" aria-describedby="afterHelp"></textarea>
+              <p class="help" id="afterHelp">Paste your notes, or bring in what you typed in the in-call panel. The agent suggests record updates.</p>
+              <div class="after-actions">
+                <button id="update" type="button" class="btn primary">Suggest updates</button>
+                <button id="importNotes" type="button" class="btn ghost" hidden></button>
+              </div>
+            </section>
+            <section id="mentions" class="sec mn" aria-labelledby="mnH"></section>
+            <section id="results" class="sec" hidden>
+              <div class="sec-head">
+                <h2 id="resultsTitle"></h2>
+                <span class="src sample" data-src="recordsList">Sample records</span>
+                <button id="acceptAll" type="button" class="btn secondary sm">Accept all</button>
+              </div>
+              <ul id="changes" class="changes" role="list"></ul>
+              <p id="tally" class="muted-line"></p>
+            </section>
+            <section id="followUp" class="sec fu" aria-labelledby="fuH"></section>
+            <section id="hsSave" class="sec hs-save" aria-labelledby="hsSaveH" hidden></section>
+          </div>
+        </div>
+      </section>
+      <section data-view="alerts" class="alerts-view" hidden></section>
+      <section data-view="map" class="map-view" hidden></section>
+      <section data-view="live" class="page wide" hidden></section>
+      <section data-view="companies" class="page" hidden></section>
+      <section data-view="company" hidden></section>
+      <section data-view="people" class="person-view" hidden></section>
+      <section data-view="data" class="page narrow" hidden></section>
+      <section data-view="settings" class="page settings-view" hidden></section>
+      <section data-view="guides" class="guides-view" hidden></section>
+    </main>
+  </div>
+
+  <dialog id="drawer" class="drawer" aria-labelledby="drawerTitle">
+    <form method="dialog" class="sheet">
+      <header class="sheet-head">
+        <h2 id="drawerTitle">Their Backstage</h2>
+        <button type="button" id="drawerClose" class="icon-btn" aria-label="Close" data-icon="x"></button>
+      </header>
+      <div class="sheet-body">
+        <label class="field-label" for="versionFile">backstage.json from their repo</label>
+        <p class="help" id="versionHelp">Paste backstage.json or package.json. Leave empty if they don't run Backstage.</p>
+        <textarea id="versionFile" rows="6" spellcheck="false" placeholder='{ "version": "1.30.0" }' aria-describedby="versionHelp"></textarea>
+        <label class="field-label" for="since">Running Backstage since (year)</label>
+        <input id="since" type="number" min="2016" inputmode="numeric" placeholder="e.g. 2021">
+        <hr>
+        <h3 class="field-title">Estimate settings</h3>
+        <p class="help" id="estimateHelp"></p>
+        <div class="two">
+          <div>
+            <label class="field-label" for="assumeRelease">Days per release behind</label>
+            <input id="assumeRelease" type="number" min="0" step="0.5" aria-describedby="estimateHelp">
+          </div>
+          <div>
+            <label class="field-label" for="assumeSerious">Extra days per serious notice</label>
+            <input id="assumeSerious" type="number" min="0" step="0.5" aria-describedby="estimateHelp">
+          </div>
+        </div>
+      </div>
+      <footer class="sheet-foot">
+        <button id="drawerSave" type="submit" value="save" class="btn primary">Save</button>
+        <button type="submit" value="cancel" formnovalidate class="btn secondary">Cancel</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="tlDialog" class="tl-dialog" aria-labelledby="tlTitle"></dialog>
+  <dialog id="checkDialog" class="dialog" aria-labelledby="checkTitle">
+    <div class="sheet">
+      <header class="sheet-head">
+        <h2 id="checkTitle">Check any company</h2>
+        <span class="src public">Public data</span>
+        <button id="checkClose" type="button" class="icon-btn" aria-label="Close" data-icon="x"></button>
+      </header>
+      <form id="checkForm" class="sheet-body">
+        <div class="check-row">
+          <div class="grow">
+            <label class="field-label" for="anyName">Company name</label>
+            <input id="anyName" type="text" placeholder="e.g. Zalando" autocomplete="off">
+          </div>
+          <div class="ver">
+            <label class="field-label" for="anyVersion">Backstage version</label>
+            <input id="anyVersion" type="text" placeholder="e.g. 1.30.0" autocomplete="off">
+          </div>
+        </div>
+        <button type="submit" class="btn primary">Check</button>
+        <div id="anyResult" class="any-result" role="status"></div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="palette" class="palette" aria-label="Search">
+    <div class="pal-input">
+      <span data-icon="search" class="pal-ic" aria-hidden="true"></span>
+      <input id="palInput" type="text" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" autocomplete="off" spellcheck="false"
+        aria-label="Search" placeholder="Search calls, people, companies">
+      <kbd class="pal-esc">Esc</kbd>
+    </div>
+    <div class="pal-filters" id="palFilters" role="group" aria-label="Show only"></div>
+    <div id="palAnswer" class="pal-answer" aria-live="polite" hidden></div>
+    <div id="palList" role="listbox" aria-label="Results"></div>
+    <div class="pal-foot">
+      <span class="pal-keys"><span class="pal-key"><kbd>↑</kbd><kbd>↓</kbd>to move</span><span class="pal-key"><kbd>Enter</kbd>to open</span><span class="pal-key"><kbd>Esc</kbd>to close</span></span>
+      <span id="palCount"></span>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="announce" class="sr-only" role="status" aria-live="polite"></div>
+
+  <script src="data/snapshot.js"></script>
+  <script src="data/sample.js"></script>
+  <script src="data/live.js"></script><!-- server.py: your calendar + MOAB records, or null -->
+  <script src="settings.js"></script>
+  <script src="core.js"></script>
+  <script src="profile.js"></script>
+  <script src="guides.js"></script>
+  <script src="map.js"></script>
+  <script src="app.js"></script>
+  <script src="settings-page.js"></script>
+</body>
+</html>

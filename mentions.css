@@ -1,0 +1,69 @@
+/* "Mentioned on the call" (After the call tab): people who were talked about on a call, from a transcript or your notes.
+   Same Asana-light parts as the brief's people list (.person) and Save to HubSpot (.hs-*): a dashed drop zone, one row per person,
+   the sentence they came up in as a soft quote, pastel status pills. Nothing here uses line-height 1 on text. */
+.tab-count {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 9px;
+  background: var(--accent-bg); color: var(--accent); font-size: 11px; font-weight: 600; line-height: 1.45; vertical-align: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.mn-lead { margin: 0 0 12px; }
+.mn-drop {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 16px; min-width: 0;
+  border: 1px dashed var(--line-2); border-radius: var(--r-lg); background: var(--surface-2);
+  transition: border-color var(--t-fast, 120ms) ease, background-color var(--t-fast, 120ms) ease;
+}
+.mn-drop.drag { border-color: var(--accent); background: var(--accent-bg); }
+.mn-drop:focus-within { border-color: var(--accent); }
+.mn-drop label.btn { cursor: pointer; }
+.mn-drop-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.mn-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.mn-sources { margin-top: 10px; }
+.mn-paste { margin-top: 4px; }
+.mn-paste .field-label { margin-top: 12px; }
+.mn-paste-box { min-height: 140px; }
+.mn-msg { margin-top: 10px; font-size: 13px; line-height: 1.5; }
+.mn-list { display: flex; flex-direction: column; margin-top: 16px; border-top: 1px solid var(--line); }
+.mn-item { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.mn-item:focus { outline: none; }
+.mn-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mn .mn-body > p, .mn .mn-cand > p, .mn .mn-body > blockquote { margin-top: 0; }  /* the column's gap spaces them, not .sec p + p */
+.mn .mn-body > .mn-actions, .mn .mn-cand > .mn-actions { margin-top: 4px; }
+.mn-name { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 15px; line-height: 1.45; min-width: 0; overflow-wrap: anywhere; }
+.mn-name > span:not(.pill):not(.src) { color: var(--ink-2); }
+.mn-said-as, .mn-facts, .mn-met, .mn-why, .mn-done { font-size: 13px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
+.mn-facts { color: var(--ink-2); }
+.mn-done { display: flex; align-items: center; gap: 6px; color: #13773a; }
+.mn-done .ic { width: 14px; height: 14px; flex: none; }
+.mn-quote { margin: 4px 0 2px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; overflow-wrap: anywhere; }
+.mn-who { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.mn-src { font-size: 13px; line-height: 1.5; }
+.mn-cap { margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--ink-2); line-height: 1.5; }
+.mn-cands { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.mn-cand { padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--bg); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mn-cand .mn-name { font-size: 14px; }
+.mn-cand .mn-actions { margin-top: 6px; }
+.mn-hs { margin-top: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-lg); min-width: 0; }
+.mn-hs .hs-plan li { padding: 8px 2px; }
+.mn-sample { margin-top: 12px; }
+.mn-pre { margin-top: 8px; padding: 12px 14px; background: var(--surface-2); border-radius: var(--r-lg); font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+/* People and companies are two lists under small headings; companies wear their letter tile instead of a face. */
+.mn-sub { margin: 18px 0 0; }
+.mn-sub + .mn-list { margin-top: 8px; }
+.mn-co { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; font-size: 14px; font-weight: 600; line-height: 1.4; }
+/* What the call said about them ("owns the roadmap", "their vendor for logging"), and their line on the People map. */
+.mn-rel { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; line-height: 1.5; color: var(--ink-2); overflow-wrap: anywhere; }
+.mn-conn { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.mn-conn .ic { width: 14px; height: 14px; flex: none; color: var(--accent); }
+.mn-change { margin-top: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface-2); }
+.mn-change .help { margin: 0; }
+.mn-cand.likely { border-color: var(--accent-line); background: var(--accent-bg); }
+@media (max-width: 560px) {
+  .mn-item { grid-template-columns: 32px minmax(0, 1fr); gap: 10px; }
+  .mn-item > .avatar.lg { width: 32px; height: 32px; font-size: 12px; }
+  .mn-item > .mn-co { width: 32px; height: 32px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .mn-drop { transition: none; } }
+/* "From Granola": the note MOAB read after the call. */
+.mn-granola { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-lg); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mn-granola .mn-sample { margin-top: 4px; }

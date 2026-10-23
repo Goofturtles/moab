@@ -1,0 +1,278 @@
+/* companies.css: the Companies list (#/companies) and the company record (#/companies/<slug>). Loads after styles.css.
+
+   Mobbin references (looked at before building; sizes below are read off them at 1440 wide):
+   List page
+   - Attio, Companies list sorted, filter chip row, logo tiles, vertical cell hairlines ... https://mobbin.com/screens/6dd2d5c3-e23c-4f63-b299-9e00f308be10
+   - Attio, Companies list "Non-US Companies" view, Sort/Filter chips, tinted range tags  https://mobbin.com/screens/25cfd7b6-b972-413d-84d8-3a7e1dd9c81a
+   - Attio, Companies list with a faces column ("Strongest connection")                  https://mobbin.com/screens/c6a29ce7-72af-4679-bd07-0085f5aa05b3
+   - Attio, Companies list filtered, "4 count" footer row                                https://mobbin.com/screens/9e21a118-c189-4e8b-934f-a9bdfba8162e
+   - Attio, Companies list with sort popover (row height, header weight)                 https://mobbin.com/screens/bbbc21cd-7563-4ef7-90f0-02e3f8452941
+   - folk, All companies table: People column as face + name, pill toolbar buttons       https://mobbin.com/screens/51302fcc-3388-41f9-8c71-b2b36560bfb9
+   - folk, All people table: company tile + name in a cell, last-interaction column      https://mobbin.com/screens/ec8f2f1a-0836-4139-9caa-c22cafebdc00
+   - folk, People/Companies list rows with tag chips on the right                         https://mobbin.com/screens/9941a461-b4a3-46fe-adad-a50fe3cf95c0
+   - HubSpot, Contacts index: saved-view tabs, filter row, search box, avatar + name      https://mobbin.com/screens/79c42c86-15e4-4e9f-88f4-2b241af3fbe7
+   - HubSpot, Lists index: status dots, two-line "updated by" cells                       https://mobbin.com/screens/74346295-6b00-40cd-8a0a-e1271ae06522
+   Record page
+   - Attio, Company record: breadcrumb, header, Activity tab, Details side panel         https://mobbin.com/screens/4596651f-1527-4ddb-9cde-b19067b5753f
+   - Attio, Company record: Team tab, Record Details property list, Lists card           https://mobbin.com/screens/059b896a-e63b-4719-8403-bd4e7bce174d
+   - Attio, Company record: activity timeline grouped by period, nodes on a line         https://mobbin.com/screens/297adfeb-8312-496b-8acf-41839a6cf775
+   - Attio, Company record: Notes tab empty state                                        https://mobbin.com/screens/f6750bef-6bce-435c-8460-3c55f32f1254
+   - Pipedrive, Organization: Details list + "Focus" upcoming call card + History line   https://mobbin.com/screens/88631280-beda-4e91-b556-6c4a7630bf4a
+   - Pipedrive, Organization: History timeline with a note card on the line               https://mobbin.com/screens/befbda50-75c4-42fa-a4b8-17dc1fc6cbec
+   - Salesforce, Lead record: About fields + "Upcoming & Overdue" activity timeline      https://mobbin.com/screens/c6dc0e4e-5e1e-4391-9923-2e16ac6084d6
+   - Salesforce, Contact record: related lists column (Opportunities, Files)             https://mobbin.com/screens/7816168f-9047-4c4b-a1bf-9a05cff7f94c
+   - Clay, People list + person pane: network strength, Timeline, Properties             https://mobbin.com/screens/53ff2546-4432-46e3-b149-a8c0e1893bc1
+
+   What came from where
+   - List: Attio's grid (36px header, hairline cells, 24px tile + 14/500 name, tinted tags, count footer); folk's faces in a
+     People column; HubSpot's saved views as a row of pill toggles with counts, search on the right.
+   - Record: Attio's breadcrumb + header + right Details panel (label column, 32px property rows); Pipedrive's "Focus" card for
+     the next call; Attio/Pipedrive history line with avatar or dot nodes, grouped by year; Salesforce's related people list.
+   - Icons: only the phone (it rings while a call is hovered) and the search glyph in the field. No decorative icons. */
+
+/* ---------- list: toolbar (views + search) ---------- */
+.co-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; min-height: 48px; margin-bottom: 8px; }
+.co-views { display: flex; flex-wrap: wrap; gap: 6px; }
+.co-view {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: var(--r-full);
+  background: var(--surface); color: var(--ink-2); font-size: 13px; font-weight: 500; line-height: 1.45; white-space: nowrap; cursor: pointer;
+  transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.co-view:hover { background: var(--hover); border-color: var(--btn-line); color: var(--ink); }
+.co-view[aria-pressed="true"] { background: var(--selected); border-color: var(--accent-line); color: var(--ink); }
+.co-view-n { font-size: 12px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.co-view[aria-pressed="true"] .co-view-n { color: var(--accent); }
+/* The global ring squares every focused control to 6px; pills keep their own shape so the ring hugs them. */
+.co-view:focus-visible { border-radius: var(--r-full); outline-offset: 2px; }
+.co-search { position: relative; width: 260px; max-width: 100%; }
+.co-search .ic { position: absolute; left: 10px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.co-search input { padding-left: 32px; }
+
+/* ---------- list: the table ---------- */
+.co-table { border-top: 1px solid var(--line); }
+.co-tr {
+  position: relative; display: grid; min-height: 44px; border-bottom: 1px solid var(--line);
+  grid-template-columns: minmax(180px, 1.3fr) minmax(150px, 1.4fr) 104px minmax(140px, 1fr) minmax(132px, 1fr) minmax(168px, 1.1fr);
+  transition: background-color var(--t-fast) ease;
+}
+.co-td {
+  display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px 12px; border-right: 1px solid var(--line);
+  font-size: 14px; line-height: 1.45; color: var(--ink-2);
+}
+.co-td:last-child { border-right: 0; }
+.co-th { min-height: 36px; }
+.co-th .co-td { padding: 0 12px; font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.co-eng { justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.co-tr:not(.co-th):not(.co-foot):not(.co-empty):hover { background: var(--hover); }
+.co-tr:hover .co-faces .avatar { box-shadow: 0 0 0 2px var(--hover); }
+
+.co-name .stretch {
+  display: block; min-width: 0; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.co-sub { min-width: 0; font-size: 13px; color: var(--muted); line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.co-none { font-size: 13px; color: var(--muted); line-height: 1.45; white-space: nowrap; }
+.co-num { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.co-ver { font-variant-numeric: tabular-nums; }
+.co-faces { flex: none; pointer-events: none; } /* clicks fall through to the row link */
+
+/* Next call: the phone rings for as long as the pointer (or focus) stays on the call. */
+.co-call {
+  display: inline-flex; align-items: center; gap: 6px; min-width: 0; height: 28px; margin-left: -6px; padding: 0 8px 0 6px;
+  border-radius: var(--r-md); color: var(--ink); font-size: 14px; font-weight: 500; line-height: 1.45; text-decoration: none;
+  transition: background-color var(--t-fast) ease;
+}
+.co-call:hover { background: var(--press); }
+.co-call-day { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.co-phone { width: 14px; height: 14px; color: var(--muted); transform-origin: 50% 50%; transition: color var(--t-fast) ease; }
+.co-call:hover .co-phone, .co-call:focus-visible .co-phone { color: var(--accent); animation: co-ring 1.1s ease-in-out infinite; }
+@keyframes co-ring {
+  0%, 46%, 100% { transform: rotate(0deg); }
+  4%, 12%, 20%, 28%, 36% { transform: rotate(-16deg); }
+  8%, 16%, 24%, 32%, 40% { transform: rotate(16deg); }
+}
+
+/* Attio's count row */
+.co-foot { min-height: 36px; border-bottom: 0; }
+.co-foot .co-td { font-size: 12px; color: var(--muted); border-right-color: transparent; }
+.co-foot .co-num { font-size: 13px; }
+.co-empty { display: block; }
+.co-empty .co-td { display: block; padding: 16px 12px; border-right: 0; color: var(--muted); line-height: 1.5; }
+
+/* ---------- record: breadcrumb, header ---------- */
+.co-crumbs { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: 13px; line-height: 1.45; }
+.co-crumbs a {
+  flex: none; padding: 4px 6px; border-radius: var(--r-md); color: var(--muted); font-weight: 500; text-decoration: none; white-space: nowrap;
+  transition: background-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.co-crumbs a:hover { background: var(--press); color: var(--ink); }
+.co-crumb-sep { color: var(--faint); }
+.co-crumb-here { min-width: 0; padding: 0 6px; color: var(--ink); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.co-rhead { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 12px 16px; padding: 24px 32px 20px; border-bottom: 1px solid var(--line); }
+.co-head-tile { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-lg); font-size: 16px; font-weight: 600; line-height: 1.3; }
+.co-rhead-text { min-width: 0; }
+.co-rtitle { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; }
+.co-rtitle h1 { min-width: 0; overflow-wrap: anywhere; }
+.co-rmeta { display: flex; flex-wrap: wrap; margin-top: 2px; font-size: 13px; color: var(--muted); line-height: 1.45; font-variant-numeric: tabular-nums; }
+.co-rmeta span + span::before { content: "·"; margin: 0 6px; }
+.co-ractions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+/* ---------- record: body = main column + Attio Details panel ---------- */
+.co-rbody { display: grid; grid-template-columns: minmax(0, 1fr) 360px; }
+.co-rmain { min-width: 0; max-width: 840px; padding: 4px 32px 64px; }
+.co-sec { margin-top: 28px; }
+.co-sec .sec-head { margin-bottom: 12px; }
+
+/* Next call (Pipedrive "Focus") */
+.co-focus {
+  position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: start; gap: 12px;
+  padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+  transition: border-color var(--t-fast) ease, box-shadow var(--t-med) ease;
+}
+.co-focus:hover { border-color: var(--line-2); box-shadow: var(--shadow-raise); }
+.co-focus-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--press); color: var(--ink-2); }
+.co-focus-ic .co-phone { width: 16px; height: 16px; color: inherit; }
+.co-focus:hover .co-phone, .co-focus:focus-within .co-phone { color: var(--accent); animation: co-ring 1.1s ease-in-out infinite; }
+.co-focus-main { min-width: 0; }
+.co-focus-title { display: block; font-size: 14px; font-weight: 600; line-height: 1.45; }
+.co-focus-meta { margin-top: 2px; font-size: 13px; color: var(--muted); line-height: 1.45; font-variant-numeric: tabular-nums; }
+.co-focus-who { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.co-focus-who > span:last-child { min-width: 0; }
+.co-focus-side { align-self: center; }
+
+/* People (Attio Team, Salesforce related list) */
+.co-people { border: 1px solid var(--line); border-radius: var(--r-lg); }
+.co-person { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: start; gap: 4px 12px; padding: 12px 16px; }
+.co-person + .co-person { border-top: 1px solid var(--line); }
+.co-person-text { min-width: 0; }
+.co-person-name { font-size: 14px; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.co-person-sub { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.co-person-note { margin-top: 4px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.co-person a, .co-ev-text a, .co-props dd a {
+  color: inherit; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px;
+  transition: text-decoration-color var(--t-fast) ease;
+}
+.co-person a:hover, .co-ev-text a:hover, .co-props dd a:hover { text-decoration-color: currentColor; }
+.co-person-side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-top: 1px; }
+.co-person-tenure { font-size: 12px; color: var(--muted); line-height: 1.45; white-space: nowrap; }
+.co-subhead { margin: 20px 0 8px; font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.45; }
+
+/* Timeline (Attio activity, Pipedrive history): one line, a face or a tinted ring per event, grouped by year */
+.co-year { margin: 16px 0 2px; font-size: 12px; font-weight: 600; color: var(--muted); line-height: 1.45; font-variant-numeric: tabular-nums; }
+.co-sec .sec-head + .co-year { margin-top: 0; }
+.co-ev { position: relative; display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 12px; padding: 8px 0; }
+.co-ev::before { content: ""; position: absolute; left: 9.5px; top: 32px; bottom: -9px; width: 1px; background: var(--line-2); }
+.co-ev:last-child::before { display: none; }
+.co-ev-node { display: grid; place-items: center; width: 20px; height: 20px; margin-top: 1px; }
+.co-ev-node .avatar { box-shadow: 0 0 0 3px var(--surface); }
+.co-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid currentColor; background: var(--surface) !important; }
+.co-ev-body { min-width: 0; }
+.co-ev-text { font-size: 14px; color: var(--ink); line-height: 1.45; }
+.co-ev-text a { font-weight: 500; }
+.co-ev-text strong { font-weight: 600; }
+.co-ev-sub { margin-top: 2px; font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.co-ev-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 4px; }
+.co-ev-date { font-size: 12px; color: var(--muted); line-height: 1.45; font-variant-numeric: tabular-nums; }
+
+/* Details panel (Attio Record Details) */
+.co-panel { min-width: 0; padding: 20px 24px 48px; border-left: 1px solid var(--line); }
+.co-panel-sec + .co-panel-sec { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.co-panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.co-panel-head h2 { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.co-props { display: grid; grid-template-columns: 116px minmax(0, 1fr); column-gap: 12px; }
+.co-props dt { display: flex; align-items: center; min-height: 32px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.co-props dd { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; min-height: 32px; padding: 4px 0; font-size: 14px; color: var(--ink); line-height: 1.45; }
+.co-props dd a { font-weight: 500; }
+.co-props .co-sub { white-space: normal; }
+.co-panel-note { margin-top: 8px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* Pages rise in on navigation, like the rest of the app (keyframes in styles.css). */
+.enter .co-record > * { animation: enter 560ms cubic-bezier(.2, .8, .2, 1) both; }
+.enter .co-record > :nth-child(2) { animation-delay: 60ms; }
+
+/* ---------- widths ---------- */
+@media (max-width: 1180px) {
+  /* Narrower content: drop the Backstage column, show faces without the count, and the call day without the time. */
+  .co-tr { grid-template-columns: minmax(170px, 1.4fr) minmax(140px, 1.3fr) 104px 88px minmax(120px, 1fr); }
+  .co-bs, .co-ppl .co-sub, .co-next .co-sub { display: none; }
+}
+@media (max-width: 1100px) {
+  .co-rbody { grid-template-columns: minmax(0, 1fr); }
+  .co-rmain { max-width: none; padding-bottom: 32px; }
+  .co-panel { border-left: 0; border-top: 1px solid var(--line); padding: 20px 32px 48px; }
+}
+@media (max-width: 860px) {
+  .co-th { display: none; }
+  .co-tr { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name status" "ppl next"; gap: 6px 12px; min-height: 0; padding: 10px 4px; }
+  .co-td { padding: 0; border-right: 0; }
+  .co-name { grid-area: name; }
+  .co-status { grid-area: status; justify-content: flex-end; }
+  .co-status .co-sub, .co-eng, .co-bs { display: none; }
+  .co-ppl .co-sub, .co-next .co-sub { display: block; }
+  .co-ppl { grid-area: ppl; }
+  .co-next { grid-area: next; justify-content: flex-end; }
+  .co-call { margin-left: 0; margin-right: -8px; }
+  .co-foot { display: flex; justify-content: space-between; padding: 10px 4px; }
+  .co-foot .co-eng { display: flex; gap: 6px; }
+  .co-foot .co-gap { display: none; }
+}
+@media (max-width: 999px) {
+  .co-rhead { grid-template-columns: 40px minmax(0, 1fr); padding: 20px 16px; }
+  .co-ractions { grid-column: 1 / -1; justify-content: flex-start; }
+  .co-rmain { padding: 4px 16px 32px; }
+  .co-panel { padding: 20px 16px 48px; }
+}
+@media (max-width: 640px) {
+  .co-bar { align-items: stretch; }
+  .co-search { width: 100%; }
+  .co-focus { grid-template-columns: 32px minmax(0, 1fr); }
+  .co-focus-side { grid-column: 2; align-self: start; }
+  .co-person { grid-template-columns: 32px minmax(0, 1fr); }
+  .co-person-side { grid-column: 2; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .co-props { grid-template-columns: 104px minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .co-call:hover .co-phone, .co-call:focus-visible .co-phone, .co-focus:hover .co-phone, .co-focus:focus-within .co-phone, .enter .co-record > * { animation: none; }
+  .co-tr, .co-view, .co-call, .co-phone, .co-focus, .co-crumbs a, .co-person a, .co-ev-text a, .co-props dd a { transition: none; }
+}
+
+/* Fill the page: the list uses the full width, with Asana-style colour number cards on top. */
+[data-view="companies"].page > :not(.page-head) { max-width: none; }
+.co-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 20px 0 8px; }
+.co-stat { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 16px 18px 16px 20px; border-radius: 16px; overflow: hidden; }
+.co-stat-n { font-size: 30px; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.co-stat-l { font-size: 14px; font-weight: 600; line-height: 1.4; }
+.co-stat-s { font-size: 12px; line-height: 1.45; opacity: 0.85; }
+.cs-blue { background: var(--tag-blue-bg); color: var(--tag-blue-ink); }
+.cs-purple { background: var(--tag-purple-bg); color: var(--tag-purple-ink); }
+.cs-green { background: var(--tag-green-bg); color: var(--tag-green-ink); }
+.cs-orange { background: var(--tag-orange-bg); color: var(--tag-orange-ink); }
+.cs-pink { background: var(--tag-pink-bg); color: var(--tag-pink-ink); }
+@media (max-width: 1100px) { .co-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .co-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .co-stat-n { font-size: 24px; } }
+
+/* ==================== Spotify theme (dark, the default) ====================
+   Views are pill chips (the chosen one white), the table reads like a track list: no cell rules, 56px rows that light to
+   #2a2a2a, names in white and details in #b3b3b3. The next-call card is a flat tile that lightens on hover. */
+:root[data-theme="dark"] .co-view { height: 32px; padding: 0 14px; border-color: transparent; background: var(--chip); color: var(--ink); font-size: 14px; }
+:root[data-theme="dark"] .co-view:hover { border-color: transparent; background: #333333; }
+:root[data-theme="dark"] .co-view[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #000000; }
+:root[data-theme="dark"] .co-view[aria-pressed="true"] .co-view-n { color: #000000; }
+:root[data-theme="dark"] .co-view-n { color: var(--muted); }
+:root[data-theme="dark"] .co-table { border-top: 0; }
+:root[data-theme="dark"] .co-tr { min-height: 56px; border-bottom-color: transparent; border-radius: 4px; }
+:root[data-theme="dark"] .co-th { min-height: 40px; border-bottom-color: var(--line); border-radius: 0; }
+:root[data-theme="dark"] .co-td { border-right-color: transparent; color: var(--muted); }
+:root[data-theme="dark"] .co-tr:not(.co-th):not(.co-foot):not(.co-empty):hover { background: #2a2a2a; }
+:root[data-theme="dark"] .co-tr:not(.co-th):not(.co-foot):not(.co-empty):hover .co-td { color: var(--ink); }
+:root[data-theme="dark"] .co-tr:hover .co-faces .avatar { box-shadow: 0 0 0 2px #2a2a2a; }
+:root[data-theme="dark"] .co-name .stretch { font-size: 15px; }
+:root[data-theme="dark"] .co-focus { border-color: transparent; background: var(--surface); transition: background-color var(--t-card) ease; }
+:root[data-theme="dark"] .co-focus:hover { border-color: transparent; background: var(--hover); box-shadow: none; }
+:root[data-theme="dark"] .co-focus-title { font-weight: 700; }
+:root[data-theme="dark"] .co-call:hover { background: #333333; }
+:root[data-theme="dark"] .co-stat { border-radius: 8px; }
+:root[data-theme="dark"] .co-stat-n { font-weight: 800; }
+:root[data-theme="dark"] .co-stat-l { font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { :root[data-theme="dark"] :is(.co-view, .co-tr, .co-focus) { transition: none; } }

@@ -1,0 +1,213 @@
+/* panel.css: MOAB's in-call side panel (panel.html), fluid from 300 to 480px. It runs inside Google Meet, inside Zoom,
+   inside the mock call on the app's In-call page, or on its own.
+
+   Mobbin references (web):
+   - Google Meet, People / In-call messages / Meeting details side panels (white, 56px header, quiet section labels)
+     https://mobbin.com/screens/cf57c62a-515a-4ed2-98ef-aef83f93263f
+     https://mobbin.com/screens/830f00f1-b298-4e0e-a76d-3441e6c5dd7f
+     https://mobbin.com/screens/72766727-bb21-4914-b6b8-4f8267dbdb16
+   - Google Meet, Backgrounds and effects: tab row inside the side panel  https://mobbin.com/screens/1be03b34-bce2-4704-b145-11af32678cfd
+   - Zoom, AI Companion docked app panel  https://mobbin.com/screens/dbb16d99-379c-4c87-a4ff-f56321dd3dd1
+   - Dialpad, in-call AI notes panel with Transcripts / Notes tabs  https://mobbin.com/screens/8ada6545-583d-436a-b58b-5714a49967b3
+   - Tana, talking points beside the call  https://mobbin.com/screens/e80d544c-2dc9-49d5-9442-ab347528efc1
+   - Hotjar, private notes panel "only visible to your team"  https://mobbin.com/screens/cfab48ff-a889-49e9-a576-d9cace7b6147
+   - Apollo, call insights: Summary tabs + section cards  https://mobbin.com/screens/d63c500d-dd25-48ad-8c3a-b692ca21d94f
+   - Otter, AI chat panel tabs  https://mobbin.com/screens/0686bdfe-5cbf-4029-acf8-f0db5b7da5ac
+   - Microsoft Teams, Participants panel rows  https://mobbin.com/screens/07e018aa-c11b-4e84-9a76-11e933934e29
+   What came from them: one tinted card only (the opener, the line said first), everything else as quiet sections with a
+   13px title; underline tabs with counts; checkable talking points with a tally; people rows with a joined check. */
+html, body { height: auto; min-height: 100%; }
+html { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; } /* a slim scrollbar, like the host's own panels */
+body { font-size: 14px; background: var(--surface); }
+#app { max-width: 480px; margin: 0 auto; padding: 0 0 24px; }
+
+/* ---------- header: call, live state, open the full brief ---------- */
+.p-head { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 10px 6px 16px; }
+.p-head .logo { width: 28px; height: 28px; }
+.p-head .logo-eyes { animation: none; } /* no loop at rest; it blinks only while hovered */
+.p-head .logo:hover .logo-eyes { animation: blink 1.4s infinite; }
+.p-title { flex: 1; min-width: 0; }
+.p-title h1 { font-size: 16px; font-weight: 600; line-height: 1.4; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-meta { display: flex; align-items: center; gap: 6px; margin-top: 1px; font-size: 12px; color: var(--muted); line-height: 1.5; white-space: nowrap; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
+.live-dot.off { background: var(--dot); }
+.p-open { color: var(--muted); }
+.p-open:hover .ic { animation: p-grow 0.9s ease-in-out infinite; }
+@keyframes p-grow { 50% { transform: scale(1.16); } }
+.p-note { margin: 0 16px 8px; padding: 8px 12px; border-radius: var(--r-md); background: var(--surface-2); font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+
+.p-pick { position: relative; display: block; margin: 2px 16px 0; }
+.p-pick select {
+  width: 100%; min-width: 0; height: 34px; padding: 0 32px 0 10px; appearance: none; -webkit-appearance: none;
+  border: 1px solid var(--field); border-radius: var(--r-md); background: var(--surface); color: var(--ink);
+  font-size: 13px; font-weight: 500; line-height: 1.45; text-overflow: ellipsis; cursor: pointer;
+  transition: border-color var(--t-fast) ease;
+}
+.p-pick select:hover { border-color: var(--field-hover); }
+.p-pick select:focus, .p-pick select:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.p-pick .ic { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+
+/* ---------- tabs ---------- */
+.p-tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 20px; height: 40px; margin-top: 8px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.p-tabs [role="tab"] {
+  display: inline-flex; align-items: center; gap: 6px; height: 100%; margin-bottom: -1px; padding: 0;
+  border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted);
+  font-size: 13px; font-weight: 500; line-height: 1.45; cursor: pointer; transition: color var(--t-fast) ease;
+}
+.p-tabs [role="tab"]:hover { color: var(--ink); }
+.p-tabs [role="tab"][aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+/* The ring sits inside the tab, so it never spills over the hairline or past the sticky bar. */
+.p-tabs [role="tab"]:focus-visible { outline-offset: -2px; border-radius: var(--r-sm); }
+.p-count {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-full);
+  background: var(--chip); color: var(--ink-2); font-size: 11px; font-weight: 600; line-height: 1.45;
+}
+
+/* ---------- panes ---------- */
+.p-pane { display: flex; flex-direction: column; gap: 20px; min-width: 0; padding: 16px; }
+.p-sec { min-width: 0; }
+.p-sec-head { display: flex; align-items: center; gap: 8px; min-height: 24px; margin-bottom: 6px; }
+.p-sec-head h2 { font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--ink); }
+.p-sec-head .link-btn { font-size: 12px; }
+.p-tally { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* The opener: the one tinted card, because it is the first thing said. */
+.p-opener { padding: 12px 16px 14px; border: 1px solid var(--accent-line); border-radius: var(--r-lg); background: var(--accent-bg); }
+.p-label { font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--accent); }
+.p-opener blockquote { margin-top: 4px; font-size: 15px; font-weight: 500; line-height: 1.55; color: var(--ink); }
+
+.p-points li + li { border-top: 1px solid var(--line); }
+.p-points label {
+  display: flex; gap: 10px; align-items: flex-start; margin: 0 -8px; padding: 10px 8px; border-radius: var(--r-md); cursor: pointer;
+  transition: background-color var(--t-fast) ease;
+}
+.p-points label:hover { background: var(--hover); }
+.p-points span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.p-points strong { font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.p-points small { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.p-points input:checked + span strong { color: var(--muted); text-decoration: line-through; }
+
+.p-props { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 8px 12px; font-size: 13px; line-height: 1.5; }
+.p-props dt { padding-top: 1px; font-size: 12px; font-weight: 500; color: var(--muted); }
+.p-props dd { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; color: var(--ink); }
+
+.p-watch li { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.p-watch li + li { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.p-plain li { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.p-plain li + li { margin-top: 6px; }
+.p-plain li::before { content: ""; width: 5px; height: 5px; margin-top: 8px; border-radius: 50%; background: var(--dot); flex: none; }
+
+.mini-map .board { border-radius: var(--r-lg); }
+.mini-map { height: 280px; }
+.mini-map.board { min-height: 280px; height: 280px; border-radius: var(--r-lg); }
+
+.p-people { display: flex; flex-direction: column; }
+.p-person + .p-person { border-top: 1px solid var(--line); }
+.p-person-btn {
+  display: flex; align-items: center; gap: 10px; width: calc(100% + 16px); margin: 0 -8px; padding: 8px; border: 0; border-radius: var(--r-md);
+  background: none; text-align: left; cursor: pointer; transition: background-color var(--t-fast) ease;
+}
+.p-person-btn:hover { background: var(--hover); }
+.p-person-btn:focus-visible { outline-offset: -2px; }
+.p-person-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.p-person-name { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; line-height: 1.45; }
+.p-person-sub { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.joined { display: inline-flex; color: var(--accent); }
+.joined .ic { width: 14px; height: 14px; }
+.p-person-more { display: flex; flex-direction: column; gap: 4px; padding: 0 0 10px 42px; font-size: 13px; line-height: 1.5; }
+.p-person-more .muted-line { font-size: 12px; }
+
+/* ---------- notes ---------- */
+.p-notes { display: flex; flex-direction: column; gap: 12px; }
+.p-note-list li { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 8px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; line-height: 1.5; }
+.p-note-list li p { grid-column: 1 / -1; }
+.p-note-kind { justify-self: start; }
+.p-note-list .muted-line { font-size: 12px; text-align: right; }
+.empty-line { display: block !important; border: 0 !important; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.p-compose { min-width: 0; padding: 10px; border: 1px solid var(--field); border-radius: var(--r-lg); background: var(--surface); transition: border-color var(--t-fast) ease; }
+.p-compose:hover { border-color: var(--field-hover); }
+.p-compose textarea { width: 100%; min-height: 60px; padding: 2px; border: 0; background: none; font-size: 13px; line-height: 1.5; resize: vertical; }
+.p-compose textarea:focus, .p-compose textarea:focus-visible { outline: none; }
+.p-compose:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.p-compose-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+/* Kind chips: tag-shaped; unselected grey, selected shows the kind's tint (set on the label) with a ring. */
+.chip-radio { position: relative; display: inline-flex; border-radius: var(--r-sm); }
+.chip-radio input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip-radio span {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--r-sm);
+  background: var(--tag-gray-bg); color: var(--tag-gray-ink); font-size: 12px; font-weight: 500; line-height: 1.5; cursor: pointer;
+}
+.chip-radio:not(:has(input:checked)) { background: none; }
+.chip-radio input:checked + span { background: transparent; color: inherit; box-shadow: inset 0 0 0 1.5px currentColor; }
+.chip-radio input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.p-private { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+@media (max-width: 360px) {
+  .p-props { grid-template-columns: 72px minmax(0, 1fr); }
+  .p-tabs { gap: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-tabs [role="tab"], .p-person-btn, .p-compose, .p-pick select, .p-points label { transition: none; }
+  .p-open:hover .ic, .p-head .logo:hover .logo-eyes { animation: none; }
+}
+.p-empty { margin: 16px; font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+
+/* ---------- mentioned on the call (People tab): people and companies found while the call runs ---------- */
+.p-mns .p-mn { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; padding: 8px 0; min-width: 0; }
+.p-mns .p-mn + .p-mn { border-top: 1px solid var(--line); }
+.p-mn-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.p-mn .p-person-name { flex-wrap: wrap; overflow-wrap: anywhere; }
+.p-mn .p-person-sub { overflow-wrap: anywhere; }
+.p-mn-co { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; font-size: 12px; font-weight: 600; line-height: 1.4; }
+.p-mn-quote { font-size: 12px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
+.p-mn-acts { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 2px; }
+.p-mn-acts .link-btn { font-size: 12px; }
+.p-hint { font-size: 12px; color: var(--muted); line-height: 1.5; }
+/* ---------- Settings > In-call panel: compact layout and the live-listening reminder ---------- */
+.p-listen { display: flex; align-items: center; gap: 6px; margin: 6px 16px 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
+[data-panel-density="compact"] .p-pane { gap: 12px; padding: 12px; }
+[data-panel-density="compact"] .p-opener { padding: 8px 12px 10px; }
+[data-panel-density="compact"] .p-opener blockquote { font-size: 14px; }
+[data-panel-density="compact"] .p-points label { padding: 6px 8px; }
+[data-panel-density="compact"] .p-points small { display: none; }
+[data-panel-density="compact"] .p-watch li + li { margin-top: 6px; padding-top: 6px; }
+/* Meetily: "Listening via Meetily" while its transcript comes in for this call. */
+.p-listen.on { color: var(--ink-2); font-weight: 500; }
+.p-listen .link-btn { font-size: 12px; }
+.p-mns .xp > summary { font-size: 12px; min-height: 24px; }
+.p-mns .xp > .xp-card { padding: 10px 12px; font-size: 12px; }
+
+/* ==================== Spotify theme (dark, the default): the in-call panel ====================
+   Like Spotify's right-hand "Now playing" panel: #121212, bold title, pill tabs (the chosen one white), the opener as
+   the one green-tinted card, talking points as rows that light to #2a2a2a, green checks with black ticks. */
+:root[data-theme="dark"] body { background: var(--bg); }
+:root[data-theme="dark"] .p-title h1 { font-size: 17px; letter-spacing: -0.015em; }
+:root[data-theme="dark"] .p-pick select { border-color: transparent; border-radius: var(--r-full); background: var(--chrome-field); padding-left: 14px; }
+:root[data-theme="dark"] .p-pick select:hover { border-color: var(--line-2); background: var(--chrome-field-hover); }
+:root[data-theme="dark"] .p-pick select:focus-visible { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+:root[data-theme="dark"] .p-tabs { gap: 8px; align-items: center; height: 48px; border-bottom-color: var(--line); background: var(--bg); }
+:root[data-theme="dark"] .p-tabs [role="tab"] {
+  height: 32px; margin: 0; padding: 0 12px; border: 0; border-radius: var(--r-full); background: var(--chip); color: var(--ink);
+  font-weight: 600; transition: background-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+:root[data-theme="dark"] .p-tabs [role="tab"]:hover { background: #333333; }
+:root[data-theme="dark"] .p-tabs [role="tab"][aria-selected="true"] { background: var(--ink); color: #000000; }
+:root[data-theme="dark"] .p-tabs [role="tab"]:focus-visible { outline-offset: 2px; border-radius: var(--r-full); }
+:root[data-theme="dark"] .p-tabs [role="tab"][aria-selected="true"] .p-count { background: #000000; color: #ffffff; }
+:root[data-theme="dark"] .p-count { background: #3e3e3e; color: var(--ink); }
+:root[data-theme="dark"] .p-sec-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+:root[data-theme="dark"] .p-opener { border-color: transparent; background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 22%, var(--surface)) 0%, var(--surface) 75%); }
+:root[data-theme="dark"] .p-label { font-weight: 700; }
+:root[data-theme="dark"] .p-opener blockquote { font-weight: 600; }
+:root[data-theme="dark"] .p-points li + li { border-top-color: transparent; }
+:root[data-theme="dark"] :is(.p-points label, .p-person-btn) { transition: background-color var(--t-fast) ease; }
+:root[data-theme="dark"] :is(.p-points label, .p-person-btn):hover { background: #2a2a2a; }
+:root[data-theme="dark"] .p-person + .p-person { border-top-color: transparent; }
+:root[data-theme="dark"] .p-person-name { font-weight: 700; }
+:root[data-theme="dark"] .p-compose { border-color: var(--btn-line); }
+:root[data-theme="dark"] .chip-radio span { border-radius: var(--r-full); padding: 0 10px; }
+:root[data-theme="dark"] .chip-radio input:checked + span { background: var(--ink); color: #000000; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dark"] :is(.p-tabs [role="tab"], .p-points label, .p-person-btn) { transition: none; }
+}

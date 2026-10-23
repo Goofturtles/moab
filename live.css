@@ -1,0 +1,224 @@
+/* live.css: the In-call panel page (#/live). A believable Google Meet (or Zoom) call with MOAB open in its side panel.
+   Loads after styles.css. The panel itself is panel.html + panel.css.
+
+   Mobbin references (web):
+   - Google Meet, in call with People side panel, bottom bar (time | code, round controls, red leave pill)
+     https://mobbin.com/screens/cf57c62a-515a-4ed2-98ef-aef83f93263f
+   - Google Meet, In-call messages panel (white rounded panel, 18px title + close)
+     https://mobbin.com/screens/830f00f1-b298-4e0e-a76d-3441e6c5dd7f
+   - Google Meet, Meeting details panel  https://mobbin.com/screens/72766727-bb21-4914-b6b8-4f8267dbdb16
+   - Google Meet, Meeting tools: featured add-ons  https://mobbin.com/screens/05b65227-1089-4b82-9a38-452fd7e0e88a
+   - Google Meet, Meeting tools expanded  https://mobbin.com/screens/ab2e1da7-db03-4fcf-a9b0-99bc48bdee4f
+   - Google Meet, Backgrounds and effects panel (tabs inside the side panel)  https://mobbin.com/screens/1be03b34-bce2-4704-b145-11af32678cfd
+   - Google Meet, Change layout (tile grid)  https://mobbin.com/screens/229f0682-2e60-470d-a7ef-9ee19634f7f9
+   - Zoom, gallery view: name chips, active-speaker border  https://mobbin.com/screens/bb07845e-b6b6-461f-8650-7a08889d449e
+   - Zoom, Participants panel docked flush right, centred title  https://mobbin.com/screens/7e19dae4-5f1a-430c-a23e-b2143498cf89
+   - Zoom, AI Companion app panel in a meeting  https://mobbin.com/screens/dbb16d99-379c-4c87-a4ff-f56321dd3dd1
+   - Microsoft Teams, 3 tiles (2 + 1 centred) with chat panel  https://mobbin.com/screens/2bb5a307-7dcc-4061-ad84-641cf0991051
+   - Microsoft Teams, Participants panel  https://mobbin.com/screens/07e018aa-c11b-4e84-9a76-11e933934e29
+   - Dialpad, AI notes panel beside the call  https://mobbin.com/screens/8ada6545-583d-436a-b58b-5714a49967b3
+   - Tana, talking points beside the call  https://mobbin.com/screens/e80d544c-2dc9-49d5-9442-ab347528efc1
+   - Hotjar, private notes panel during a call  https://mobbin.com/screens/cfab48ff-a889-49e9-a576-d9cace7b6147
+   - ClickUp, call with camera-off monogram tiles and red Leave pill  https://mobbin.com/screens/c89bc823-e583-401e-88f1-38ca4342c54c
+   - Apollo, call insights tabs + section cards  https://mobbin.com/screens/d63c500d-dd25-48ad-8c3a-b692ca21d94f
+   - Otter, AI chat side panel with tabs  https://mobbin.com/screens/0686bdfe-5cbf-4029-acf8-f0db5b7da5ac
+   What came from them: Meet's #202124 stage, 12px tiles filling the stage, 8px gaps, white 12px side panel with a 56px
+   header, an 80px bottom bar (time | meeting code left, 40px round controls centre, red 56px leave pill, panel toggles
+   right); Zoom's flush docked panel with a centred title, label-under-icon toolbar and red End; Teams' odd tile centred
+   on the last row; the speaking ring + voice meter. Motion: only while hovered (the ring follows the pointer, the
+   leave phone rings), nothing loops at rest. */
+
+/* ---------- controls above the call ---------- */
+.page.wide > .lv-bar, .page.wide > .lv-call, .page.wide > .lv-setup { max-width: 1600px; }
+.page.wide > .lv-note { max-width: 760px; }
+.lv-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+#liveCall { width: auto; min-width: 180px; }
+.lv-bar .seg button:focus-visible { border-radius: var(--r-full); } /* keep the pill shape when the ring shows */
+.lv-solo {
+  font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--accent);
+  text-decoration: underline; text-decoration-color: var(--accent-line); text-underline-offset: 3px;
+}
+.lv-solo:hover { text-decoration-color: currentColor; }
+
+/* ---------- the call window ---------- */
+.lv-call {
+  --lv-bg: #202124; --lv-tile: #3c4043; --lv-ink: #e8eaed; --lv-btn: #3c4043; --lv-btn-hover: #4a4e52;
+  --lv-ring: var(--chrome-focus); --lv-leave: #dc362e; --lv-leave-hover: #c5221f;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto;
+  height: clamp(560px, calc(100vh - 236px), 820px); height: clamp(560px, calc(100dvh - 236px), 820px);
+  padding: 16px 16px 0; border-radius: 16px; background: var(--lv-bg); color: var(--lv-ink);
+}
+.lv-main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; min-height: 0; }
+
+/* Tiles fill the stage: 2 across, the odd last one centred under them. */
+.lv-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 8px; min-width: 0; min-height: 0; }
+.lv-grid[data-n="2"] { grid-auto-rows: auto; align-content: center; }
+.lv-grid[data-n="2"] .lv-tile { aspect-ratio: 4 / 3; }
+.lv-tile {
+  grid-column: span 2; position: relative; isolation: isolate; display: grid; place-items: center; min-width: 0; min-height: 0;
+  border-radius: 12px; background: var(--lv-tile); overflow: hidden;
+}
+.lv-tile:last-child:nth-child(odd):not(:first-child) { grid-column: 2 / span 2; }
+/* Camera on: the face fills the tile, centred on the face. */
+.lv-tile > .avatar { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 0; font-size: 40px; }
+.lv-tile > .avatar img { object-fit: cover; object-position: 50% 28%; }
+/* Chris: camera off, so his monogram sits in the middle of a plain tile (never a photo). */
+.lv-tile.is-self > .avatar {
+  position: relative; inset: auto; width: clamp(56px, 28%, 120px); height: auto; aspect-ratio: 1; border-radius: 50%;
+  background: #e8eaed; color: #202124; font-size: clamp(22px, 2.6vw, 44px); font-weight: 500;
+}
+.lv-name {
+  position: absolute; left: 10px; bottom: 10px; z-index: 2; max-width: calc(100% - 20px); padding: 2px 8px; border-radius: var(--r-sm);
+  background: rgba(32, 33, 36, 0.72); color: #fff; font-size: 13px; font-weight: 500; line-height: 1.5;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Speaking: a ring drawn inside the tile edge (an overlay, so it sits on top of the photo and is never clipped) plus a
+   voice meter. At rest it stays on one person; while the pointer is on a tile it moves there and the meter talks. */
+.lv-tile::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 3px var(--lv-ring); opacity: 0; transition: opacity var(--t-fast) ease;
+}
+.lv-voice {
+  position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 2px;
+  width: 26px; height: 26px; border-radius: 50%; background: var(--lv-ring); opacity: 0; transition: opacity var(--t-fast) ease;
+}
+.lv-voice i { width: 3px; height: 12px; border-radius: 2px; background: #0b3a1e; transform: scaleY(0.45); }
+.lv-voice i:nth-child(2) { transform: scaleY(0.8); }
+.lv-tile.is-speaking::after, .lv-tile.is-speaking .lv-voice, .lv-tile:hover::after, .lv-tile:hover .lv-voice { opacity: 1; }
+.lv-grid:has(.lv-tile:hover) .lv-tile.is-speaking:not(:hover)::after,
+.lv-grid:has(.lv-tile:hover) .lv-tile.is-speaking:not(:hover) .lv-voice { opacity: 0; }
+.lv-tile:hover .lv-voice i { animation: lv-talk 0.8s ease-in-out infinite; }
+.lv-tile:hover .lv-voice i:nth-child(2) { animation-delay: -0.27s; }
+.lv-tile:hover .lv-voice i:nth-child(3) { animation-delay: -0.54s; }
+
+/* Side panel: the host's add-on frame (MOAB logo, name, close) around the real panel. */
+.lv-side { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; border-radius: 12px; background: var(--surface); color: var(--ink); overflow: hidden; }
+.lv-side-head { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 16px 0 20px; }
+.lv-side-head img { width: 22px; height: 22px; flex: none; }
+.lv-side-title { flex: 1; min-width: 0; font-size: 16px; font-weight: 500; line-height: 1.5; color: var(--ink); } /* was #1f1f1f: unreadable on the dark panel */
+.lv-side-head .ic { width: 20px; height: 20px; color: var(--muted); }
+:root[data-theme="dark"] .lv-side { background: var(--bg); }  /* the same #121212 as the panel inside it */
+:root[data-theme="dark"] .lv-side-title { font-weight: 700; }
+.lv-side iframe { display: block; width: 100%; height: 100%; border: 0; }
+/* The panel draws its own focus rings. A ring on the frame itself sat 2px outside it, half cut off by the rounded panel. */
+.lv-side iframe:focus, .lv-side iframe:focus-visible { outline: none; }
+
+/* Bottom bar: time | meeting code, round controls with the red leave pill, panel toggles on the right. */
+.lv-dock { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; min-height: 80px; padding: 0 8px; }
+.lv-dock > :first-child { justify-self: start; }
+.lv-dock > :last-child { justify-self: end; }
+.lv-meta { display: flex; align-items: center; gap: 12px; min-width: 0; max-width: 100%; font-size: 15px; font-weight: 500; line-height: 1.5; white-space: nowrap; }
+.lv-sep { width: 1px; height: 16px; background: #5f6368; flex: none; }
+.lv-code { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lv-group { display: flex; align-items: center; gap: 8px; }
+.lv-btn {
+  position: relative; display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--lv-btn); color: var(--lv-ink); transition: background-color var(--t-fast) ease;
+}
+.lv-btn:hover { background: var(--lv-btn-hover); }
+.lv-btn .ic { width: 20px; height: 20px; }
+.lv-leave { width: 56px; border-radius: var(--r-full); background: var(--lv-leave); color: #fff; }
+.lv-leave:hover { background: var(--lv-leave-hover); }
+.lv-leave .ic { transform: rotate(135deg); }
+.lv-group.end .lv-btn { background: transparent; }
+.lv-group.end .lv-btn:hover { background: rgba(232, 234, 237, 0.08); }
+.lv-btn.is-on { color: var(--lv-ring); }
+.lv-group.end .lv-btn.is-on { background: rgba(111, 207, 151, 0.16); }
+.lv-count {
+  position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--r-full);
+  background: #5f6368; color: #fff; font-size: 10px; font-weight: 600; line-height: 16px; text-align: center;
+}
+/* Each control comes alive only while hovered; the leave phone rings for as long as the pointer stays on it. */
+.lv-btn:hover .ic-mic { animation: lv-pulse 0.9s ease-in-out infinite; }
+.lv-btn:hover .ic-video { animation: lv-nudge 0.9s ease-in-out infinite; }
+.lv-btn:hover .ic-present, .lv-btn:hover .ic-users { animation: lv-lift 0.9s ease-in-out infinite; }
+.lv-btn:hover .ic-more { animation: lv-spin90 1.2s ease-in-out infinite; }
+.lv-btn:hover .ic-apps { animation: lv-tilt 1s ease-in-out infinite; }
+.lv-leave:hover .ic-leave { animation: lv-ring 1.1s ease-in-out infinite; }
+@keyframes lv-talk { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+@keyframes lv-pulse { 50% { transform: scale(1.14); } }
+@keyframes lv-nudge { 50% { transform: translateX(2px); } }
+@keyframes lv-lift { 50% { transform: translateY(-2px); } }
+@keyframes lv-spin90 { 50% { transform: rotate(90deg); } }
+@keyframes lv-tilt { 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+@keyframes lv-ring {
+  0%, 56%, 100% { transform: rotate(135deg); }
+  8%, 24%, 40% { transform: rotate(152deg); }
+  16%, 32%, 48% { transform: rotate(118deg); }
+}
+
+/* ---------- Zoom skin: black stage, flush docked panel, label-under-icon toolbar, red End ---------- */
+.lv-call[data-app="zoom"] {
+  --lv-bg: #1a1a1a; --lv-tile: #2b2b2b; --lv-btn: transparent; --lv-btn-hover: #2e2e2e;
+  grid-template-rows: auto minmax(0, 1fr) auto; padding: 0; border-radius: var(--r-xl); overflow: hidden;
+}
+.lv-top { display: flex; align-items: center; gap: 16px; min-height: 40px; padding: 0 16px; border-bottom: 1px solid #2b2b2b; font-size: 13px; font-weight: 500; line-height: 1.5; color: #fff; }
+.lv-topic { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lv-view { color: #b3b3b3; white-space: nowrap; }
+[data-app="zoom"] .lv-main { gap: 0; }
+[data-app="zoom"] .lv-grid { padding: 12px; gap: 6px; }
+[data-app="zoom"] .lv-tile { border-radius: 8px; }
+[data-app="zoom"] .lv-tile::after { box-shadow: inset 0 0 0 2px var(--lv-ring); }
+[data-app="zoom"] .lv-voice { display: none; }
+[data-app="zoom"] .lv-name { left: 6px; bottom: 6px; padding: 1px 6px; background: rgba(0, 0, 0, 0.66); font-size: 12px; }
+[data-app="zoom"] .lv-side { border-radius: 0; }
+[data-app="zoom"] .lv-side-head { position: relative; justify-content: center; gap: 8px; min-height: 44px; padding: 0 44px; border-bottom: 1px solid var(--line); }
+[data-app="zoom"] .lv-side-head img { width: 18px; height: 18px; }
+[data-app="zoom"] .lv-side-title { flex: 0 1 auto; font-size: 14px; font-weight: 600; }
+[data-app="zoom"] .lv-side-head .ic { position: absolute; right: 12px; top: 50%; width: 18px; height: 18px; margin-top: -9px; }
+[data-app="zoom"] .lv-dock { min-height: 64px; padding: 0 12px; gap: 8px; border-top: 1px solid #2b2b2b; }
+[data-app="zoom"] .lv-group { gap: 2px; }
+[data-app="zoom"] .lv-btn { width: auto; min-width: 64px; height: 52px; padding: 4px 8px; border-radius: 8px; grid-template-rows: 20px auto; gap: 2px; }
+[data-app="zoom"] .lv-count { top: 4px; right: 12px; min-width: 0; padding: 0; background: none; color: #e8eaed; }
+.lv-lbl { font-size: 11px; font-weight: 500; line-height: 1.45; color: #e8eaed; white-space: nowrap; }
+.lv-end { display: inline-flex; align-items: center; height: 32px; padding: 0 16px; border-radius: 8px; background: #c5221f; color: #fff; font-size: 13px; font-weight: 600; line-height: 1.5; transition: background-color var(--t-fast) ease; }
+.lv-end:hover { background: #a50e0e; }
+
+/* ---------- below the call ---------- */
+.lv-note { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.lv-setup { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); }
+.lv-setup h2 { font-size: 16px; font-weight: 600; line-height: 1.5; }
+.lv-setup-sub { margin-top: 2px; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.lv-setup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.lv-steps { min-width: 0; padding: 20px 24px 24px; border: 1px solid var(--line); border-radius: var(--r-xl); background: var(--surface); }
+.lv-steps h3 { margin: 0 0 12px; font-size: 14px; font-weight: 600; line-height: 1.5; }
+.lv-steps ol { counter-reset: lv-step; display: flex; flex-direction: column; gap: 12px; }
+.lv-steps li { counter-increment: lv-step; position: relative; min-height: 24px; padding-left: 36px; font-size: 14px; color: var(--ink-2); line-height: 1.55; }
+.lv-steps li::before {
+  content: counter(lv-step); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--chip); color: var(--ink-2); font-size: 12px; font-weight: 600; line-height: 24px; text-align: center;
+}
+.lv-steps b { font-weight: 600; color: var(--ink); }
+.lv-setup .list-foot { margin-top: 16px; font-size: 13px; }
+
+@media (max-width: 1240px) {
+  .lv-main { grid-template-columns: minmax(0, 1fr) 320px; }
+}
+@media (max-width: 760px) {
+  /* Phone: the call, its controls right under it, then the panel (like Meet's panel opening as a sheet). */
+  .lv-call { display: flex; flex-direction: column; height: auto; padding: 12px; border-radius: var(--r-xl); }
+  .lv-main { display: contents; }
+  .lv-grid { order: 1; }
+  .lv-dock { order: 2; }
+  .lv-side { order: 3; }
+  .lv-grid { grid-auto-rows: auto; }
+  .lv-tile { aspect-ratio: 4 / 3; }
+  .lv-name { left: 6px; bottom: 6px; max-width: calc(100% - 12px); font-size: 12px; }
+  .lv-voice { top: 6px; right: 6px; }
+  .lv-side { height: 560px; }
+  .lv-dock { grid-template-columns: minmax(0, 1fr); justify-items: center; min-height: 72px; }
+  .lv-dock > :first-child, .lv-dock > :last-child { justify-self: center; }
+  .lv-dock > .lv-meta, .lv-dock > .lv-group.end { display: none; }
+  [data-app="zoom"] .lv-main { gap: 0; }
+  [data-app="zoom"] .lv-side { height: 560px; border-top: 1px solid #2b2b2b; }
+  [data-app="zoom"] .lv-dock { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; padding: 8px; }
+  [data-app="zoom"] .lv-dock > .lv-group.end { display: flex; }
+  [data-app="zoom"] .lv-btn { min-width: 40px; height: 40px; padding: 0; grid-template-rows: none; }
+  [data-app="zoom"] .lv-lbl { display: none; }
+  [data-app="zoom"] .lv-count { top: 0; right: 2px; }
+  .lv-setup-grid { grid-template-columns: minmax(0, 1fr); }
+  .lv-steps { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lv-call *, .lv-call *::after, .lv-end { animation: none !important; transition: none !important; }
+}

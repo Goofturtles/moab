@@ -1,0 +1,183 @@
+/* calendar.css: the Calls page (#/calls) as a week calendar. Owned by the calendar redesign; loads after styles.css.
+
+   Mobbin references (open each at the URL; what was taken from it):
+   1  Clockwise, week view: now-line only on today's column with a dot at its left end, today's date in a filled badge
+      https://mobbin.com/screens/c6dbfcf9-74eb-4741-aa55-193a0b693151
+   2  Clockwise, week view: the current time written in the hour gutter, the hour label under it hidden
+      https://mobbin.com/screens/4b10a68a-e9fc-49aa-8415-41275666431a
+   3  Clockwise, event panel: attendees as round faces under the event
+      https://mobbin.com/screens/ba80871d-4316-4430-b428-289ce8222ed7
+   4  Amie, week view: soft tinted blocks with a 3px left bar, title in the darker shade, time under it; grey weekend column
+      https://mobbin.com/screens/87f084f6-dd39-4578-9594-35bc73b6448a
+   5  Amie, week view: faint now-line across the week, solid segment on today, time label in the gutter
+      https://mobbin.com/screens/96f0872a-df23-4e4b-ba94-3cfdeefe342d
+   6  Amie, event brief: the hovered or open block sits above the grid
+      https://mobbin.com/screens/0756a815-38a1-446c-9ac4-0bc8564a4679
+   7  Rise, week view: hour gutter with zero-padded 24h labels, blocks of title + start time, now-line
+      https://mobbin.com/screens/007929b1-c2c1-4a42-9606-abd23f7d7548
+   8  Rise, week view with mini month dropped from the week title
+      https://mobbin.com/screens/4f21d518-0765-4ad8-8e80-d4e0afeb794f
+   9  Rise, event detail: participant faces and states
+      https://mobbin.com/screens/ab6aafad-870a-4164-bef9-c7afd174608c
+   10 ClickUp, week view: the current time as a filled pill in the gutter; "Tue 28" badge for today
+      https://mobbin.com/screens/3e7df50a-8ae4-4537-a3cf-7e91fcd288ae
+   11 ClickUp, event card: attendee faces inline with the event
+      https://mobbin.com/screens/c1bc32c5-3d44-4f14-9258-d2988204cb4a
+   12 Proton Calendar, toolbar: bordered Today button, then prev/next chevrons, then the date range title
+      https://mobbin.com/screens/bec0d72e-934b-42c3-a3c3-1c91d1eac278
+   13 Microsoft Teams (Outlook calendar), work week: hour label at the top of each row, half-hour lines, tinted blocks with a left bar
+      https://mobbin.com/screens/ab362cc0-67e4-47c5-8acf-4a12c00d9f4c
+   14 Motion, week view: weekend columns set apart, Today + chevrons + month title
+      https://mobbin.com/screens/cd5e73ea-7f67-4e5a-9711-2b46dd66407a
+   15 Skiff, week view: "Oct - Nov 2023" range title, uppercase weekday over the date, today badge
+      https://mobbin.com/screens/97ac7285-c74b-4451-a88b-8f2ee08e1ec5
+   16 Microsoft Outlook iOS, agenda: one group per day, time + length beside each event, faces in the row (phone layout)
+      https://mobbin.com/screens/3a21d1a0-0bec-472b-9c07-8a33dddf45cf
+   17 Toggl Track, week grid: today's column accent, now dot + line, day header with date and weekday
+      https://mobbin.com/screens/ec591d9c-1442-4ee2-bf55-5773d17397a9
+   Mobbin returned no Google Calendar, Notion Calendar, Fantastical, Vimcal or Calendly week views; the apps above cover the same patterns.
+
+   Decisions: 120px per hour (2px per minute) so a 30-minute call still shows company, time, type, faces and prep;
+   office hours 9:00 to 17:00 ET, stretched by app.js to fit the week's calls and the time now;
+   weekend days without calls are condensed to 0.6 of a weekday (Outlook's work week with the weekend kept in view);
+   the week grid needs 960px of page width, below that the same calls show as an agenda by day.
+   One accent (green) for today, the now-line and Today; each call keeps its company's tint (C.tint, same as the company tiles). */
+
+[data-view="calls"] { container: calls / inline-size; --cal-today: color-mix(in srgb, var(--accent-bg) 55%, var(--bg)); --gut: 56px; }
+[data-view="calls"] > .cal { max-width: none; }
+
+/* ---------- toolbar: title, sample tag, Today, prev/next, week range (Proton, Motion, ClickUp) ---------- */
+.cal-top { margin-bottom: 0; padding-top: 14px; padding-bottom: 14px; }
+.cal-top .page-head-row { gap: 8px 10px; }
+.cal-nav { display: flex; align-items: center; gap: 4px; margin-left: 16px; min-width: 0; }
+.cal-nav .btn { margin-right: 4px; }
+.cal-nav .icon-btn { width: 28px; height: 28px; }
+.cal-range { margin-left: 8px; font-size: 16px; font-weight: 600; line-height: 1.5; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cal-sum { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ---------- day header: weekday over the date, today in a green badge (Skiff, Clockwise, Toggl) ---------- */
+.cal-head {
+  position: sticky; top: 0; z-index: 5; background: var(--bg);
+  display: grid; grid-template-columns: var(--gut) var(--cols, repeat(7, minmax(0, 1fr)));
+  border-bottom: 1px solid var(--line-2);
+}
+.cal-tz { align-self: end; padding: 0 8px 8px 0; text-align: right; font-size: 11px; font-weight: 500; color: var(--muted); line-height: 1.45; }
+.cal-dh { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px 8px; min-width: 0; }
+.cal-dh.is-today { background: var(--cal-today); }
+.cal-dow { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); line-height: 1.45; }
+.cal-dnum {
+  display: grid; place-items: center; min-width: 36px; height: 36px; padding: 0 4px; border-radius: var(--r-full);
+  font-size: 20px; font-weight: 500; line-height: 1.3; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.is-today .cal-dow { color: var(--accent); }
+.is-today .cal-dnum { background: var(--accent-fill); color: var(--on-accent); font-weight: 600; }
+
+/* ---------- grid: hour gutter, hour + half-hour lines, day columns (Teams, Rise) ---------- */
+.cal-body { display: grid; grid-template-columns: var(--gut) minmax(0, 1fr); }
+.cal-gutter { position: relative; }
+.cal-hl { position: absolute; right: 8px; margin-top: 4px; font-size: 11px; color: var(--muted); line-height: 1.45; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cal-days { position: relative; display: grid; grid-template-columns: var(--cols, repeat(7, minmax(0, 1fr))); border-left: 1px solid var(--line); }
+.cal-lines { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.cal-hr, .cal-half, .cal-now-all { position: absolute; left: 0; right: 0; height: 0; }
+.cal-hr { border-top: 1px solid var(--line); }
+.cal-half { border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
+.cal-col { position: relative; min-width: 0; }
+.cal-col + .cal-col { border-left: 1px solid var(--line); }
+.cal-col.is-off { background: var(--surface-2); }
+.cal-col.is-today { background: var(--cal-today); }
+
+/* now: faint across the week, solid with a dot on today, the time as a pill in the gutter (Amie, Clockwise, ClickUp) */
+.cal-now-all { border-top: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+.cal-now { position: absolute; left: -1px; right: 0; z-index: 3; height: 0; margin-top: -1px; border-top: 2px solid var(--accent); pointer-events: none; }
+.cal-now::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.cal-now-t {
+  position: absolute; right: 4px; z-index: 1; transform: translateY(-50%); padding: 0 6px; border-radius: var(--r-full);
+  background: var(--accent-fill); color: var(--on-accent); font-size: 11px; font-weight: 600; line-height: 18px; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* ---------- a call (week block and agenda card share the inside) (Amie, Teams, ClickUp) ---------- */
+.cal-ev, .ag-ev {
+  color: var(--ink); text-decoration: none; background: var(--ev-bg); box-shadow: inset 3px 0 0 var(--ev-ink);
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+.cal-ev { position: absolute; left: 3px; right: 6px; z-index: 2; container-type: size; border-radius: var(--r-md); overflow: hidden; }
+.ag-ev { position: relative; display: block; border-radius: var(--r-lg); }
+.cal-ev:hover, .ag-ev:hover { transform: translateY(-1px); box-shadow: inset 3px 0 0 var(--ev-ink), var(--shadow-raise); }
+.cal-ev:hover, .cal-ev:focus-visible { z-index: 4; }
+
+.ev-in {
+  display: grid; height: 100%; padding: 6px 6px 6px 10px; row-gap: 2px; column-gap: 6px; align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto 1fr;
+  grid-template-areas: "co co" "meta meta" "faces prep";
+}
+.ev-co { grid-area: co; min-width: 0; font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--ev-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-meta { grid-area: meta; display: flex; flex-direction: column; min-width: 0; font-size: 12px; line-height: 1.3; color: var(--ink-2); }
+.ev-when { display: flex; align-items: center; gap: 4px; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; flex: none; }
+.ev-when .ic { width: 12px; height: 12px; color: var(--ev-ink); }
+.ev-kind { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-in > .stack { grid-area: faces; align-self: end; }
+.ev-in > .stack .avatar { box-shadow: 0 0 0 1.5px var(--ev-bg); }
+.ev-in > .prep { grid-area: prep; align-self: end; height: 20px; background: var(--surface); }
+/* In a week block the prep chip is words only ("Not prepped"), and the faces are a size smaller, so both fit one row. */
+.cal-ev .stack .avatar.xs { width: 18px; height: 18px; }
+.cal-ev .ev-in > .prep { padding: 0 6px; font-size: 11px; }
+.cal-ev .ev-in > .prep .ic { display: none; }
+
+/* A short call (under 40 minutes): faces beside the company, the end time dropped, prep beside the time. */
+@container (max-height: 79px) {
+  .ev-in { padding-top: 4px; padding-bottom: 4px; row-gap: 0; align-items: center; grid-template-rows: auto auto; grid-template-areas: "co faces" "meta prep"; }
+  .ev-meta { flex-direction: row; }
+  .ev-end { display: none; }
+  .ev-kind::before { content: "·" / ""; margin: 0 4px; }
+  .ev-in > .stack, .ev-in > .prep { align-self: center; }
+}
+/* No room for the words: the chip shows its state icon only (the words stay for screen readers). */
+@container (max-height: 79px) or (max-width: 147px) {
+  .cal-ev .ev-in > .prep { width: 20px; padding: 0; gap: 0; justify-content: center; font-size: 0; }
+  .cal-ev .ev-in > .prep .ic { display: block; }
+}
+
+/* Hovering (or tabbing to) a call makes its phone ring for as long as you stay: the shared .ic-phone ring in motion.css. */
+
+/* ---------- agenda by day: under 960px of page width, phones included (Outlook iOS) ---------- */
+.agenda { display: none; max-width: 720px; border-top: 1px solid var(--line); }
+.ag-day { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ag-date { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ag-list { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ag-none { padding-top: 26px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.ag-ev .ev-in { padding: 10px 12px 10px 14px; row-gap: 4px; }
+.ag-ev .ev-co { font-size: 14px; white-space: normal; }
+.ag-ev .ev-meta { flex-direction: row; flex-wrap: wrap; font-size: 13px; line-height: 1.45; }
+.ag-ev .ev-kind { white-space: normal; }
+.ag-ev .ev-kind::before { content: "·" / ""; margin: 0 6px; }
+.ag-ev .ev-in > .stack, .ag-ev .ev-in > .prep { margin-top: 4px; }
+
+@container calls (max-width: 959px) {
+  .cal { display: none; }
+  .agenda { display: block; }
+  .cal-top .grow { display: none; }
+  .cal-nav { margin-left: 0; width: 100%; }
+  .cal-range { margin-left: 4px; }
+  .cal-sum { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cal-ev, .ag-ev { transition: none; }
+  .cal-ev:hover, .ag-ev:hover { transform: none; }
+}
+@media (forced-colors: active) {
+  .cal-ev, .ag-ev { border: 1px solid CanvasText; }
+  .cal-now, .cal-now::before, .cal-now-t { forced-color-adjust: none; }
+}
+
+/* ==================== Spotify theme (dark, the default) ====================
+   Today is a faint green column with the date in a green circle (black number); weekends a step lighter; call blocks
+   keep their company colour as an edge (base.css) and lighten on hover instead of lifting. */
+:root[data-theme="dark"] [data-view="calls"] { --cal-today: color-mix(in srgb, var(--accent) 5%, var(--bg)); }
+:root[data-theme="dark"] .cal-col.is-off { background: #161616; }
+:root[data-theme="dark"] .cal-range { font-weight: 700; letter-spacing: -0.01em; }
+:root[data-theme="dark"] .is-today .cal-dnum { font-weight: 700; }
+:root[data-theme="dark"] :is(.cal-ev, .ag-ev) { transition: background-color var(--t-card) ease; }
+:root[data-theme="dark"] :is(.cal-ev, .ag-ev):hover { transform: none; background: color-mix(in srgb, var(--ev-bg) 24%, var(--hover)); }
+:root[data-theme="dark"] .ev-co { font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { :root[data-theme="dark"] :is(.cal-ev, .ag-ev) { transition: none; } }

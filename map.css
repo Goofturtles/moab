@@ -1,0 +1,309 @@
+/* People map board (map.js). Look: Asana's connected-work canvas: soft dot grid, white cards with soft shadows,
+   ring avatars, square lines with round bends and end dots, the selected path in the accent.
+   Also Cofounder (fade on select), Jira (line labels), Deel (zoom bar), Felt (legend).
+
+   Motion references (Mobbin, web), studied for line, node, selection and zoom behaviour:
+   - Asana, Goals strategy map, zoom bar pressed:        https://mobbin.com/screens/c479b792-0b12-486b-b058-01c62e995ffb
+   - Asana, strategy map, two levels of connectors:      https://mobbin.com/screens/6d951ee3-556e-4642-9f1f-59a6d913c66b
+   - Asana, strategy map with saved maps tab:            https://mobbin.com/screens/e4c5e61d-ddd6-4e2d-aa71-51d98a549dcf
+   - Asana, strategy map edit mode, card outlines:       https://mobbin.com/screens/e0b61040-635c-49d3-bbff-911d5a56f9e4
+   - Asana, reference guide (solid/dashed, highlight, fit to view): https://mobbin.com/screens/fc6b90a3-84db-4cb1-a370-3915ab85799f
+   - Asana, strategy map dark, dashed connectors:        https://mobbin.com/screens/c8900b38-8ff5-4424-92c5-3d1c41f8416b
+   - Miro, selected card, outline flush with the card:   https://mobbin.com/screens/a92c6f99-0daf-4c40-ba72-a4ea3a6bb03c
+   - Miro, org chart frame selected with connector:      https://mobbin.com/screens/ed334ef6-ac2e-4ca1-b77e-713ce6d77164
+   - Miro, card at rest after deselect:                  https://mobbin.com/screens/ae23b10d-2f08-41a0-b31e-e0bed0d47b2a
+   - Relume, sitemap hovered section (flush accent outline): https://mobbin.com/screens/e4e00704-1b5e-4de3-b04b-7fae20fba08a
+   - Relume, sitemap selected section + panel:           https://mobbin.com/screens/6380e300-cfd0-428d-8083-e10ce7ea701a
+   - Relume, sitemap elbow connectors at rest:           https://mobbin.com/screens/af97426b-a94d-463a-9819-1d576e269d6f
+   - Cofounder, selected node with soft accent halo:     https://mobbin.com/screens/e16a7369-dcf7-441a-aefb-0bdab51d6df6
+   - WRITER, blueprint graph, lit connectors + port dots: https://mobbin.com/screens/8af7c34a-1370-4c2e-af2f-d3e1eb6c3676
+   - Confluence, whiteboard connector with end dots:     https://mobbin.com/screens/9b02ecfe-7cf2-4e82-8c4d-8f1b83a46716
+   - Fibery, relation graph:                             https://mobbin.com/screens/8d9b55e8-241c-417c-ad8d-647b89e58719
+   What we took: one focus/selection ring that hugs the card (Miro, Relume) with a soft halo (Cofounder) instead of two
+   stacked outlines; lines that light in the accent from the chosen card (Asana highlight, WRITER); end dots that land
+   on the card edge (Confluence); fit-to-view that glides (Asana). Timings follow docs/DESIGN-ASANA.md: 120-200ms for
+   state, ~420ms for lines drawing, var(--ease). Everything is off under prefers-reduced-motion. */
+.board {
+  --card-shadow: 0 1px 2px rgba(23, 24, 26, 0.06), 0 4px 14px rgba(23, 24, 26, 0.06);
+  --card-shadow-hi: 0 2px 4px rgba(23, 24, 26, 0.06), 0 10px 24px rgba(23, 24, 26, 0.10);
+  position: relative; background: #f5f5f3; border: 1px solid var(--line); border-radius: 16px; min-height: 420px; isolation: isolate;
+}
+/* The canvas viewport clips on purpose: it is a pan-and-zoom window onto the board. */
+.board-viewport {
+  position: absolute; inset: 0; overflow: hidden; border-radius: inherit; cursor: grab; touch-action: none; outline: none;
+  background-image: radial-gradient(circle, #d3d3cf 1px, transparent 1.3px); background-size: 18px 18px;
+}
+.board.dragging .board-viewport { cursor: grabbing; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.edges { position: absolute; left: -3000px; top: -3000px; width: 6000px; height: 6000px; overflow: visible; pointer-events: none; }
+.edges path, .edges circle { transform: translate(3000px, 3000px); transition: opacity 160ms ease, stroke 160ms ease; }
+.edges path { fill: none; stroke-linecap: round; }
+.edge { stroke: #cdcdc9; stroke-width: 1.5; }
+.edge.warm { stroke: var(--accent); stroke-width: 1.75; }
+.edge.together { stroke-dasharray: 4 5; stroke: #b4b4b0; }
+.edge.mentioned { stroke: color-mix(in srgb, var(--accent) 40%, var(--surface)); stroke-width: 1.5; }
+.edge.lit { stroke: var(--accent); stroke-width: 2; }
+.edge.dim, .edot.dim { opacity: 0.25; }
+.edot { fill: var(--ink); stroke: var(--surface); stroke-width: 1.5; }
+.nodes { position: absolute; left: 0; top: 0; }
+
+/* Company frames: a quiet tinted area, the company's name card on top. */
+.frame { position: absolute; background: var(--frame-bg); border: 1px solid #e6e6e2; border-radius: 20px; transition: opacity 160ms ease; }
+.frame-head {
+  position: absolute; left: 10px; top: 10px; right: 10px; display: flex; align-items: center; gap: 8px; height: 34px;
+  padding: 0 8px 0 6px; border: 0; background: none; cursor: grab; text-align: left; border-radius: 10px;
+}
+.frame-head:hover { background: rgba(23, 24, 26, 0.04); }
+.frame-name { font-size: 14px; font-weight: 600; line-height: 1.4; }
+.frame-chip {
+  font-size: 12px; font-weight: 500; line-height: 1.5; padding: 0 6px; border-radius: var(--r-sm); white-space: nowrap; flex: none;
+}
+.frame-chip:not([class*="tag-"]) { background: var(--tag-gray-bg); color: var(--tag-gray-ink); }
+.co-tile { width: 24px; height: 24px; border-radius: 7px; background: var(--ink); color: #fff; display: inline-grid; place-items: center; font-size: 11px; font-weight: 600; line-height: 1.25; flex: none; }
+
+/* Cards */
+.node {
+  position: absolute; display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 10px; text-align: left; cursor: grab;
+  background: var(--surface); border: 1px solid rgba(23, 24, 26, 0.05); border-radius: 12px; color: var(--ink); box-shadow: var(--card-shadow);
+  transition: opacity 160ms ease, box-shadow 160ms ease, transform 200ms var(--ease);
+}
+.node:hover { box-shadow: var(--card-shadow-hi); }
+/* The brief's people list also uses .person (styles.css: a grid, no side padding); on the board a person stays a padded card. */
+.node.person { display: flex; padding: 8px 14px 8px 10px; }
+.node.person + .node.person { border-top-color: rgba(23, 24, 26, 0.05); }
+.node.selected { box-shadow: 0 0 0 2px var(--accent), var(--card-shadow-hi); }
+/* One ring, not two: a focused card gets the outline; a focused card that is also selected keeps its accent ring
+   and adds a soft halo outside it, instead of a second outline floating 2px off the first. */
+.board .node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.board .node.selected:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent), 0 0 0 5px var(--accent-line), var(--card-shadow-hi); }
+/* Dimmed cards fade their shadow and pictures, never their text, so names stay readable. */
+.node.dim { box-shadow: 0 0 0 1px var(--line); }
+.node.dim .avatar, .node.dim .co-tile, .node.dim .src { opacity: 0.4; }
+.node.dim .node-name { color: var(--ink-2); }
+.frame.dim { border-style: dashed; }
+.node-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+/* One line each so cards keep their slot on the board; the full text is in the card's title tooltip. */
+.node-name, .node-sub, .frame-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.node-name { font-size: 14px; font-weight: 600; line-height: 1.35; }
+.node-sub { font-size: 12px; color: var(--muted); line-height: 1.35; }
+/* Ring avatars, like Asana's: a white ring lifts the circle off the card. */
+.node .avatar { width: 36px; height: 36px; font-size: 12px; font-weight: 600; box-shadow: 0 0 0 3px var(--surface), 0 1px 4px rgba(23, 24, 26, 0.18); }
+.node .avatar img { pointer-events: none; -webkit-user-drag: none; }
+/* You are the centre of the board: the one dark card, a Spotify-green monogram and a "Your network" tag. */
+.node.you {
+  border-radius: 999px; padding: 4px 14px 4px 4px; gap: 10px; background: #1e1f21; border-color: #1e1f21; color: #fff;
+  box-shadow: 0 0 0 4px rgba(30, 215, 96, 0.22), 0 10px 24px rgba(23, 24, 26, 0.28);
+}
+.node.you:hover { box-shadow: 0 0 0 5px rgba(30, 215, 96, 0.32), 0 14px 30px rgba(23, 24, 26, 0.32); }
+.node.you .you-av { width: 36px; height: 36px; background: #1ed760; color: #0b2a17; font-weight: 700; box-shadow: none; }
+.node.you .node-name { font-size: 13px; line-height: 1.3; color: #fff; }
+.node.you .node-sub { color: rgba(255, 255, 255, 0.72); }
+.node.you .you-tag { flex: none; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: rgba(30, 215, 96, 0.18); color: #7ef0a8; font-size: 11px; font-weight: 600; line-height: 1.5; }
+.node.you.selected { box-shadow: 0 0 0 2px #1ed760, 0 0 0 6px rgba(30, 215, 96, 0.22), 0 14px 30px rgba(23, 24, 26, 0.32); }
+.node.past { border-radius: 999px; padding: 6px 18px 6px 6px; gap: 10px; }
+.node.past .co-tile { width: 36px; height: 36px; border-radius: 50%; font-size: 12px; background: var(--chip); color: var(--ink-2); box-shadow: 0 0 0 3px var(--surface), 0 1px 4px rgba(23, 24, 26, 0.14); }
+.node.past .src { font-size: 12px; line-height: 1.35; }
+/* Mentioned on a call (not on the invite): a dashed indigo outline, so they read as "came up", not "was there". */
+.node.mentioned { border: 1px dashed var(--accent-line); }
+
+.edge-label {
+  position: absolute; transform: translate(-50%, -50%); padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+  background: var(--surface); border: 0; box-shadow: var(--card-shadow); color: var(--ink-2); font-size: 12px; font-weight: 500; line-height: 1.5; cursor: pointer;
+}
+.edge-label.warm { background: var(--accent-bg); color: var(--accent); box-shadow: 0 0 0 1px var(--accent-line); }
+.edge-label:hover { box-shadow: var(--card-shadow-hi); }
+
+.board-zoom {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 2px;
+  padding: 4px; background: var(--surface); border-radius: 12px; box-shadow: var(--card-shadow-hi);
+}
+.board-zoom .icon-btn { width: 30px; height: 30px; }
+.board-zoom .ic { width: 15px; height: 15px; }
+.zoom-val { font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.board-legend {
+  position: absolute; left: 12px; top: 12px; max-width: calc(100% - 24px); padding: 6px 12px; background: var(--surface); border-radius: 10px; box-shadow: var(--card-shadow);
+  font-size: 12px; color: var(--ink-2); line-height: 1.5; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;
+}
+.board-legend p { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.lk { position: relative; width: 24px; height: 0; border-top: 1.75px solid var(--accent); flex: none; }
+.lk::before, .lk::after { content: ""; position: absolute; top: -4.5px; width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
+.lk::before { left: -3px; } .lk::after { right: -3px; }
+.lk.moved { border-top: 1.5px solid #cdcdc9; }
+.lk.together { border-top: 1.5px dashed #b4b4b0; }
+.lk.mentioned { border-top: 1.5px solid color-mix(in srgb, var(--accent) 40%, var(--surface)); }
+.legend-src { gap: 12px !important; padding-left: 16px; border-left: 1px solid var(--line); }
+.board-focus {
+  position: absolute; right: 12px; bottom: 14px; display: flex; align-items: center; gap: 12px;
+  padding: 6px 14px; background: var(--ink); color: var(--bg); border-radius: 999px; font-size: 13px; line-height: 1.4; white-space: nowrap; box-shadow: var(--card-shadow-hi);
+}
+.board-focus .link-btn { color: var(--bg); text-decoration-color: currentColor; }
+.edge-pop {
+  position: absolute; width: 288px; padding: 12px 14px; background: var(--surface); border-radius: 12px;
+  box-shadow: var(--shadow-pop); font-size: 13px; line-height: 1.5; color: var(--ink-2); z-index: 2;
+}
+.edge-pop p + p { margin-top: 6px; }
+.pop-ends { color: var(--ink); }
+.pop-src { overflow-wrap: anywhere; }
+
+/* Compact board (in-call panel): no legend, small zoom bar */
+.board.compact { min-height: 260px; border-radius: 12px; }
+.board.compact .board-zoom { bottom: 8px; padding: 2px; }
+.board.compact .board-zoom .icon-btn { width: 26px; height: 26px; }
+.board.compact .board-focus { top: 8px; right: 8px; bottom: auto; font-size: 12px; }
+.board.compact .node { padding: 6px 10px 6px 7px; gap: 9px; }
+.board.compact .node-name { font-size: 13px; }
+.board.compact .node .avatar { width: 28px; height: 28px; font-size: 10px; box-shadow: 0 0 0 2px var(--surface), 0 1px 3px rgba(23, 24, 26, 0.18); }
+.board.compact .node.you { padding: 3px 12px 3px 3px; }
+.board.compact .node.past .co-tile { width: 22px; height: 22px; }
+.board.compact .frame-chip, .board.compact .edge-label { display: none; }
+
+/* ---------- Motion ---------- */
+/* Hover: the card lifts 2px; its lines darken (warm ones go to the accent) and come to the front. */
+@media (hover: hover) {
+  .node:hover, .node.hovering { transform: translateY(-2px); box-shadow: var(--card-shadow-hi); }
+  .node.selected:hover, .node.selected.hovering { box-shadow: 0 0 0 2px var(--accent), var(--card-shadow-hi); }
+}
+.edge.hot { stroke: #8d8d89; opacity: 1; }
+.edge.warm.hot, .edge.lit.hot { stroke: var(--accent); }
+/* The dot that travels along a hovered card's lines (map.js adds it only while hovered). */
+.edges .flow { transform: none; fill: var(--accent); stroke: var(--surface); stroke-width: 1.5; }
+
+/* Selecting: lines that leave the selection fade down, lines that join it fade up, the chosen card's ring
+   closes in from a wider halo, line labels pop in one after another, the far end dots land last. */
+@keyframes mapFadeDown { from { opacity: 1; } }
+@keyframes mapFadeUp { from { opacity: 0.25; } }
+@keyframes mapAppear { from { opacity: 0; } }
+@keyframes mapRing { from { box-shadow: 0 0 0 9px transparent, var(--card-shadow-hi); } }
+@keyframes mapLabelPop { from { opacity: 0; transform: translate(-50%, -50%) scale(0.86); } }
+@keyframes mapRise { from { opacity: 0; transform: translateY(4px); } }
+.edge.fade-out, .edot.fade-out { animation: mapFadeDown 260ms var(--ease) both; }
+.edge.fade-in, .edot.fade-in { animation: mapFadeUp 260ms var(--ease) both; }
+.edot.pop { animation: mapAppear 200ms ease-out 300ms both; }
+.node.sel-pop { animation: mapRing 320ms var(--ease) both; }
+.node.to-dim .avatar, .node.to-dim .co-tile, .node.to-dim .src { animation: mapFadeDown 260ms var(--ease) both; }
+.node.to-lit .avatar, .node.to-lit .co-tile, .node.to-lit .src { animation: mapFadeUp 260ms var(--ease) both; }
+.edge-label.pop { animation: mapLabelPop 280ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both; animation-delay: calc(160ms + var(--i, 0) * 40ms); }
+.board-focus:not([hidden]) { animation: mapRise 200ms var(--ease) both; }
+.edge-pop:not([hidden]) { animation: mapRise 140ms ease-out both; }
+/* Side panel content arrives with the selection, one block after another. */
+.map-side > * { animation: mapRise 220ms var(--ease) both; }
+.map-side > :nth-child(2) { animation-delay: 30ms; }
+.map-side > :nth-child(3) { animation-delay: 60ms; }
+.map-side > :nth-child(4) { animation-delay: 90ms; }
+.map-side > :nth-child(n+5) { animation-delay: 120ms; }
+
+/* Zoom bar: the view glides to the new zoom or fit instead of jumping. */
+.board.easing .world { transition: transform 320ms var(--ease); }
+/* Zoom bar icons act out their job, only while hovered. */
+.board-zoom .ic { transition: transform 160ms var(--ease); }
+.board-zoom [data-z="in"]:hover .ic { transform: scale(1.2); }
+.board-zoom [data-z="out"]:hover .ic { transform: scaleX(0.7); }
+@keyframes mapFitBreathe { 50% { transform: scale(1.16); } }
+.board-zoom [data-z="fit"]:hover .ic { animation: mapFitBreathe 900ms var(--ease) infinite; }
+/* "Open the call" arrow leans the way it goes. */
+.map-side .side-actions .btn .ic { transition: transform 160ms var(--ease); }
+.map-side .side-actions .btn:hover .ic { transform: translateX(3px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .edges path, .edges circle, .node, .frame, .board-zoom .ic, .map-side .side-actions .btn .ic { transition: none; }
+  .board.easing .world { transition: none; }
+  .edge, .edot, .node, .node *, .edge-label, .board-focus, .edge-pop, .map-side > *, .board-zoom .ic { animation: none !important; }
+  .node:hover, .node.hovering, .board-zoom [data-z]:hover .ic, .map-side .side-actions .btn:hover .ic { transform: none; }
+}
+
+/* Warm and selected lines carry a gradient in the accent (map.js draws #mapGrad with fixed colours; these stops win). */
+.edge.warm { stroke: url(#mapGrad); stroke-opacity: 0.75; }
+.edge.lit { stroke: url(#mapGrad); stroke-opacity: 1; }
+#mapGrad stop:nth-child(1), #mapGrad stop:nth-child(3) { stop-color: var(--accent); }
+#mapGrad stop:nth-child(2) { stop-color: color-mix(in srgb, var(--accent) 55%, var(--surface)); }
+
+/* Click-to-explain card (core.js explainHtml): what a connection is, its sourced sentences (numbered to the sources under
+   them), short quotes with links and dates, the call's own words, and where it was found. Used in the People map's popover
+   and side panel, After the call and the in-call panel. Text is 1.45 to 1.5 line height; nothing is clipped (it wraps). */
+.xp { margin-top: 6px; min-width: 0; }
+.xp > summary {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 26px; padding: 0 8px 0 2px; border-radius: var(--r-md);
+  font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--accent); cursor: pointer; list-style: none;
+}
+.xp > summary::-webkit-details-marker { display: none; }
+.xp > summary:hover { background: var(--accent-bg); }
+.xp > summary:focus-visible { outline: 2px solid var(--chrome-focus); outline-offset: 1px; }
+.xp-chev { width: 14px; height: 14px; flex: none; transition: transform 150ms ease; }
+.xp[open] > summary .xp-chev { transform: rotate(90deg); }
+.xp > .xp-card { margin-top: 6px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
+.xp-card { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 13px; line-height: 1.5; color: var(--ink-2); overflow-wrap: anywhere; }
+.xp-card.xp-card p, .xp-card.xp-card blockquote { margin: 0; }  /* beats ".sec p + p" in styles.css, which loads later */
+.xp-type { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.xp-label { color: var(--ink); font-weight: 500; }
+.xp-what { display: flex; flex-direction: column; gap: 4px; color: var(--ink); }
+.xp-about { color: var(--ink); }
+.xp-ref { margin-left: 2px; font-size: 10px; font-weight: 600; line-height: 1.4; color: var(--accent); vertical-align: 4px; font-variant-numeric: tabular-nums; }
+.xp-ref + .xp-ref::before { content: ","; color: var(--muted); }
+.xp-since { display: flex; align-items: center; gap: 6px; color: var(--ink-2); }
+.xp-since .ic { width: 14px; height: 14px; flex: none; color: var(--muted); }
+.xp-card.xp-card .xp-h { margin-top: 4px; font-size: 12px; font-weight: 600; line-height: 1.45; color: var(--muted); }
+.xp-quote { margin: 0; padding: 8px 12px; border-left: 3px solid var(--tag-purple-bg); background: var(--surface-2); border-radius: 0 var(--r-md) var(--r-md) 0;
+  display: flex; flex-direction: column; gap: 2px; color: var(--ink); }
+.xp-who { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.xp-ev { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.xp-ev li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; min-width: 0; }
+.xp-n { display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; background: var(--accent-bg); color: var(--accent);
+  font-size: 11px; font-weight: 600; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.xp-evq { color: var(--ink); font-style: italic; }
+.xp-evs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; line-height: 1.5; }
+.xp-evs a { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-weight: 500; }
+.xp-evs .ic { width: 12px; height: 12px; flex: none; }
+.xp-date { color: var(--muted); }
+.xp-card.xp-card .xp-meta { margin-top: 2px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.edge-pop.xp-pop { width: 320px; max-width: calc(100% - 24px); max-height: min(440px, calc(100% - 24px)); overflow-y: auto; }
+.edge-pop.xp-pop .xp-card { margin-top: 6px; }
+.map-side .xp > .xp-card { padding: 10px 12px; }
+@media (prefers-reduced-motion: reduce) { .xp-chev { transition: none; } }
+.xp > summary .xp-chev { animation: none !important; }  /* the chevron turns; it doesn't nudge */
+
+/* ==================== Spotify theme (dark, the default): the People map ====================
+   A near-black canvas (#0e0e0e) with a quiet dot grid, flat #1f1f1f cards that lighten on hover, grey lines for
+   past links and green gradient lines for warm and selected ones, green end dots. "You" is the one green card. */
+:root[data-theme="dark"] .board { --card-shadow: none; --card-shadow-hi: 0 8px 24px rgba(0, 0, 0, 0.5); background: #0e0e0e; border-color: var(--line); }
+:root[data-theme="dark"] .board-viewport { background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1.3px); }
+:root[data-theme="dark"] .frame { border-color: #242424; background: rgba(255, 255, 255, 0.025); }
+:root[data-theme="dark"] .frame-head:hover { background: rgba(255, 255, 255, 0.05); }
+:root[data-theme="dark"] .frame-name { font-weight: 700; }
+:root[data-theme="dark"] .node { background: var(--surface-2); border-color: #2a2a2a; transition: opacity 160ms ease, box-shadow 160ms ease, transform 200ms var(--ease), background-color var(--t-card) ease; }
+:root[data-theme="dark"] .node:hover, :root[data-theme="dark"] .node.hovering { background: var(--hover); }
+:root[data-theme="dark"] .node.person + .node.person { border-top-color: #2a2a2a; }
+:root[data-theme="dark"] .node .avatar, :root[data-theme="dark"] .node.past .co-tile { box-shadow: none; }
+:root[data-theme="dark"] .node-name { font-weight: 700; }
+:root[data-theme="dark"] .node.selected,
+:root[data-theme="dark"] .node.selected:hover { box-shadow: 0 0 0 2px var(--accent), 0 0 0 6px color-mix(in srgb, var(--accent) 22%, transparent), var(--card-shadow-hi); }
+:root[data-theme="dark"] .node.dim { box-shadow: 0 0 0 1px #2a2a2a; }
+/* You: Spotify green with black text, a black monogram and a soft green halo. */
+:root[data-theme="dark"] .node.you { background: #1ed760; border-color: #1ed760; color: #000000; box-shadow: 0 0 0 4px rgba(30, 215, 96, 0.2), 0 10px 24px rgba(0, 0, 0, 0.5); }
+:root[data-theme="dark"] .node.you:hover { background: #1fdf64; box-shadow: 0 0 0 5px rgba(30, 215, 96, 0.28), 0 14px 30px rgba(0, 0, 0, 0.55); }
+:root[data-theme="dark"] .node.you .you-av { background: #000000; color: #1ed760; }
+:root[data-theme="dark"] .node.you .node-name { color: #000000; }
+:root[data-theme="dark"] .node.you .node-sub { color: rgba(0, 0, 0, 0.72); }
+:root[data-theme="dark"] .node.you .you-tag { background: rgba(0, 0, 0, 0.16); color: #000000; }
+:root[data-theme="dark"] .node.you.selected { box-shadow: 0 0 0 2px #0e0e0e, 0 0 0 4px #1ed760, 0 0 0 9px rgba(30, 215, 96, 0.2), 0 14px 30px rgba(0, 0, 0, 0.55); }
+/* Line colours keep 3:1 or more against the #0e0e0e canvas (grey 3.6:1, mentioned green 5:1). */
+:root[data-theme="dark"] .edge { stroke: #6a6a6a; }
+:root[data-theme="dark"] .edge.together { stroke: #727272; }
+:root[data-theme="dark"] .edge.hot { stroke: #b3b3b3; }
+:root[data-theme="dark"] .edge.mentioned { stroke: color-mix(in srgb, var(--accent) 60%, #0e0e0e); }
+:root[data-theme="dark"] .edge.warm { stroke: url(#mapGrad); }
+:root[data-theme="dark"] .edge.lit, :root[data-theme="dark"] .edge.warm.hot, :root[data-theme="dark"] .edge.lit.hot { stroke: url(#mapGrad); stroke-opacity: 1; }
+:root[data-theme="dark"] .edot { fill: var(--accent); stroke: #0e0e0e; }
+:root[data-theme="dark"] .edges .flow { stroke: #0e0e0e; }
+:root[data-theme="dark"] #mapGrad stop:nth-child(2) { stop-color: color-mix(in srgb, var(--accent) 50%, #0e0e0e); }
+:root[data-theme="dark"] .lk.moved { border-top-color: #6a6a6a; }
+:root[data-theme="dark"] .lk.together { border-top-color: #727272; }
+:root[data-theme="dark"] .lk.mentioned { border-top-color: color-mix(in srgb, var(--accent) 60%, var(--surface)); }
+:root[data-theme="dark"] .lk::before, :root[data-theme="dark"] .lk::after { background: var(--accent); }
+:root[data-theme="dark"] :is(.edge-label, .board-zoom, .board-legend) { background: var(--surface-2); }
+:root[data-theme="dark"] .edge-label:hover { background: var(--hover); }
+:root[data-theme="dark"] .edge-pop { background: #282828; }
+:root[data-theme="dark"] .board-focus { font-weight: 600; }
+:root[data-theme="dark"] .xp-quote { border-left-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dark"] .node { transition: none; }
+}

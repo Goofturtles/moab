@@ -1,0 +1,7 @@
+# Secrets and personal data stay on this PC: Google sign-in, Claude/HubSpot/Gong/Granola keys, records.
+.data/
+*.key
+.env
+__pycache__/
+*.pyc
+.playwright-mcp/

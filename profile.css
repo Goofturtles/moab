@@ -1,0 +1,416 @@
+/* profile.css: what MOAB found about a guest or a company (profile.js), on the person page (#/people/<key>), in the brief,
+   on the company page, on the People map's side panel and in the in-call panel. Loaded by index.html and panel.html.
+   References (Mobbin, web): Attio record page (header, main column, a Details side panel)
+     https://mobbin.com/screens/f6750bef-6bce-435c-8460-3c55f32f1254
+   LinkedIn profile (role at company under the name; Experience with a company tile per role)
+     https://mobbin.com/screens/f8153155-60d7-4545-a4b5-0f2d14dfc34b
+   Microsoft Copilot References (numbered sources, the site under each title)
+     https://mobbin.com/screens/e631b279-cfc4-4c1c-85c9-f06c838b8df2
+   What came from them: one heading per section, the same small dot bullet everywhere, a numbered chip after each fact,
+   a timeline with a company tile per job, facts as a grid of small cards. Motion only on hover. */
+
+/* ---------- the person page ---------- */
+.pf-page { min-width: 0; }
+.pf-head { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 12px 20px; padding: 24px 32px 20px; border-bottom: 1px solid var(--line); }
+.pf-head-text { min-width: 0; }
+.pf-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.pf-title-row h1 { font-size: 24px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; color: var(--ink); }
+.pf-role { margin-top: 2px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.pf-role a { color: var(--ink); font-weight: 500; text-decoration: none; }
+.pf-role a:hover { text-decoration: underline; }
+.pf-at { color: var(--muted); }
+.pf-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.pf-sep { color: var(--faint); }
+.pf-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.pf-actions .btn { text-decoration: none; }
+.pf-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; }
+.pf-main { min-width: 0; max-width: 860px; padding: 4px 32px 64px; }
+.pf-side { min-width: 0; padding: 20px 24px 48px; border-left: 1px solid var(--line); }
+.pf-side-sec + .pf-side-sec { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.pf-side .pf-h { margin-bottom: 8px; font-size: 13px; }
+.pf-side-sub { margin: 12px 0 4px; font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--muted); }
+.pf-foot { padding: 0 32px 32px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ---------- sections, bullets and source chips (everywhere) ---------- */
+.pf-sec { margin-top: 28px; min-width: 0; }
+.pf-h { margin: 0 0 10px; font-size: 15px; font-weight: 600; line-height: 1.4; color: var(--ink); }
+.pf-lead.pf-lead { margin: 0; font-size: 15px; line-height: 1.6; color: var(--ink); overflow-wrap: anywhere; }
+.pf-list { display: flex; flex-direction: column; gap: 8px; min-width: 0; margin: 0; padding: 0; }
+.pf-list > li { position: relative; display: flex; align-items: baseline; gap: 10px; min-width: 0; padding-left: 16px; font-size: 14px; line-height: 1.55; color: var(--ink); }
+.pf-list > li::before { content: ""; position: absolute; left: 3px; top: 0.62em; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-line); }
+.pf-list-sm > li { font-size: 13px; color: var(--ink-2); }
+.pf-txt { min-width: 0; overflow-wrap: anywhere; }
+.pf-txt strong { font-weight: 600; color: var(--ink); }
+.pf-date { flex: none; min-width: 64px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pf-when { color: var(--muted); }
+.pf-cites { display: inline-flex; flex-wrap: wrap; gap: 3px; margin-left: 6px; vertical-align: 1px; }
+.pf-cite {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 5px;
+  background: var(--accent-bg); color: var(--accent); font-size: 11px; font-weight: 600; line-height: 1.5; text-decoration: none; font-variant-numeric: tabular-nums;
+  transition: background-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.pf-cite:hover { background: var(--accent-fill); color: var(--on-accent); }
+.pf-cite:focus-visible { outline-offset: 1px; border-radius: 5px; }
+.pf-state { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; padding: 12px 14px; border-radius: var(--r-lg); background: var(--surface-2); font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.pf-state .ic { margin-top: 3px; color: var(--muted); }
+.pf-state strong { color: var(--ink); font-weight: 600; }
+
+/* Past work: a company tile per job on a thin line, newest first. */
+.pf-tl { display: flex; flex-direction: column; margin: 0; padding: 0; }
+.pf-tl-item { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 14px; padding-bottom: 18px; }
+.pf-tl-item:last-child { padding-bottom: 0; }
+.pf-tl-item:not(:last-child)::before { content: ""; position: absolute; left: 15.5px; top: 38px; bottom: 4px; width: 1px; background: var(--line-2); }
+.pf-tl-tile { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; font-size: 13px; font-weight: 600; line-height: 1.3; }
+.pf-tl-body { min-width: 0; padding-top: 1px; }
+.pf-tl-role.pf-tl-role { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+.pf-tl-meta.pf-tl-meta { margin: 0 0 6px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.pf-tl-body .pf-list { margin-top: 6px; }
+
+/* Key facts: small cards in a grid. */
+.pf-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 8px; margin: 0; }
+.pf-fact { min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
+.pf-fact dt { font-size: 12px; line-height: 1.5; color: var(--muted); }
+.pf-fact dd { margin: 2px 0 0; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink); overflow-wrap: anywhere; }
+
+/* Sources: numbered, the site under each title. */
+.pf-srcs { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; }
+.pf-srcs > li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; }
+.pf-n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--chip); color: var(--ink-2); font-size: 12px; font-weight: 600; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.pf-src-t { display: flex; flex-direction: column; min-width: 0; font-size: 14px; line-height: 1.45; }
+.pf-src-t a { color: var(--ink); font-weight: 500; text-decoration: none; overflow-wrap: anywhere; }
+.pf-src-t a:hover { color: var(--accent); text-decoration: underline; }
+.pf-src-t .ext { width: 12px; height: 12px; margin-left: 4px; vertical-align: -1px; color: var(--muted); }
+.pf-host { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+
+/* "With you" and "At a glance" */
+.pf-calls { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; }
+.pf-call { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; align-items: center; margin: 0 -8px; padding: 6px 8px; border-radius: var(--r-md); color: var(--ink); text-decoration: none; transition: background-color var(--t-fast) ease; }
+.pf-call:hover { background: var(--hover); }
+.pf-date-tile, .pm-date { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; flex: none; width: 36px; height: 40px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); }
+.pf-date-tile .m, .pm-date .m { font-size: 10px; font-weight: 600; line-height: 1.4; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tag-red-ink); }
+.pf-date-tile .d, .pm-date .d { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--ink); }
+.pf-call-text { display: flex; flex-direction: column; min-width: 0; }
+.pf-call-t { font-size: 13px; font-weight: 500; line-height: 1.45; overflow-wrap: anywhere; }
+.pf-call-s { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.pf-faces { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; }
+.pf-faces > li { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pf-face-t { display: flex; flex-direction: column; min-width: 0; }
+.pf-face-name { font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--ink); text-align: left; }
+a.pf-face-name, .link-btn.pf-face-name { color: var(--ink); text-decoration: none; }
+a.pf-face-name:hover, .link-btn.pf-face-name:hover { color: var(--accent); text-decoration: underline; }
+.pf-face-s { font-size: 12px; color: var(--muted); line-height: 1.45; overflow-wrap: anywhere; }
+.pf-ties { margin-top: 12px; }
+.pf-props { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 6px 12px; margin: 0; font-size: 13px; line-height: 1.5; }
+.pf-props dt { color: var(--muted); }
+.pf-props dd { margin: 0; min-width: 0; color: var(--ink); overflow-wrap: anywhere; }
+.pf-props a { color: var(--accent); font-weight: 500; }
+
+/* ---------- in the brief: a person's compact profile, "Bring up on the call", the company block ---------- */
+.pf-mini { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
+.pf-mini .pf-lead { font-size: 14px; line-height: 1.55; }
+.pf-mini .pf-mini-h, .pm-card .pf-mini-h, .pm-row-card .pf-mini-h { margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--muted); }
+.pf-mini .pf-mini-open { margin: 2px 0 0; }
+.pf-open { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 500; text-decoration: none; }
+.pf-open .ic { width: 14px; height: 14px; transition: transform var(--t-fast) var(--ease); }
+.pf-open:hover .ic { transform: translateX(2px); }
+.p-name .pf-name-link { color: var(--ink); text-decoration: none; }
+.p-name .pf-name-link:hover strong { color: var(--accent); text-decoration: underline; }
+.pf-forcall > li::before { background: var(--accent); }
+.pf-who { display: inline-flex; align-items: center; gap: 6px; margin-right: 4px; font-weight: 600; color: var(--ink); text-decoration: none; vertical-align: top; }
+.pf-who .avatar { flex: none; }
+a.pf-who:hover, .link-btn.pf-who:hover { color: var(--accent); }
+.pf-sub-h.pf-sub-h { margin: 16px 0 8px; font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--ink); }
+.pf-org { min-width: 0; }
+.pf-org-head { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; align-items: center; }
+.pf-org-tile { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; font-size: 13px; font-weight: 600; line-height: 1.3; }
+.pf-org-head-t { min-width: 0; }
+.pf-org-name { margin: 0; font-size: 18px; font-weight: 600; line-height: 1.35; color: var(--ink); overflow-wrap: anywhere; }
+.pf-org .pf-meta { margin-top: 2px; }
+.pf-org .pf-sec { margin-top: 20px; }
+.pf-org .pf-h { font-size: 14px; margin-bottom: 8px; }
+.co-sec.pf-org-sec { padding-bottom: 4px; }
+.pf-note-src { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ---------- the person's connection map ---------- */
+.pm { container: pm / inline-size; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.pm-canvas {
+  position: relative; min-width: 0; padding: 16px 18px 18px; border: 1px solid var(--line); border-radius: var(--r-xl);
+  background-color: #f5f5f3; background-image: radial-gradient(circle, #d3d3cf 1px, transparent 1.3px); background-size: 18px 18px;
+}
+.pm-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.pm-line { fill: none; stroke: #c9c9c5; stroke-width: 1.5; stroke-linecap: round; transition: opacity 160ms ease, stroke 160ms ease; }
+.pm-line.past { stroke-dasharray: 4 5; }
+.pm-line.mentioned { stroke: color-mix(in srgb, var(--accent) 40%, var(--surface)); }
+.pm-line.lit { stroke: var(--accent); stroke-width: 2; }
+.pm-line.dim, .pm-dot.dim { opacity: 0.28; }
+.pm-dot { fill: var(--ink); stroke: var(--surface); stroke-width: 1.5; transition: opacity 160ms ease; }
+.pm-cols { position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 16px 36px; }
+.pm-col { display: flex; flex-direction: column; min-width: 0; }
+.pm-col-h { margin: 0 0 8px; font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--muted); }
+.pm-col-nodes { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10px; min-width: 0; }
+.pm-node {
+  position: relative; display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 8px 10px; border: 1px solid rgba(23, 24, 26, 0.06);
+  border-radius: 12px; background: var(--surface); color: var(--ink); text-align: left; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(23, 24, 26, 0.06), 0 4px 14px rgba(23, 24, 26, 0.06); transition: box-shadow 160ms ease, transform 200ms var(--ease);
+}
+.pm-node:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(23, 24, 26, 0.06), 0 10px 24px rgba(23, 24, 26, 0.10); }
+.pm-node[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent), 0 2px 4px rgba(23, 24, 26, 0.06), 0 10px 24px rgba(23, 24, 26, 0.10); }
+.pm-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pm-self { border-color: var(--accent-line); }
+.pm-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.pm-name, .pm-sub { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pm-name { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.pm-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.pm-tile { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; font-size: 13px; font-weight: 600; line-height: 1.3; flex: none; }
+.pm-node .pm-date { width: 32px; height: 36px; }
+.pm-node .avatar { box-shadow: 0 0 0 2px var(--surface), 0 1px 4px rgba(23, 24, 26, 0.16); }
+.pm-card { min-width: 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.pm-card > * + * { margin-top: 8px; }
+.pm-card.on { box-shadow: var(--shadow-card); }
+.pm-hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.pm-hint .ic { margin-top: 2px; flex: none; }
+.pm-card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.pm-card-name.pm-card-name { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere; }
+.pm-card-sub.pm-card-sub { font-size: 13px; line-height: 1.5; color: var(--muted); }
+.pm-card .pf-lead { font-size: 14px; line-height: 1.55; }
+.pm-card .pf-facts { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.pm-card-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.pm-card-acts .btn { text-decoration: none; }
+.pm-card-acts .btn .ic, .pm-act .ic { width: 14px; height: 14px; }
+.pm-act { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; font-weight: 500; }
+.pm-card .xp-card { font-size: 13px; }
+/* Narrow box (phones): the columns become labelled groups, one card per line. Lines would run behind the stacked cards
+   and read as a chain, so they are left out here; each group's heading says how the cards connect. */
+@container pm (max-width: 640px) {
+  .pm-cols { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .pm-col-nodes { gap: 8px; }
+  .pm-lines { display: none; }
+}
+
+/* The panel's version of the map: a grouped list, each row opens its card under it. */
+.pm-list { display: flex; flex-direction: column; min-width: 0; }
+.pm-list .pm-col-h { margin: 8px 0 2px; }
+.pm-list .pm-col-h:first-child { margin-top: 0; }
+.pm-list ul { margin: 0; padding: 0; }
+.pm-row {
+  display: flex; align-items: center; gap: 10px; width: calc(100% + 12px); min-width: 0; margin: 0 -6px; padding: 6px; border: 0; border-radius: var(--r-md);
+  background: none; color: var(--ink); text-align: left; cursor: pointer; transition: background-color var(--t-fast) ease;
+}
+.pm-row:hover { background: var(--hover); }
+.pm-row:focus-visible { outline-offset: -2px; }
+.pm-row .pf-chev { width: 14px; height: 14px; color: var(--muted); flex: none; transition: transform 150ms ease; }
+.pm-row[aria-expanded="true"] .pf-chev { transform: rotate(180deg); }
+.pm-row-card { margin: 4px 0 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.pm-row-card > * + * { margin-top: 6px; }
+
+/* ---------- the in-call panel's profile view (about 360px wide) ---------- */
+.pp { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pp-back {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; height: 28px; margin-left: -6px; padding: 0 10px 0 4px; border: 0;
+  border-radius: var(--r-md); background: none; color: var(--ink-2); font-size: 13px; font-weight: 500; line-height: 1.45; cursor: pointer;
+}
+.pp-back:hover { background: var(--hover); color: var(--ink); }
+.pp-back .ic { width: 16px; height: 16px; }
+.pp-head { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; align-items: center; }
+.pp-head-t { min-width: 0; }
+.pp-name { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.pp-sub { font-size: 12px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
+.pp-pills { margin-top: 4px; }
+.pp .pf-meta { margin-top: 0; font-size: 12px; }
+.pp .pf-state { margin-top: 0; font-size: 13px; }
+.pp .pf-lead { font-size: 14px; }
+.pp .pf-list > li { font-size: 13px; }
+.pp .pf-date { min-width: 52px; font-size: 12px; }
+.pp .pf-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pp .pf-fact { padding: 8px 10px; }
+.pp .pf-fact dd { font-size: 13px; }
+.pp .pf-org-name { font-size: 16px; }
+.pp-open { margin-top: 4px; font-size: 13px; }
+.pp-open a { display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+.pp-open .ext { width: 12px; height: 12px; }
+.pf-fold { min-width: 0; border-top: 1px solid var(--line); }
+.pf-fold > summary {
+  display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 2px; cursor: pointer; list-style: none;
+  font-size: 13px; font-weight: 600; line-height: 1.45; color: var(--ink); border-radius: var(--r-sm);
+}
+.pf-fold > summary::-webkit-details-marker { display: none; }
+.pf-fold > summary:hover { color: var(--accent); }
+.pf-fold > summary:focus-visible { outline-offset: -2px; }
+.pf-fold-t { flex: 1; min-width: 0; }
+.pf-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-full); background: var(--chip); color: var(--ink-2); font-size: 11px; font-weight: 600; line-height: 1.45; }
+.pf-chev { width: 14px; height: 14px; color: var(--muted); flex: none; transition: transform 150ms ease; }
+.pf-fold[open] > summary .pf-chev { transform: rotate(180deg); }
+.pf-fold-body { padding: 0 0 14px; min-width: 0; }
+.p-props .link-btn.pp-org-link { font-weight: 500; text-align: left; }
+.pp-key { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.pp-key strong { color: var(--ink); font-weight: 600; }
+.pp .rs { margin-top: 0; gap: 2px; font-size: 12px; }
+.pp > .muted-line { font-size: 12px; }
+.pp-row-chev { width: 14px; height: 14px; color: var(--muted); flex: none; transition: transform var(--t-fast) var(--ease); }
+.p-person-btn:hover .pp-row-chev { transform: translateX(2px); }
+/* Brief: the guests under "On the call" open their profiles. */
+a.who-chip { color: inherit; text-decoration: none; }
+a.who-chip:hover { color: var(--accent); }
+
+/* ---------- People map side panel: the profile under a selected card ---------- */
+.map-side .pf-mini { margin-top: 12px; }
+.map-side .pf-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.map-side .pf-org-name { font-size: 15px; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 1100px) {
+  .pf-body { grid-template-columns: minmax(0, 1fr); }
+  .pf-side { border-left: 0; border-top: 1px solid var(--line); padding: 20px 32px 48px; }
+}
+@media (max-width: 640px) {
+  .pf-head { grid-template-columns: 48px minmax(0, 1fr); padding: 16px; gap: 10px 14px; }
+  .pf-head .avatar.xl { width: 48px; height: 48px; font-size: 17px; }
+  .pf-title-row h1 { font-size: 20px; }
+  .pf-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  .pf-main { padding: 4px 16px 40px; }
+  .pf-side { padding: 16px 16px 40px; }
+  .pf-foot { padding: 0 16px 24px; }
+  .pf-date { min-width: 52px; }
+}
+
+/* ---------- dark theme (Spotify, the default): the same canvas as the People map, flat cards, bold names ---------- */
+:root[data-theme="dark"] .pm-canvas { border-color: var(--line); background-color: #0e0e0e; background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1.3px); }
+:root[data-theme="dark"] .pm-line { stroke: #6a6a6a; }
+:root[data-theme="dark"] .pm-line.mentioned { stroke: color-mix(in srgb, var(--accent) 60%, #0e0e0e); }
+:root[data-theme="dark"] .pm-line.lit { stroke: var(--accent); }
+:root[data-theme="dark"] .pm-dot { fill: var(--accent); stroke: #0e0e0e; }
+:root[data-theme="dark"] .pm-node { border-color: #2a2a2a; background: var(--surface-2); box-shadow: none; transition: box-shadow 160ms ease, background-color var(--t-card) ease; }
+:root[data-theme="dark"] .pm-node:hover { background: var(--hover); box-shadow: none; transform: none; }
+:root[data-theme="dark"] .pm-node[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent), 0 0 0 6px color-mix(in srgb, var(--accent) 22%, transparent); }
+:root[data-theme="dark"] .pm-node .avatar { box-shadow: none; }
+:root[data-theme="dark"] .pm-self { border-color: var(--accent-line); }
+:root[data-theme="dark"] :is(.pm-card, .pm-row-card, .pf-mini, .pf-fact) { border-color: transparent; }
+:root[data-theme="dark"] .pf-title-row h1 { font-size: 32px; line-height: 1.25; }
+:root[data-theme="dark"] :is(.pf-h, .pf-org-name, .pm-card-name.pm-card-name, .pp-name, .tl-title, .tl-d-h) { font-weight: 700; letter-spacing: -0.01em; }
+:root[data-theme="dark"] .pf-list > li::before { background: var(--accent); }
+:root[data-theme="dark"] .pf-date-tile .m, :root[data-theme="dark"] .pm-date .m { color: var(--accent); }
+:root[data-theme="dark"] .pf-call:hover, :root[data-theme="dark"] .pm-row:hover { background: #2a2a2a; }
+/* Past to present: the track is a green gradient, cards lighten on hover. */
+:root[data-theme="dark"] .tl-track::before { background: linear-gradient(90deg, #2a2a2a, var(--accent-press) 70%, var(--accent)); }
+:root[data-theme="dark"] .tl-dot { background: #121212; box-shadow: 0 0 0 2px #535353; }
+:root[data-theme="dark"] .tl-call .tl-dot { box-shadow: 0 0 0 2px var(--accent); }
+:root[data-theme="dark"] .tl-now .tl-dot { background: var(--accent); box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px color-mix(in srgb, var(--accent) 28%, transparent); }
+:root[data-theme="dark"] .tl-card { border-color: transparent; background: var(--surface-2); box-shadow: none; transition: background-color var(--t-card) ease, border-color 140ms ease; }
+:root[data-theme="dark"] .tl-card:hover { background: var(--hover); border-color: transparent; box-shadow: none; }
+:root[data-theme="dark"] .tl-card[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent); }
+:root[data-theme="dark"] .tl-person { border-color: transparent; background: var(--chip); }
+:root[data-theme="dark"] .tl-person:hover { background: #333333; border-color: transparent; }
+:root[data-theme="dark"] .tl-guest:hover { background: var(--chip); }
+:root[data-theme="dark"] .tl-role { font-weight: 700; }
+:root[data-theme="dark"] .tl-dialog { background: #181818; }
+:root[data-theme="dark"] .tl-head { background: #181818; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-node, .pm-line, .pm-dot, .pf-cite, .pf-call, .pm-row, .pm-row .pf-chev, .pf-chev, .pf-open .ic { transition: none; }
+  .pm-node:hover, .pf-open:hover .ic { transform: none; }
+  :root[data-theme="dark"] :is(.pm-node, .tl-card) { transition: none; }
+}
+
+/* ---------- past to present (profile.js timelineHtml): a dialog over the page ---------- */
+.tl-dialog { width: min(1240px, calc(100vw - 48px)); max-height: calc(100vh - 64px); margin: 32px auto auto; border-radius: var(--r-xl); overflow: auto; }
+.tl-dialog[open] { animation: pop 140ms ease-out; }
+.tl { padding: 0 0 20px; }
+.tl-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 14px; padding: 18px 20px 16px 24px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.tl-head-t { min-width: 0; flex: 1; }
+.tl-kicker, .tl-d-kicker { font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--muted); }
+.tl-title { font-size: 20px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+.tl-title:focus { outline: none; }
+.tl-sub { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.tl-head-acts { display: flex; align-items: center; gap: 6px; flex: none; }
+.tl-head-acts .btn { text-decoration: none; }
+.tl > .pf-state { margin: 16px 24px 0; }
+
+/* The track: stops left to right on one line; each stop is a date, a dot on the line, a card and the people under it. */
+.tl-scroll { overflow-x: auto; padding: 22px 24px 8px; scroll-padding: 24px; }
+.tl-scroll:focus-visible { outline-offset: -2px; }
+.tl-track { position: relative; display: flex; gap: 16px; min-width: min-content; }
+.tl-track::before { content: ""; position: absolute; left: 12px; right: 12px; top: 33px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--line-2), var(--accent-line) 70%, var(--accent)); }
+.tl-stop { position: relative; display: flex; flex-direction: column; align-items: flex-start; width: 212px; flex: none; }
+.tl-when { height: 20px; max-width: 100%; font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-now .tl-when, .tl-call .tl-when { color: var(--accent); }
+.tl-dot { position: relative; z-index: 1; width: 12px; height: 12px; margin: 8px 0 12px 6px; border-radius: 50%; background: var(--surface); box-shadow: 0 0 0 2px var(--line-2); }
+.tl-now .tl-dot { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg), 0 0 0 4px var(--accent-line); }
+.tl-call .tl-dot { background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
+
+.tl-card { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; text-align: left; border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 0 1px 2px rgba(23, 24, 26, 0.04); transition: border-color 140ms ease, box-shadow 140ms ease; }
+.tl-card:hover { border-color: var(--line-2); box-shadow: 0 1px 2px rgba(23, 24, 26, 0.06), 0 4px 14px rgba(23, 24, 26, 0.06); }
+.tl-card[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.tl-card-now { background: var(--accent-bg); border-color: var(--accent-line); }
+.tl-tile, .tl-ic { width: 32px; height: 32px; border-radius: 9px; flex: none; }
+.tl-tile { display: inline-grid; place-items: center; font-size: 13px; font-weight: 600; line-height: 1.3; }
+.tl-ic { display: grid; place-items: center; background: var(--accent-bg); color: var(--accent); }
+.tl-ic .ic { width: 16px; height: 16px; }
+.tl-card-t { display: grid; min-width: 0; }
+.tl-role { font-size: 13.5px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.tl-org { font-size: 12.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
+
+/* Who they're connected with at that stop: a short stem down from the card, then one chip per person. */
+.tl-conn { display: grid; gap: 6px; margin-top: 10px; padding-left: 16px; border-left: 2px solid var(--line); margin-left: 15px; width: calc(100% - 15px); }
+.tl-conn-row { display: flex; flex-wrap: wrap; margin: 8px 0 0; padding: 0; border: 0; width: auto; }
+.tl-person { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 10px 6px 6px; text-align: left; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); color: var(--ink); cursor: pointer; transition: border-color 140ms ease, background 140ms ease; }
+.tl-conn-row .tl-person { width: auto; max-width: 280px; }
+.tl-person:hover { background: var(--hover); border-color: var(--line-2); }
+.tl-person[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-bg); }
+.tl-guest { cursor: default; }
+.tl-guest:hover { background: var(--surface); border-color: var(--line); }
+.tl-person-t { display: grid; min-width: 0; }
+.tl-person-n { font-size: 12.5px; font-weight: 600; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-person-n a { color: inherit; text-decoration: none; }
+.tl-person-n a:hover { text-decoration: underline; }
+.tl-person-r { font-size: 11.5px; line-height: 1.4; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.tl-loose { margin: 14px 24px 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.tl-detail { margin: 16px 24px 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--canvas, var(--hover)); }
+.tl-d-h { margin-top: 2px; font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--ink); }
+.tl-d-sub { margin-top: 2px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.tl-d-sub a { color: var(--ink); font-weight: 500; }
+.tl-d-p { margin-top: 8px; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+.tl-d-note { margin-top: 8px; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.tl-d-acts { margin-top: 10px; }
+.tl-d-acts .btn { text-decoration: none; }
+.tl-detail .pf-list { margin-top: 8px; }
+.tl-d-org { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.tl-srcs { margin: 14px 24px 0; font-size: 13px; color: var(--muted); }
+.tl-srcs summary { cursor: pointer; font-weight: 500; line-height: 1.5; }
+.tl-srcs .pf-srcs { margin-top: 8px; }
+
+/* Narrow screens: the same stops, stacked top to bottom with the line down the left. */
+@media (max-width: 640px) {
+  .tl-dialog { width: calc(100vw - 16px); margin: 8px auto auto; max-height: calc(100vh - 16px); }
+  .tl-head { padding: 14px 12px 12px 16px; }
+  .tl-scroll { overflow-x: visible; padding: 16px; }
+  .tl-track { flex-direction: column; gap: 18px; min-width: 0; }
+  .tl-track::before { left: 21px; right: auto; top: 40px; bottom: 8px; width: 2px; height: auto; background: linear-gradient(180deg, var(--line-2), var(--accent-line) 70%, var(--accent)); }
+  .tl-stop { width: 100%; padding-left: 40px; }
+  .tl-when { height: auto; }
+  .tl-dot { position: absolute; left: 0; top: 30px; margin: 0 0 0 10px; }
+  .tl-loose, .tl-detail, .tl-srcs { margin-left: 16px; margin-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .tl-dialog[open] { animation: none; } .tl-card, .tl-person { transition: none; } }
+
+/* ---------- ask about this person (profile.js askBox): one line to ask, the answer with its source chips ---------- */
+.pf-ask { margin: 20px 0 4px; }
+.pf-ask-form { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface);
+  box-shadow: 0 1px 2px rgba(23, 24, 26, 0.04); transition: border-color 140ms ease, box-shadow 140ms ease; }
+.pf-ask-form:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+.pf-ask-ic { width: 16px; height: 16px; color: var(--accent); flex: none; }
+.pf-ask-in { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 14px; line-height: 1.5; padding: 4px 0; }
+.pf-ask-in::placeholder { color: var(--muted); }
+.pf-ask-out:empty { display: none; }
+.pf-ask-out { margin-top: 10px; padding: 12px 14px; border-radius: 12px; background: var(--accent-bg); }
+.pf-ask-q { font-size: 12.5px; font-weight: 600; line-height: 1.5; color: var(--muted); }
+.pf-ask-a { margin-top: 2px; font-size: 14px; line-height: 1.6; color: var(--ink); }
+.pf-ask-note { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.pp .pf-ask { margin: 12px 0 4px; }
+.tl-ask { margin: 16px 24px 0; }
+.tl-ask .pf-ask { margin: 0; }
+@media (max-width: 640px) { .tl-ask { margin: 12px 16px 0; } }
+@media (prefers-reduced-motion: reduce) { .pf-ask-form { transition: none; } }

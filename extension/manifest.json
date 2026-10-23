@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "MOAB in-call panel",
+  "short_name": "MOAB",
+  "version": "1.1.1",
+  "description": "Opens MOAB's in-call panel (MOAB on this PC, http://localhost:3576) in Chrome's side panel on Google Meet and Zoom web calls, and reads Google Meet's captions (when CC is on) so MOAB can find who and what was mentioned.",
+  "minimum_chrome_version": "116",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApcTxSl5dY6xD9+2qOWLtJqDOnIrFYyZCwyDZKQPat+to7oPrhAu2fVgQ9KvZWF1Rk0xKZm6qg9dEt7Jv197hxcxoUGftCaGANPcgo7YhdtRc9UqqN0/p3FPyX7omBUe+St2QtDga7XYE994HqqSbsfKkOH3E3kp1iVvdXORp+ml0fPuNZvT8ki2yCmvARyBvxCmx9M58UgcSTBPDeX9R1c/gZCvtYApQRKteyqQ6JIV1RDep8Q52mdHXZZaSt2LVk+XmBRrXBRw3gdcL1fmCvwDn3QFIksT1MplzN2oCV8Uf0tWRX/1M64ts6GVsvZJn9UL1vOAAQh4daeia9kPKswIDAQAB",
+  "permissions": [
+    "sidePanel",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://meet.google.com/*",
+    "https://*.zoom.us/*",
+    "http://localhost:3576/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://meet.google.com/*"
+      ],
+      "js": [
+        "captions.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Open MOAB's in-call panel",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; object-src 'none'; style-src 'self'; img-src 'self'; frame-src http://localhost:3576; connect-src http://localhost:3576; base-uri 'none'; form-action 'none'"
+  }
+}

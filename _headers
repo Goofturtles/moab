@@ -1,0 +1,6 @@
+# Netlify / Cloudflare Pages headers. Zoom Apps refuse to render pages without these four (OWASP check).
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://appssdk.zoom.us https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.pexels.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://versions.backstage.io; frame-src 'self'; frame-ancestors 'self' https://meet.google.com https://*.zoom.us

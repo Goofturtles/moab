@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOAB</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- MOAB's own in-call panel, from MOAB on this PC. The meeting code from this tab's address picks the call. -->
+  <iframe id="moab" title="MOAB in-call panel" hidden></iframe>
+  <main id="off" class="off" hidden>
+    <img src="icons/icon48.png" alt="" width="40" height="40">
+    <h1>MOAB isn't running</h1>
+    <p>Start MOAB on this PC, then press Try again.</p>
+    <pre>tks-spotify/.venv/Scripts/python.exe tks-spotify/centralize/server.py</pre>
+    <button id="retry" type="button">Try again</button>
+  </main>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

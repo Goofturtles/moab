@@ -1,0 +1,256 @@
+/* motion.css: the top-bar search field, the command palette, the hover-only icon motion and the logo blink.
+   Loads after styles.css, so these rules win.
+
+   Mobbin references (looked at before building; layout, sizes and states come from these):
+   Search field in the top bar
+   - Asana, search dropdown opens in place over the bar's pill (input stays where the field was), recents with faces
+       https://mobbin.com/screens/c5378cb7-107c-4ff5-82fd-b4724ac229d4
+       https://mobbin.com/screens/a6cc9c82-315c-40ef-bc5e-62fe158cdfff
+   - Asana, closed pill search centred in the dark top bar
+       https://mobbin.com/screens/1f2baf25-fd29-4486-9436-c6f9c8eaf4ca
+   - Vercel, "Find..." field with one quiet key hint on the right
+       https://mobbin.com/screens/ee9c9ca1-d199-4d29-8532-eec6ed7b5ca0
+   - Savee, pill search in a dark bar
+       https://mobbin.com/screens/7aa4294d-330d-42b2-aa1d-864e4e95db2c
+   - Whop, the bar's field turns into the results panel in place; people rows with faces; footer keys + result count
+       https://mobbin.com/screens/ecb8e98a-5c33-471e-85ba-a0291fc86634
+   Palette
+   - Linear, search: plain input row (no boxed input), hairline under it, quiet 36-40px rows
+       https://mobbin.com/screens/a2f96ae5-202c-4747-a959-d33d7e5c0f72
+       https://mobbin.com/screens/dba91946-d147-4b2f-ad92-4195eae017fc
+   - Notion, search: "Label  context" one-line rows, small section labels, footer hint
+       https://mobbin.com/screens/b1273bdd-d65d-44be-a422-ffc0f601bacd
+       https://mobbin.com/screens/5aec445a-35fa-40de-9b65-753f36bb41a5
+   - Magnific, command menu: grey selected row with an Enter key on the right, footer "Navigate / Select / Close"
+       https://mobbin.com/screens/e22e26e2-f813-4f1e-beda-43c9ecf26419
+   - Gumloop, command menu: "Open" + Enter only on the selected row
+       https://mobbin.com/screens/e9e0911a-09a4-4c72-bb98-6ac9357fa590
+   - Navattic, command menu: 12px section labels, 36px rows, 12px radius panel
+       https://mobbin.com/screens/c65971cf-c4ea-45e9-99a5-555930cb5d73
+   - Juicebox, command menu: footer of boxed keys with words
+       https://mobbin.com/screens/2af813bf-0129-45d1-81ed-069edee76e16
+   - Mintlify, search: section groups, selected row tint
+       https://mobbin.com/screens/7c7ad31f-9dfe-4be7-83d7-6002fe31d4d0
+   - Vapi, command menu: label then muted context on one line, result count in the footer
+       https://mobbin.com/screens/593d7acd-2e16-4365-bcd6-02ce52f48f3b
+
+   Decisions taken from them: pill field 32px tall, 520px wide, lighter than the bar, icon + "Search calls, people,
+   companies" + one boxed key hint. The palette opens over the field (Asana, Whop), 640px, 12px radius, input row 44px
+   with a hairline (Linear), 40px rows with a 24px face / tile / icon, label then muted context (Notion, Vapi), matched
+   text in semibold (Asana, Linear), Enter key shown on the selected row only (Magnific, Gumloop), footer keys + count
+   (Juicebox, Whop). */
+
+/* ---------- search field in the top bar ---------- */
+.search-trigger {
+  justify-self: center; display: flex; align-items: center; gap: 8px;
+  width: min(520px, calc(100% - 232px)); height: 32px; padding: 0 6px 0 12px;
+  border: 1px solid transparent; border-radius: var(--r-full); background: var(--chrome-field); color: #cfcdce; /* 6:1 on the field */
+  font: inherit; font-size: 14px; line-height: 1.45; text-align: left; cursor: pointer;
+  transition: background-color var(--t-fast) ease, border-color var(--t-fast) ease, color var(--t-fast) ease;
+}
+.search-trigger .ic { color: inherit; }
+.st-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-trigger .st-kbd {
+  height: 20px; padding: 0 6px; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--r-sm);
+  background: transparent; color: #cfcdce; font-size: 11px; letter-spacing: 0.02em;
+}
+.search-trigger:hover { background: var(--chrome-field-hover); border-color: rgba(255, 255, 255, 0.08); color: var(--chrome-ink); }
+.search-trigger:active { background: var(--chrome-active); }
+.search-trigger:focus-visible { outline: 2px solid var(--chrome-focus); outline-offset: 2px; border-radius: var(--r-full); }
+
+/* ---------- command palette ---------- */
+.palette {
+  width: min(640px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 16px); margin: 8px auto auto; padding: 0;
+  border-radius: var(--r-xl); background: var(--surface); box-shadow: var(--shadow-modal); overflow: hidden;
+}
+.palette[open] { display: flex; flex-direction: column; }
+/* Lined up with the search field by palPlace() in app.js: same centre, input row over the field. */
+.palette.anchored {
+  margin: 0; inset: var(--pal-y, 2px) auto auto var(--pal-x, 16px); width: var(--pal-w, 640px);
+  max-height: calc(100dvh - var(--pal-y, 2px) - 24px);
+}
+.palette::backdrop { background: rgba(30, 31, 33, 0.24); }
+
+.pal-input { flex: none; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 10px 0 14px; border-bottom: 1px solid var(--line); }
+.pal-ic { display: inline-flex; color: var(--muted); }
+.pal-input input {
+  flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: none;
+  font: inherit; font-size: 15px; line-height: 1.45; color: var(--ink);
+}
+.pal-input input::placeholder { color: var(--muted); opacity: 1; }
+/* The input is the palette's only control and always holds focus: the caret marks it, as in Linear and Raycast. */
+.pal-input input:focus, .pal-input input:focus-visible { outline: none; box-shadow: none; }
+.pal-esc { flex: none; }
+
+#palList {
+  flex: 1 1 auto; min-height: 0; max-height: 420px; overflow-y: auto; overscroll-behavior: contain; padding: 4px 8px 8px;
+  scrollbar-width: thin; scrollbar-color: var(--line-2) transparent;
+}
+.pal-sec + .pal-sec { margin-top: 4px; }
+.pal-group { padding: 8px 8px 4px; font-size: 12px; font-weight: 500; line-height: 1.45; color: var(--muted); }
+.pal-opt {
+  display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 8px;
+  border-radius: var(--r-md); color: var(--ink); cursor: pointer;
+}
+.pal-opt[aria-selected="true"] { background: var(--press); }
+.pal-lead { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; color: var(--muted); }
+.pal-opt[aria-selected="true"] .pal-lead { color: var(--ink-2); }
+.pal-text { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }
+.pal-text .lbl { flex: 0 1 auto; max-width: 72%; min-width: 0; font-size: 14px; line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pal-text .lbl mark { background: none; color: inherit; font-weight: 600; }
+.pal-text .sub { flex: 1 1 0; min-width: 0; font-size: 13px; line-height: 1.45; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pal-meta { flex: none; display: inline-flex; align-items: center; }
+.pal-opt[aria-selected="true"] .stack .avatar { box-shadow: 0 0 0 2px var(--press); }
+.pal-go {
+  flex: none; display: inline-grid; place-items: center; width: 24px; height: 20px; border: 1px solid var(--line-2);
+  border-radius: var(--r-sm); background: var(--surface); color: var(--muted); opacity: 0;
+}
+.pal-go .ic { width: 12px; height: 12px; }
+.pal-opt[aria-selected="true"] .pal-go { opacity: 1; }
+
+.pal-empty { padding: 32px 24px 36px; text-align: center; }
+.pal-empty-t { font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink); }
+.pal-empty-s { margin-top: 4px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+.pal-foot {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; padding: 6px 12px;
+  border-top: 1px solid var(--line); background: var(--surface-2); font-size: 12px; line-height: 1.45; color: var(--muted);
+}
+.pal-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.pal-key { display: inline-flex; align-items: center; gap: 4px; }
+.pal-key kbd { min-width: 20px; justify-content: center; }
+.pal-key kbd:last-of-type { margin-right: 2px; }
+#palCount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 999px) {
+  .palette { width: calc(100vw - 16px); margin: 8px auto auto; }
+  .pal-keys { display: none; }
+  .pal-foot { justify-content: flex-end; }
+}
+
+/* ---------- motion ----------
+   Nothing moves at rest. ic() gives every icon an "ic-<name>" class; an icon comes alive only while something you can
+   point at or tab to (a link, button, option, tab, row) is hovered or keyboard-focused, and stops when you leave.
+   Another page can opt a plain container in with class "motion-host".
+   Only the separate translate / rotate / scale properties are used, so an icon's own transform (a rotated chevron,
+   a centred search icon) is never overwritten. */
+@media (prefers-reduced-motion: no-preference) {
+  :where(.ic) { transition: translate 200ms var(--ease), rotate 240ms var(--ease), scale 200ms var(--ease); }
+  .ic-bell { transform-origin: 50% 8%; }
+
+  /* Phone: rings for as long as the pointer stays on its row. Eight quick shakes, a beat, again. */
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-phone,
+  .palette.kb [aria-selected="true"] .ic-phone { animation: ic-ring 1.2s linear infinite; }
+
+  /* Bell: swings from its top. */
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-bell,
+  .palette.kb [aria-selected="true"] .ic-bell { animation: ic-swing 1.4s ease-in-out infinite; }
+
+  /* Video camera and mic: pulse like a live light. */
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) :is(.ic-video, .ic-mic),
+  .palette.kb [aria-selected="true"] :is(.ic-video, .ic-mic) { animation: ic-pulse 1.1s ease-in-out infinite; }
+
+  /* Arrows: nudge the way they point. */
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) :is(.ic-arrowRight, .ic-play, .ic-chevron:not(.chev)),
+  .palette.kb [aria-selected="true"] :is(.ic-arrowRight, .ic-play) { animation: ic-nudge 0.9s ease-in-out infinite; }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-chevronLeft { animation: ic-nudge-back 0.9s ease-in-out infinite; }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-link { animation: ic-nudge-out 0.9s ease-in-out infinite; }
+
+  /* Places and records (building, data, map, home, people...): a small lift that holds while hovered. */
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) :is(.ic-building, .ic-database, .ic-network, .ic-home, .ic-calendar, .ic-users, .ic-briefcase, .ic-receipt, .ic-note, .ic-list, .ic-listChecks, .ic-shield, .ic-clock, .ic-panel, .ic-tag, .ic-trend),
+  .palette.kb [aria-selected="true"] :is(.ic-building, .ic-database, .ic-network, .ic-home, .ic-list, .ic-tag) { translate: 0 -2px; }
+
+  /* One-shot turns that hold while hovered. */
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-search,
+  .palette.kb [aria-selected="true"] .ic-search { rotate: -12deg; scale: 1.08; }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) :is(.ic-x, .ic-plus) { rotate: 90deg; }
+  :where(.ic-rotate) { transition: rotate 600ms var(--ease); }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-rotate { rotate: -360deg; }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-sparkle { rotate: 12deg; scale: 1.15; }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-pencil { rotate: -14deg; }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-settings { rotate: 60deg; }
+  :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) :is(.ic-maximize, .ic-fit, .ic-check, .ic-circleCheck) { scale: 1.12; }
+
+  /* MOAB logo: the bot blinks only while the brand is hovered or focused (once straight away, then every 2.4s). */
+  .brand:is(:hover, :focus-visible) .logo-eyes { animation: logo-blink 2.4s ease-in-out infinite; }
+
+  /* Palette opens with a short drop from the field, no bounce. */
+  .palette[open] { transform-origin: 50% 0; animation: pal-in 160ms var(--ease); }
+  .palette[open]::backdrop { animation: pal-fade 160ms ease; }
+}
+
+@keyframes ic-ring {
+  0% { rotate: 0deg; }
+  5% { rotate: -15deg; }
+  10% { rotate: 13deg; }
+  15% { rotate: -13deg; }
+  20% { rotate: 11deg; }
+  25% { rotate: -9deg; }
+  30% { rotate: 7deg; }
+  35% { rotate: -4deg; }
+  40%, 100% { rotate: 0deg; }
+}
+@keyframes ic-swing {
+  0% { rotate: 0deg; }
+  15% { rotate: 16deg; }
+  30% { rotate: -12deg; }
+  45% { rotate: 8deg; }
+  60% { rotate: -4deg; }
+  72%, 100% { rotate: 0deg; }
+}
+@keyframes ic-pulse { 0%, 100% { scale: 1; } 50% { scale: 1.14; } }
+@keyframes ic-nudge { 0%, 100% { translate: 0 0; } 50% { translate: 3px 0; } }
+@keyframes ic-nudge-back { 0%, 100% { translate: 0 0; } 50% { translate: -3px 0; } }
+@keyframes ic-nudge-out { 0%, 100% { translate: 0 0; } 50% { translate: 2px -2px; } }
+@keyframes logo-blink { 0%, 12%, 100% { scale: 1 1; } 6% { scale: 1 0.1; } }
+@keyframes pal-in { from { opacity: 0; transform: translateY(-4px) scale(0.99); } }
+@keyframes pal-fade { from { opacity: 0; } }
+
+/* ---------- search dropdown, Asana style (Mobbin: Asana search with filter chips and recents) ---------- */
+.palette { border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 2px 6px rgba(23, 24, 26, 0.06), 0 24px 56px rgba(23, 24, 26, 0.18); }
+.palette::backdrop { background: rgba(30, 31, 33, 0.16); }
+.palette .pal-input { height: 40px; margin: 8px 8px 0; padding: 0 8px 0 12px; border: 1.5px solid var(--accent); border-bottom: 1.5px solid var(--accent); border-radius: 10px; box-shadow: 0 0 0 3px var(--accent-bg); }
+.pal-filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px 6px; }
+.pal-chip {
+  min-height: 28px; padding: 2px 12px; border: 1px solid var(--line-2); border-radius: var(--r-full); background: var(--surface);
+  font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--ink-2); cursor: pointer;
+  transition: background-color var(--t-fast) ease, color var(--t-fast) ease, border-color var(--t-fast) ease;
+}
+.pal-chip:hover { background: var(--hover); color: var(--ink); }
+.pal-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.pal-chip:focus-visible { border-radius: var(--r-full); }
+.pal-opt { border-radius: 10px; }
+.pal-foot { border-radius: 0 0 16px 16px; }
+@media (prefers-reduced-motion: reduce) { .pal-chip { transition: none; } }
+
+/* ---------- Ask MOAB: the answer sits under the input, above the results (Raycast AI, Linear Ask) ---------- */
+.pal-answer { flex: none; max-height: 45vh; overflow: auto; padding: 12px 16px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.pa-q { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--ink-2); }
+.pa-q .ic { flex: none; width: 15px; height: 15px; margin-top: 2px; color: var(--accent); }
+.pa-busy { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.pa-busy .ic { width: 15px; height: 15px; }
+.pa-text { margin-top: 8px; font-size: 14px; line-height: 1.6; color: var(--ink); overflow-wrap: anywhere; }
+.pa-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 10px; }
+.pa-src { margin-right: 4px; font-size: 12px; line-height: 1.45; color: var(--muted); }
+
+/* The field becomes the panel (Asana): no dimmed page, the input keeps the field's size and shape, rows stay compact. */
+.palette::backdrop { background: transparent; }
+.palette.anchored { border-radius: 16px; }
+.palette.anchored .pal-input { height: var(--pal-ih, 40px); border-radius: var(--pal-ir, 10px); margin: 8px 8px 0; }
+.pal-opt { min-height: 36px; }
+.pal-group { padding-top: 10px; }
+
+/* ---------- Inline search: the field is the input; results drop down under it ---------- */
+.search-field { cursor: text; }
+.search-field input {
+  flex: 1; min-width: 0; height: 100%; border: 0; padding: 0; background: transparent; outline: none; box-shadow: none;
+  font: inherit; color: var(--ink); text-overflow: ellipsis;
+}
+.search-field input::placeholder { color: #6b6d72; opacity: 1; }
+.search-field input:focus, .search-field input:focus-visible { outline: none; box-shadow: none; }
+.search-trigger.search-field:focus-within { background: var(--surface); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+.home-ask.search-field:focus-within { border-color: transparent; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(90deg, #6d63e6, #e05fb5, #f5845c) border-box; box-shadow: 0 0 0 4px rgba(109, 99, 230, 0.12), 0 12px 32px rgba(23, 24, 26, 0.09); }
+.home-ask input { font-size: 16px; }
+.palette.inline { position: fixed; z-index: 60; margin: 0; inset: var(--pal-y) auto auto var(--pal-x); width: var(--pal-w); max-height: min(520px, calc(100dvh - var(--pal-y) - 16px)); border-radius: 14px; }
+.palette.inline .pal-input { display: none; }
+.palette.inline .pal-filters { padding-top: 10px; }
