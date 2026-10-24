@@ -21,7 +21,7 @@ Pexels licence: https://www.pexels.com/license/
 
 ## Logo
 
-The MOAB bot logo (`logo.svg`, inline in the app) was drawn for this project.
+The Overture bot logo (`logo.svg`, inline in the app) was drawn for this project.
 
 ## Design references
 

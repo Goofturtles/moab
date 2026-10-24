@@ -1,4 +1,4 @@
-// MOAB profiles: who a guest is at work and what their company does, as MOAB's own research found it (core.js cleans it:
+// Overture profiles: who a guest is at work and what their company does, as Overture's own research found it (core.js cleans it:
 // C.personInfo, C.orgInfo). Drawn the same way on the person page (#/people/<key>), in the brief, on the company page, on the
 // People map's side panel and in the in-call panel. Every bullet carries numbered source chips that open the page it came from.
 // Layout references (Mobbin, web): Attio record page (header, then a main column and a Details side panel)
@@ -23,9 +23,9 @@
   const orgKey = (s) => String(s || "").toLowerCase().replace(/\(.*?\)/g, " ").replace(/\.[a-z]{2,}$/, "")
     .replace(/\b(the|inc|ltd|llc|gmbh|plc|corp|corporation|limited|co)\b\.?/g, " ").replace(/[^a-z0-9]+/g, "");
   const callsWith = (email) => D.invites.filter((i) => i.attendees.some((a) => a.email === email));
-  const srcTag = () => '<span class="src ' + (DEMO ? "sample" : "public") + '">' + (DEMO ? "Sample" : "Found by MOAB") + "</span>";
+  const srcTag = () => '<span class="src ' + (DEMO ? "sample" : "public") + '">' + (DEMO ? "Sample" : "Found by Overture") + "</span>";
 
-  // Who a guest is, from the calendar, MOAB's records and the research.
+  // Who a guest is, from the calendar, Overture's records and the research.
   function who(email) {
     const info = C.personInfo(email), rec = info.rec, r = info.research || {}, calls = callsWith(email);
     const att = calls.length ? calls[0].attendees.find((a) => a.email === email) : null;
@@ -100,14 +100,14 @@
     const hid = (opts.idp || "pf") + "-" + id, h = "h" + (opts.level || 2);
     return '<section class="' + (opts.cls || "pf-sec") + '" aria-labelledby="' + hid + '"><' + h + ' class="pf-h" id="' + hid + '">' + esc(title) + "</" + h + ">" + body + "</section>";
   }
-  // "Researching…", or what MOAB found when there was nothing to show. Never a to-do for the user.
+  // "Researching…", or what Overture found when there was nothing to show. Never a to-do for the user.
   function stateHtml(status, note, name, org) {
     if (status === "pending") {
-      return '<p class="pf-state" role="status">' + ic("search") + "<span><strong>Researching…</strong> MOAB is reading public sources about "
+      return '<p class="pf-state" role="status">' + ic("search") + "<span><strong>Researching…</strong> Overture is reading public sources about "
         + esc(org ? name : first(name) + "'s work") + ". This fills in as soon as it is done.</span></p>";
     }
     if (["unknown", "error", "skipped", "notfound", "done", "later"].includes(status)) {
-      const text = note || (status === "done" || status === "unknown" ? "MOAB searched the web and found no public work information about " + (org ? "this company" : "them") + "." : "");
+      const text = note || (status === "done" || status === "unknown" ? "Overture searched the web and found no public work information about " + (org ? "this company" : "them") + "." : "");
       return text ? '<p class="pf-state">' + ic("circleAlert") + "<span>" + esc(text) + "</span></p>" : "";
     }
     return "";
@@ -172,7 +172,7 @@
       + " " + esc(x.b.text) + cites(x.b.src, x.sources) + "</span></li>").join("") + "</ul>";
   }
 
-  // What MOAB's calendar and records already know: the calls with you, who else is on them, and how you know them.
+  // What Overture's calendar and records already know: the calls with you, who else is on them, and how you know them.
   function withYou(email, opts) {
     const w = who(email), r = w.info.research || {}, local = r.local || {}, rec = w.info.rec;
     let h = "";
@@ -191,7 +191,7 @@
         }).join("") + "</ul>";
       }
     }
-    // How you know them (MOAB's records or the sample's): a warm line from "you" on the People map.
+    // How you know them (Overture's records or the sample's): a warm line from "you" on the People map.
     const ties = (D.relationships || []).filter((e) => e.a === "you" && e.b === "p:" + email && e.why);
     const known = [local.metBefore ? "Met before, last on " + local.lastMet : local.company ? "First meeting with them" : "", rec.note ? rec.note : ""].filter(Boolean);
     if (ties.length || known.length) {
@@ -224,7 +224,7 @@
       + (role ? '<p class="pf-role">' + role + "</p>" : "") + metaHtml(pr, r) + "</div>"
       + (actions ? '<div class="pf-actions">' + actions + "</div>" : "") + "</header>";
     const state = pr ? (info.status === "pending" ? stateHtml("pending", "", w.name) : "") : stateHtml(info.status, info.note, w.name);
-    const none = !pr && !state ? '<p class="pf-state">' + ic("circleAlert") + "<span>MOAB has no public work profile for " + esc(first(w.name)) + " yet. What your calendar and records know is under With you.</span></p>" : "";
+    const none = !pr && !state ? '<p class="pf-state">' + ic("circleAlert") + "<span>Overture has no public work profile for " + esc(first(w.name)) + " yet. What your calendar and records know is under With you.</span></p>" : "";
     const main = (pr ? askBox(email, "pfask") : "") + state + none + (pr ? personSections(email, { idp: "pf", extra: { connections: opts.connections || "" } }) : opts.connections || "");
     const sideOpts = { idp: "pfs", level: 2, cls: "pf-side-sec" };
     const side = section(sideOpts, "with", "With you", withYou(email, opts)) + section(sideOpts, "glance", "At a glance", glance(email, opts));
@@ -267,7 +267,7 @@
       + section(opts, "oforcall", "For this call", bullets(pr.forCall, S, "pf-forcall"), pr.forCall.length)
       + section(opts, "osources", "Sources", sourcesList(S), S.length);
   }
-  // A whole company block: heading (the real name MOAB found), how it was found, then the sections. "" when there is nothing.
+  // A whole company block: heading (the real name Overture found), how it was found, then the sections. "" when there is nothing.
   function orgBlock(name, opts) {
     opts = opts || {};
     const info = C.orgInfo(name), pr = info.profile;
@@ -364,7 +364,7 @@
         + g.nodes.filter((n) => n.col === c).map(nodeHtml).join("") + "</div></div>").join("")
       + '</div></div><div class="pm-card" aria-live="polite">' + hintHtml(g) + "</div></div>";
   }
-  const hintHtml = (g) => '<p class="pm-hint">' + ic("network") + "<span>Select any card to see what MOAB knows about it: " + esc(first(g.who.name)) + "'s companies, your calls with them and the people on those calls.</span></p>";
+  const hintHtml = (g) => '<p class="pm-hint">' + ic("network") + "<span>Select any card to see what Overture knows about it: " + esc(first(g.who.name)) + "'s companies, your calls with them and the people on those calls.</span></p>";
   // The in-call panel's version: the same nodes as a grouped list; each row opens its card under it.
   function listHtml(g, opts) {
     return '<div class="pm-list" data-pm-list>' + COLS.filter(([c]) => c !== "self" && g.nodes.some((n) => n.col === c)).map(([c, label]) => '<p class="pm-col-h">' + esc(label) + '</p><ul role="list">'
@@ -398,7 +398,7 @@
     } else if (n.type === "past") {
       body = n.roles.length ? timeline(n.roles, g.who.info.profile.sources)
         : '<p class="pm-card-sub">' + esc(first(g.who.name) + " worked here" + (g.who.info.rec.previousRole ? " as " + g.who.info.rec.previousRole : "") + ".") + "</p>"
-          + '<p class="pf-note-src">From ' + esc(DEMO ? "the sample records" : "MOAB's records") + ".</p>";
+          + '<p class="pf-note-src">From ' + esc(DEMO ? "the sample records" : "Overture's records") + ".</p>";
       const pc = D.companies[n.label];
       if (pc && pc.status) body += '<p class="pm-card-sub">' + esc("With Spotify: " + pc.status) + "</p>";
     } else if (n.type === "call") {
@@ -490,7 +490,7 @@
     slot.innerHTML = open ? nodeCard(g, btn.dataset.pm, opts) : "";
   }
 
-  // ---------- ask about this person: a quick answer from MOAB's saved research, with its sources ----------
+  // ---------- ask about this person: a quick answer from Overture's saved research, with its sources ----------
   function askBox(email, idp) {
     const w = who(email), id = (idp || "ask") + "-" + C.personKey(email);
     return '<div class="pf-ask"><form class="pf-ask-form" data-ask-person="' + esc(C.personKey(email)) + '"><label class="sr-only" for="' + id + '">Ask about ' + esc(w.name) + "</label>"
@@ -513,9 +513,9 @@
     e.preventDefault();
     const input = f.querySelector("input"), q = input.value.trim(), out = f.parentElement.querySelector(".pf-ask-out"), btn = f.querySelector("button");
     if (!q) { input.focus(); return; }
-    if (DEMO) { out.innerHTML = '<p class="pf-ask-note">In the demo, questions need MOAB running with your Claude key.</p>'; return; }
+    if (DEMO) { out.innerHTML = '<p class="pf-ask-note">In the demo, questions need Overture running with your Claude key.</p>'; return; }
     const person = C.emailForKey(f.dataset.askPerson);
-    if (!person) { out.innerHTML = '<p class="pf-ask-note">MOAB lost track of who this is. Reload the page and ask again.</p>'; return; }
+    if (!person) { out.innerHTML = '<p class="pf-ask-note">Overture lost track of who this is. Reload the page and ask again.</p>'; return; }
     btn.disabled = true;
     out.innerHTML = '<p class="pf-ask-note">Thinking…</p>'; // the box is already aria-live
     try {
@@ -584,7 +584,7 @@
       return '<p class="tl-d-kicker">Connected with ' + esc(first(w.name)) + "</p><h3 class=\"tl-d-h\">" + esc(p.name) + "</h3>"
         + ([p.role, p.org].filter(Boolean).length ? '<p class="tl-d-sub">' + esc([p.role, p.org].filter(Boolean).join(" · ")) + "</p>" : "")
         + '<p class="tl-d-p">' + esc(p.how) + (p.when ? " (" + esc(p.when) + ")" : "") + cites(p.src, sources) + "</p>"
-        + '<p class="tl-d-note">From public pages that name them together. MOAB keeps work ties only.</p>';
+        + '<p class="tl-d-note">From public pages that name them together. Overture keeps work ties only.</p>';
     }
     if (!s) return "";
     if (s.kind === "call") {

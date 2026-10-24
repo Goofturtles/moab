@@ -1,10 +1,12 @@
-// MOAB app: a hash-routed shell around the agent (core.js), the people map (map.js) and the in-call panel (panel.html).
+// Overture app: a hash-routed shell around the agent (core.js), the people map (map.js) and the in-call panel (panel.html).
 // Pages: #/home, #/calls, #/calls/<id>[/after], #/alerts[/<id>], #/companies[/<slug>], #/map, #/live, #/data, #/settings[/<menu>] (settings-page.js).
 (function () {
   "use strict";
   const C = window.C;
   const { D, SNAP, MODE, SRC, ME, $, $$, esc, ic, plural, fmtDate, splitWhen, store, NEW_TAB, MONTHS, avatar, coTile, tagFor } = C;
   const LIVE_MODE = MODE === "live", DEMO = MODE === "demo";
+  // Where your data is kept: this PC, or (the shared site) your own account, which nobody else who signs in can see.
+  const savedWhere = () => (window.MOAB_STATUS && window.MOAB_STATUS.hosted ? "in your own account, which other people who sign in can't see" : "on this PC");
 
   Object.assign(C.ICONS, {
     menu: '<path d="M4 12h16M4 6h16M4 18h16"/>',
@@ -62,7 +64,7 @@
   const badgeCount = () => (digestOn() ? new Set(alerts().filter((a) => !readAlerts.has(a.id)).map((a) => a.date)).size : unreadCount());
 
   // ---------- small shared bits ----------
-  const srcKind = (label) => (/^Public/.test(label) ? "public" : /^Sample/.test(label) ? "sample" : /^(Your calendar|Your transcript|MOAB records|HubSpot|Gong)/.test(label) ? "yours" : "guess");
+  const srcKind = (label) => (/^Public/.test(label) ? "public" : /^Sample/.test(label) ? "sample" : /^(Your calendar|Your transcript|Overture records|HubSpot|Gong)/.test(label) ? "yours" : "guess");
   function srcTag(label) {
     return '<span class="src ' + srcKind(label) + '">' + esc(label) + "</span>";
   }
@@ -195,8 +197,8 @@
     else if (r.view === "guides" && window.MoabGuides) title = window.MoabGuides.show(r.guide, $('[data-view="guides"]'));
     renderNav();
     placeSearchInput();
-    document.title = (title ? title + " · " : "") + "MOAB";
-    $("#appbarTitle").textContent = title || "MOAB";
+    document.title = (title ? title + " · " : "") + "Overture";
+    $("#appbarTitle").textContent = title || "Overture";
     $(".main").scrollTop = 0;
     window.scrollTo(0, 0);
     if (app.started) {
@@ -220,7 +222,7 @@
     let action, note = "";
     if (!st.server) {
       action = '<span class="btn primary" aria-disabled="true">Connect Google Calendar</span>';
-      note = "MOAB's server isn't answering, or an older copy is running. Restart <code>server.py</code>, then reload this page.";
+      note = "Overture's server isn't answering, or an older copy is running. Restart <code>server.py</code>, then reload this page.";
     } else if (!st.google.configured) {
       action = '<span class="btn primary" aria-disabled="true">Connect Google Calendar</span>';
       note = 'Google sign-in isn\'t set up on this PC yet. <a href="#/guides/google">Set it up in a few steps</a>' + ", then restart <code>server.py</code>.";
@@ -231,16 +233,16 @@
     return '<section class="widget span-2 connect" aria-labelledby="connectH"><div class="connect-art" aria-hidden="true">' + bot
       + '<span class="connect-swap">' + ic("arrowRight") + '</span><span class="connect-cal">' + ic("calendar") + "</span></div>"
       + '<h2 id="connectH" class="connect-title">Connect your calendar</h2>'
-      + '<p class="connect-sub">MOAB reads your upcoming calls and preps each one: who is on it, what changed since you last met, and how to open.</p>'
+      + '<p class="connect-sub">Overture reads your upcoming calls and preps each one: who is on it, what changed since you last met, and how to open.</p>'
       + '<div class="connect-provider"><span class="connect-tile" aria-hidden="true">' + ic("calendar") + '</span><span class="connect-pt"><span class="connect-name">Google Calendar</span>'
       + '<span class="connect-acct">' + esc(st.google.email || "Read-only · the next 14 days") + "</span></span>" + action + "</div>"
       + (note ? '<p class="connect-note" role="status">' + note + "</p>" : "")
-      + '<p class="connect-privacy">' + ic("shield") + "<span>Read-only calendar access. Your calls, notes and records stay on this PC.</span></p>"
+      + '<p class="connect-privacy">' + ic("shield") + "<span>Read-only calendar access. Your calls, notes and records stay " + savedWhere() + ".</span></p>"
       + '<a class="connect-skip" href="?demo=1#/home">Look around with sample data</a></section>';
   }
   function noCallsCard() {
     return '<section class="widget span-2 empty-calls" aria-labelledby="noCallsH"><h2 id="noCallsH">No calls in the next 14 days</h2>'
-      + "<p>MOAB preps events on your Google Calendar that have at least one guest from outside your company. New invites show up here within a minute.</p>"
+      + "<p>Overture preps events on your Google Calendar that have at least one guest from outside your company. New invites show up here within a minute.</p>"
       + '<a class="btn secondary" href="https://calendar.google.com" target="_blank" rel="noopener">Open Google Calendar' + NEW_TAB + "</a></section>";
   }
 
@@ -375,7 +377,7 @@
     requestAnimationFrame(drawHeroLines);
   }
 
-  // The hero's cards (Asana's sign-in page): what MOAB is connecting right now, from the real data. Decorative copies of
+  // The hero's cards (Asana's sign-in page): what Overture is connecting right now, from the real data. Decorative copies of
   // things shown below, so they are hidden from screen readers and skipped by Tab.
   function heroWeb(next, later) {
     const w = splitWhen(next.when), list = alerts(), a = list.find((x) => !readAlerts.has(x.id)) || list[0];
@@ -413,7 +415,7 @@
         '<span class="hw-squares">' + D.invites.filter((i) => !i.ended).map((i) => '<span style="background:' + C.solid(i.company) + '">' + esc(i.company.charAt(0)) + "</span>").join("") + '</span><span class="hw-note">' + D.invites.map((i) => esc(splitWhen(i.when).day.slice(0, 3))).join(" · ") + "</span>")
       + "</div>";
   }
-  // The same hero before any calls exist: what MOAB already knows from public data, and the one step left.
+  // The same hero before any calls exist: what Overture already knows from public data, and the one step left.
   function heroWebPublic() {
     const sec = alerts().find((a) => a.kind === "Security"), latest = C.state.latest, n = C.state.adopters.length;
     const tile = (bg, icon) => '<span class="co-tile-md" style="background:' + bg + ';color:#fff">' + ic(icon) + "</span>";
@@ -429,7 +431,7 @@
         : card("hw-a", "#/home", label("tone-indigo", "Step 1") + '<span class="hw-meta">2 minutes</span>', tile("#3b7ddd", "calendar") + text("Connect your calendar", "Read-only · next 14 days"), "Your calls appear here, ready to prep"))
       + (sec ? card("hw-b", "#/alerts/" + sec.id, label("tone-red", "Security") + '<span class="hw-meta">' + esc(sec.date) + "</span>", tile("#d93a4e", "shield") + text(esc(sec.title), "GitHub security advisories"), esc(sec.text.split(". ")[0]) + ".") : "")
       + card("hw-c", "#/data", label("tone-teal", "Latest release") + '<span class="hw-meta">' + esc(fmtDate(latest.date)) + "</span>", tile("#14a39a", "tag") + text("Backstage " + esc(latest.version), "versions.backstage.io"), "Teams on older versions fall behind on fixes")
-      + card("hw-d", "#/data", label("tone-green", "Public data") + '<span class="hw-meta">ADOPTERS.md</span>', tile("#3f9466", "list") + text(n.toLocaleString("en-US") + " adopters", "on the Backstage adopters list"), "Ask MOAB to check any company against it")
+      + card("hw-d", "#/data", label("tone-green", "Public data") + '<span class="hw-meta">ADOPTERS.md</span>', tile("#3f9466", "list") + text(n.toLocaleString("en-US") + " adopters", "on the Backstage adopters list"), "Ask Overture to check any company against it")
       + "</div>";
   }
   // Square lines with round bends and end dots between the hero cards (the same drawing as the people map).
@@ -481,11 +483,11 @@
   // providers side by side, "or", an email and Continue. Google is the one that works today; Outlook is marked as coming.
   function connectHero() {
     const st = C.state, ok = st.server && st.google.configured;
-    const note = !st.server ? "MOAB's server isn't answering, or an older copy is running. Restart <code>server.py</code>, then reload."
+    const note = !st.server ? "Overture's server isn't answering, or an older copy is running. Restart <code>server.py</code>, then reload."
       : !st.google.configured ? 'Google sign-in isn\'t set up on this PC yet. <a href="#/guides/google">Set it up in a few steps</a>' + ", then restart <code>server.py</code>." : "";
     return '<p class="eyebrow">' + esc(today().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })) + "</p>"
-      + '<h1 class="page-title hero-big" tabindex="-1">Every call,<br>prepped by MOAB</h1>'
-      + '<p class="hero-sub">Connect your calendar and MOAB gets you ready for each one.</p>'
+      + '<h1 class="page-title hero-big" tabindex="-1">Every call,<br>prepped by Overture</h1>'
+      + '<p class="hero-sub">Connect your calendar and Overture gets you ready for each one.</p>'
       + '<div class="auth-row">' + (ok ? '<a class="auth-btn" href="/auth/google">' + G_LOGO + "<span>Google</span></a>" : '<span class="auth-btn" aria-disabled="true">' + G_LOGO + "<span>Google</span></span>")
       + '<span class="auth-btn" aria-disabled="true" title="Outlook calendar is coming soon">' + MS_LOGO + "<span>Microsoft</span></span></div>"
       + '<div class="auth-or"><span>or</span></div>'
@@ -493,7 +495,7 @@
       + '<input id="authEmail" name="login_hint" type="email" placeholder="name@company.com" autocomplete="email"' + (ok ? "" : " disabled") + ">"
       + '<button type="submit" class="auth-go"' + (ok ? "" : " disabled") + ">Continue</button></form>"
       + (note ? '<p class="auth-note" role="status">' + note + "</p>" : "")
-      + '<p class="auth-legal">Read-only calendar access. Your calls, notes and records stay on this PC. <a href="?demo=1#/home">Look around with sample data</a></p>';
+      + '<p class="auth-legal">Read-only calendar access. Your calls, notes and records stay ' + savedWhere() + '. <a href="?demo=1#/home">Look around with sample data</a></p>';
   }
   function renderHomeEmpty(sec) {
     const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/moabCut/g, "moabCutAsk");
@@ -736,7 +738,7 @@
       + '<p class="using">' + esc(inputsText(inv.id).line) + "</p>"
       + '<p class="checks-title">' + ic("loader", "spin") + 'Preparing the brief <span class="muted">· ' + C.STEP_DEFS.length + " checks</span></p>"
       + '<div id="liveSteps">' + stepsHtml(run.states, false) + "</div>"
-      + '<p class="leave-note">You can leave this page. MOAB will tell you when it\'s ready.</p></div>';
+      + '<p class="leave-note">You can leave this page. Overture will tell you when it\'s ready.</p></div>';
   }
   function renderError(run) {
     const inv = inviteById(app.callId);
@@ -773,7 +775,7 @@
   function renderBrief(run) {
     const ctx = run.ctx, inv = ctx.invite, b = ctx.bill, c = ctx.company, top = ctx.products[0], w = splitWhen(inv.when);
     const bp = C.prefs() ? C.prefs().brief : { sections: [], length: "full" }, short = bp.length === "short";
-    const org = C.orgInfo(inv.company); // what MOAB's research found about the company (profile.js draws it)
+    const org = C.orgInfo(inv.company); // what Overture's research found about the company (profile.js draws it)
     const detail = c && /: /.test(c.status) ? '<span class="muted">' + esc(c.status.replace(/^[^:]*: /, "")) + "</span>" : "";
     let html = '<header class="brief-head"><div class="title-row"><h1 tabindex="-1">' + esc(inv.company) + "</h1>" + (inv.ended ? '<span class="pill tag-gray">Ended</span>' : "")
       + (top.score > 0 ? '<span class="pill accent">Best fit: ' + esc(top.name) + "</span>" : "") + C.priorityBadge(inv.company) + "</div>"
@@ -837,12 +839,12 @@
       todos: () => {
         const bring = window.CP.forCallHtml(ctx.people, profileLinks);
         if (!ctx.todos.length && !bring) return "";
-        return '<section class="sec" id="todo">' + secHead(ctx.todos.length ? "Before the call" : "Bring up on the call", ctx.todos.length ? SRC.records : DEMO ? "Sample data" : "Found by MOAB")
+        return '<section class="sec" id="todo">' + secHead(ctx.todos.length ? "Before the call" : "Bring up on the call", ctx.todos.length ? SRC.records : DEMO ? "Sample data" : "Found by Overture")
           + (ctx.todos.length ? '<ul class="todos" role="list">' + ctx.todos.map((t) => '<li><label><input type="checkbox" data-call="' + esc(inv.id) + '" data-todo="' + esc(t.text) + '"' + (run.ticks.has(t.text) ? " checked" : "") + "><span>" + esc(t.text) + "</span></label>"
             + (t.link ? '<a class="todo-link" href="' + t.link.href + '" data-jump="' + t.link.href.slice(1) + '">' + esc(t.link.label) + "</a>" : "") + (t.src ? srcTag(t.src) : "") + "</li>").join("") + "</ul>" : "")
           + (bring ? (ctx.todos.length ? '<h3 class="pf-sub-h">Bring up on the call</h3>' : "") + bring : "") + "</section>";
       },
-      // The company as MOAB's research found it (or "Researching…"), then each guest with their compact profile.
+      // The company as Overture's research found it (or "Researching…"), then each guest with their compact profile.
       people: () => {
         const about = window.CP.orgBlock(inv.company, Object.assign({ heading: false, idp: "bco", level: 2 }, profileLinks));
         const aboutSec = about ? '<section class="sec pf-org-sec" id="company">' + secHead("About " + esc(org.profile && org.profile.name ? org.profile.name : inv.company), "",
@@ -850,9 +852,9 @@
         return aboutSec + '<section class="sec" id="people">' + secHead("Who's on the call", SRC.records, '<a class="ghost-edit" href="#/map">' + ic("network") + "Map</a>") + '<ul class="people" role="list">' + ctx.people.map((p) => {
           if (editingPerson === p.email) return personForm(p);
           const f = p.facts, found = !!C.personInfo(p.email).profile;
-          const key = f.lead ? "<strong>" + esc(f.lead.text) + "</strong> " + esc(p.note || f.lead.tail) : esc(p.note || (f.unknown && !found ? (DEMO ? "Not in Spotify's records yet." : "Not in MOAB's records yet.") : ""));
+          const key = f.lead ? "<strong>" + esc(f.lead.text) + "</strong> " + esc(p.note || f.lead.tail) : esc(p.note || (f.unknown && !found ? (DEMO ? "Not in Spotify's records yet." : "Not in Overture's records yet.") : ""));
           const bits = [C.tenure(p.startedAt) + (f.isNew ? ", and new leaders often want change" : "")];
-          if (f.unknown && !found && (f.lead || p.note)) bits.push(DEMO ? "Not in Spotify's records yet" : "Not in MOAB's records yet");
+          if (f.unknown && !found && (f.lead || p.note)) bits.push(DEMO ? "Not in Spotify's records yet" : "Not in Overture's records yet");
           const auto = !!(p.research && p.research.status === "done" && p.research.found === "auto");
           const pedit = LIVE_MODE && !auto ? '<button type="button" class="ghost-edit p-edit" data-edit-person="' + esc(p.email) + '" aria-label="' + esc("Edit " + p.name + "'s title and note") + '">' + ic("pencil") + "Edit</button>" : "";
           return '<li class="person">' + avatar(p, "lg") + "<div>"
@@ -890,12 +892,12 @@
     const trimmed = [short ? "Short brief" : "", hidden ? plural(hidden, "section") + " hidden" : ""].filter(Boolean).join(", ");
     html += '<p class="footnote">' + (trimmed ? esc(trimmed) + '. <a href="#/settings/brief">Change it in Settings</a>. ' : "")
       + (DEMO ? "Sample data (people, companies, history, papers, alerts and call notes) is made up for this demo and stands in for Spotify's own records. Public data (Backstage versions, security notices, the adopters list and rival prices) is real."
-      : "The call and its guests come from your Google Calendar. Titles, notes, status and history come from MOAB's records on this PC; edit them here or on the company page. Public data (Backstage versions, security notices, the adopters list and rival prices) is real.") + "</p>";
+      : "The call and its guests come from your Google Calendar. Titles, notes, status and history come from Overture's records on this PC; edit them here or on the company page. Public data (Backstage versions, security notices, the adopters list and rival prices) is real.") + "</p>";
     $("#panelBrief").innerHTML = html;
     $("#howSteps").innerHTML = stepsHtml(ctx.states, true);
   }
 
-  // ---------- filling in what the calendar can't know (live mode: saved to MOAB's records on this PC) ----------
+  // ---------- filling in what the calendar can't know (live mode: saved to Overture's records on this PC) ----------
   let editingPerson = null, editingCompany = null;
   function personForm(p) {
     return '<li class="person editing">' + avatar(p, "lg") + '<form class="rec-form" data-person-form="' + esc(p.email) + '" aria-label="' + esc("Edit " + p.name) + '">'
@@ -920,7 +922,7 @@
     if (run && run.ctx && run.ctx.done) renderBrief(run);
     const b = $('[data-edit-person="' + CSS.escape(email) + '"]');
     if (b) b.focus();
-    announce(DEMO ? "Sample data: changed on this page only." : "Saved to MOAB's records.");
+    announce(DEMO ? "Sample data: changed on this page only." : "Saved to Overture's records.");
     if (hubspotOn() && hsCalls[app.callId]) refreshHubspotPlan(app.callId); // a new title can be offered to HubSpot
   }
   // Research results (found automatically) reach every open brief: the call's people are copies made when the agent ran.
@@ -958,7 +960,7 @@
     const again = $(kind === "confirm" ? '[data-rs-confirm="' + CSS.escape(email) + '"]' : '[data-rs-again="' + CSS.escape(email) + '"]');
     const b = again || $('[data-edit-person="' + CSS.escape(email) + '"]');
     if (b) b.focus();
-    announce(kind === "confirm" ? (DEMO ? "Confirmed (sample data, this page only)." : "Confirmed. Saved to MOAB's records.") : "Looking them up.");
+    announce(kind === "confirm" ? (DEMO ? "Confirmed (sample data, this page only)." : "Confirmed. Saved to Overture's records.") : "Looking them up.");
   }
   const STATUS_OPTIONS = ["New lead", "Open deal: Portal", "Open deal: Confidence", "Open deal: Xirp", "Customer: Portal", "Not a fit yet"];
   function companyForm(name) {
@@ -970,7 +972,7 @@
         + '<input id="cfStatus" class="input" name="status" list="cfStatusList" maxlength="80" autocomplete="off" value="' + esc(c.status && c.status !== "Prospect" ? c.status : "") + '" placeholder="e.g. Open deal: Portal" aria-describedby="cfHelp">'
         + '<datalist id="cfStatusList">' + STATUS_OPTIONS.map((o) => '<option value="' + esc(o) + '">').join("") + "</datalist>"
         + '<p class="help" id="cfHelp">Start with Customer, Open deal or New lead and the tag takes that colour.</p>')
-      + '<label class="field-label" for="cfNotes">Notes</label><textarea id="cfNotes" class="input" name="notes" rows="4" maxlength="4000" placeholder="What MOAB should know about them">' + esc(c.notes || "") + "</textarea>"
+      + '<label class="field-label" for="cfNotes">Notes</label><textarea id="cfNotes" class="input" name="notes" rows="4" maxlength="4000" placeholder="What Overture should know about them">' + esc(c.notes || "") + "</textarea>"
       + '<div class="rec-actions"><button type="submit" class="btn primary sm">Save</button><button type="button" class="btn ghost sm" data-cancel-edit="company">Cancel</button><span class="rec-err" role="alert"></span></div></form></section>';
   }
   async function saveCompany(form) {
@@ -989,9 +991,9 @@
     renderNav();
     const b = $("[data-edit-company]");
     if (b) b.focus();
-    announce("Saved to MOAB's records.");
+    announce("Saved to Overture's records.");
   }
-  // Accepted after-call updates go to MOAB's records (live mode) and show up in the company's history at once.
+  // Accepted after-call updates go to Overture's records (live mode) and show up in the company's history at once.
   async function syncChanges(run, accept, undo) {
     if (!LIVE_MODE || (!accept.length && !undo.length)) return true;
     const inv = run.ctx.invite, pick = (c) => ({ kind: c.kind, text: c.text });
@@ -1107,8 +1109,8 @@
   }
 
   // ---------- Mentioned on the call (after the call): people who were talked about, not the guests ----------
-  // The transcript is read on this PC by MOAB's server (rules) and, when Chrome has it, by Chrome's on-device AI here in the browser.
-  // MOAB keeps only who was mentioned and the sentence they came up in. Web lookups send only a name, role words and the company.
+  // The transcript is read on this PC by Overture's server (rules) and, when Chrome has it, by Chrome's on-device AI here in the browser.
+  // Overture keeps only who was mentioned and the sentence they came up in. Web lookups send only a name, role words and the company.
   const mnCalls = {}; // per call id: { items, loading, error, busy, notice, paste, sample, hs: { [mention id]: { plan, error, busy, done } } }
   const mnState = (id) => mnCalls[id] || (mnCalls[id] = { items: null, orgs: [], loading: false, error: "", busy: false, notice: "", paste: false, sample: false, hs: {}, change: {}, granola: null });
   const MN_MAX_BYTES = 1000000;
@@ -1151,10 +1153,10 @@
     renderMentions(id);
     try {
       let r;
-      try { r = await C.fetchTimeout("/api/mentions?callId=" + encodeURIComponent(id), 10000); } catch (e) { throw new Error("Couldn't reach MOAB's server. Is server.py running?"); }
+      try { r = await C.fetchTimeout("/api/mentions?callId=" + encodeURIComponent(id), 10000); } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
       let j = {};
       try { j = await r.json(); } catch (e) { /* no body */ }
-      if (!r.ok) throw new Error(j.error || "MOAB's server answered " + r.status);
+      if (!r.ok) throw new Error(j.error || "Overture's server answered " + r.status);
       st.items = j.items || [];
       st.orgs = j.orgs || [];
       st.granola = j.granola || null;
@@ -1167,7 +1169,7 @@
     mnWatch();
   }
   // Chrome's on-device AI (only when this browser has it) reads the transcript on this PC and suggests names the rules could miss.
-  // Its suggestions go only to MOAB's own server, which keeps a name only when it is really in the transcript.
+  // Its suggestions go only to Overture's own server, which keeps a name only when it is really in the transcript.
   async function deviceHints(text) {
     if ((await C.deviceChecked) !== "available" || !text) return [];
     const hints = [];
@@ -1272,7 +1274,7 @@
       st.orgs = j.orgs || st.orgs;
       delete st.change[mid];
       mnGraph(id, j);
-      announce({ pick: "Picked. Added to the People map.", confirm: "Confirmed.", add: "Added to MOAB's records.", none: "Marked as not found.", again: "Looking it up.",
+      announce({ pick: "Picked. Added to the People map.", confirm: "Confirmed.", add: "Added to Overture's records.", none: "Marked as not found.", again: "Looking it up.",
         remove: "Removed from the People map.", restore: "Back on the People map." }[action]);
     } catch (e) { toast(e.message === "no-key" ? "Add a Claude key to look people up." : e.message); }
     renderMentions(id);
@@ -1362,7 +1364,7 @@
     if (it.status === "pick" && it.candidates.length) {
       const likely = it.likely && it.candidates[0] && it.candidates[0].from === "Web";
       x += '<p class="mn-cap">' + esc(likely ? (it.candidates.length > 1 ? "Most likely first. Nothing goes on the People map until you pick." : "One possible match. Nothing goes on the People map until you pick.")
-        : it.note || "Who did they mean? MOAB won't pick for you.") + '</p><ul class="mn-cands" role="list">' + it.candidates.map((c, i) => '<li class="mn-cand' + (likely && !i ? " likely" : "") + '">'
+        : it.note || "Who did they mean? Overture won't pick for you.") + '</p><ul class="mn-cands" role="list">' + it.candidates.map((c, i) => '<li class="mn-cand' + (likely && !i ? " likely" : "") + '">'
         + '<p class="mn-name"><strong>' + esc(c.name) + "</strong>" + (c.title ? "<span>· " + esc(c.title) + "</span>" : "")
         + (likely && !i ? '<span class="pill tag-orange">Likely, not confirmed</span>' : "") + mnFromTag(c) + "</p>"
         + mnFacts(c) + mnSources(c.sources)
@@ -1373,18 +1375,18 @@
     if ((it.status === "found" || it.status === "known") && p) {
       if (!it.confirmed) acts.push('<button type="button" class="btn secondary sm" data-mn-act="confirm">' + ic("check") + "Confirm</button>");
       if (it.autoFound && !it.confirmed) acts.push('<button type="button" class="btn ghost sm" data-mn-change aria-expanded="' + !!st.change[it.id] + '">' + ic("pencil") + "Change</button>");
-      if (!it.added && p.from !== "MOAB records") acts.push('<button type="button" class="btn ghost sm" data-mn-act="add">' + ic("plus") + "Add to MOAB records</button>");
+      if (!it.added && p.from !== "Overture records") acts.push('<button type="button" class="btn ghost sm" data-mn-act="add">' + ic("plus") + "Add to Overture records</button>");
       if (hubspotOn() && p.from !== "HubSpot" && !it.hubspot && !(h && h.plan)) acts.push('<button type="button" class="btn ghost sm" data-mn-hs' + (h && h.busy ? " disabled" : "") + ">" + (h && h.busy ? ic("loader", "spin") : "") + "Save to HubSpot</button>");
       if (it.status === "found" && !st.sample && !it.autoFound) acts.push('<button type="button" class="btn ghost sm" data-mn-act="none">Not them</button>');
     }
     if (LIVE_MODE && C.state.claudeOn && (it.status === "notfound" || it.status === "error" || it.status === "nokey")) acts.push('<button type="button" class="btn ghost sm" data-mn-act="again">' + ic("rotate") + (it.status === "error" ? "Try again" : "Look up on the web") + "</button>");
     if (acts.length) x += '<p class="mn-actions">' + acts.join("") + "</p>";
-    if (it.autoFound && st.change[it.id]) x += '<div class="mn-change"><p class="help">MOAB picked this because it was the only sourced match for the name and team said on the call.</p>'
+    if (it.autoFound && st.change[it.id]) x += '<div class="mn-change"><p class="help">Overture picked this because it was the only sourced match for the name and team said on the call.</p>'
       + '<p class="mn-actions"><button type="button" class="btn ghost sm" data-mn-act="none">Not them</button>'
       + (LIVE_MODE && C.state.claudeOn ? '<button type="button" class="btn ghost sm" data-mn-act="again">' + ic("rotate") + "Look up again</button>" : "") + "</p></div>";
     if (it.explain && (["found", "known", "pick"].includes(it.status) || it.said)) x += C.explainFold(it.explain, { noMention: true });
     x += mnConn(it);
-    if (it.added) x += '<p class="mn-done">' + ic("check") + (DEMO ? "Added (sample data, this page only)." : "In MOAB's records: MOAB knows them on the next transcript.") + "</p>";
+    if (it.added) x += '<p class="mn-done">' + ic("check") + (DEMO ? "Added (sample data, this page only)." : "In Overture's records: Overture knows them on the next transcript.") + "</p>";
     if (it.hubspot) x += '<p class="mn-done">' + ic("check") + (it.hubspot === "unknown" ? "A save to HubSpot got no answer: check HubSpot before saving again." : "Saved to HubSpot as a contact.") + "</p>";
     if (h && (h.plan || h.error)) {
       x += '<div class="mn-hs">' + (h.plan ? '<p class="help hs-lead">Nothing goes to HubSpot until you press Save. This is exactly what it writes:</p><ul class="hs-plan" role="list"><li><p class="hs-what">' + ic("users")
@@ -1423,7 +1425,7 @@
     if (o.explain && r && r.type !== "unknown") x += C.explainFold(o.explain, { noMention: true });
     return x + mnConn(o) + "</div></li>";
   }
-  // "From Granola": the note MOAB read after the call (its title, a link and Granola's summary). The transcript itself isn't kept.
+  // "From Granola": the note Overture read after the call (its title, a link and Granola's summary). The transcript itself isn't kept.
   function granolaHtml(g) {
     const href = C.safeHref(g.url);
     return '<div class="mn-granola"><p class="mn-name"><strong>From Granola</strong>' + srcTag("Granola") + "</p>"
@@ -1436,7 +1438,7 @@
     if (!el || app.callId !== id) return;
     const st = mnState(id), a = document.activeElement, focusSel = a && a.closest("#mentions") && a.id ? "#" + a.id : "";
     let h = '<div class="sec-head"><h2 id="mnH">Mentioned on the call</h2>' + srcTag(DEMO ? "Sample data" : "Your transcript") + "</div>";
-    h += '<p class="help mn-lead">Drop a Zoom or Google Meet transcript (.vtt, .srt or .txt), paste one, or use your call notes (notes typed in the in-call panel are read while you type). MOAB finds the people and companies that were talked about, who they are and how they relate, and adds them to the People map. The transcript stays on this PC: MOAB keeps only who was mentioned and the sentence they came up in.</p>';
+    h += '<p class="help mn-lead">Drop a Zoom or Google Meet transcript (.vtt, .srt or .txt), paste one, or use your call notes (notes typed in the in-call panel are read while you type). Overture finds the people and companies that were talked about, who they are and how they relate, and adds them to the People map. The transcript stays on this PC: Overture keeps only who was mentioned and the sentence they came up in.</p>';
     h += '<div class="mn-drop" data-mn-drop><input type="file" id="mnFile" class="sr-only" accept=".vtt,.srt,.txt,text/vtt,text/plain"' + (st.busy ? " disabled" : "") + ">"
       + '<label for="mnFile" class="btn secondary sm">' + ic("note") + "Choose a transcript</label><span class=\"mn-drop-text\">or drop it here</span></div>";
     h += '<p class="mn-actions mn-sources">'
@@ -1533,14 +1535,14 @@
     window.scrollTo(0, 0);
   }
 
-  // ---------- follow-up email (Settings > Follow-up email templates): filled from the call and its notes. MOAB never sends it. ----------
+  // ---------- follow-up email (Settings > Follow-up email templates): filled from the call and its notes. Overture never sends it. ----------
   const fuState = {}; // per call id: { type, to, subject, body, said }
   const FU_TYPES = { intro: "intro", discovery: "discovery", demo: "demo", renewal: "renewal", other: "follow-up" };
   function callType(inv) {
     const t = (inv.title + " " + kindOf(inv)).toLowerCase();
     return /renew/.test(t) ? "renewal" : /\bdemo/.test(t) ? "demo" : /discover/.test(t) ? "discovery" : /\bintro/.test(t) ? "intro" : "other";
   }
-  // The fill-ins: {first_name} {company} {my_name} {next_step} {summary} {date}. Anything MOAB can't fill stays as [add ...] for you.
+  // The fill-ins: {first_name} {company} {my_name} {next_step} {summary} {date}. Anything Overture can't fill stays as [add ...] for you.
   function followupDraft(id) {
     const run = runs[id], inv = inviteById(id), type = callType(inv), tpl = C.prefs().followup.templates[type];
     // One bullet per sentence of the notes (and per in-call note).
@@ -1567,7 +1569,7 @@
     const kind = FU_TYPES[callType(inv)];
     let h = '<div class="sec-head"><h2 id="fuH">Follow-up email</h2><span class="grow"></span><a class="ghost-edit" href="#/settings/followup">' + ic("pencil") + "Templates</a></div>";
     if (!d) {
-      h += '<p class="help fu-help">Fills in your ' + esc(kind) + " template from this call and your notes. MOAB never sends it: copy it, or open it in your mail app.</p>"
+      h += '<p class="help fu-help">Fills in your ' + esc(kind) + " template from this call and your notes. Overture never sends it: copy it, or open it in your mail app.</p>"
         + '<div class="after-actions"><button type="button" class="btn secondary" data-fu="draft">' + ic("pencil") + "Draft follow-up</button></div>";
     } else {
       h += '<div class="fu-form"><label class="field-label" for="fuTo">To</label><input id="fuTo" class="input" value="' + esc(d.to.join(", ")) + '" readonly aria-describedby="fuToHelp">'
@@ -1731,11 +1733,11 @@
         + '<dt>Company</dt><dd><a href="#/companies/' + slug(inv.company) + '">' + esc(inv.company) + "</a></dd>"
         + (ch.also ? '<dt>Also affects</dt><dd><a href="#/companies/' + slug(ch.also) + '">' + esc(ch.also) + "</a></dd>" : "")
         + '<dt>Call</dt><dd><a href="#/calls/' + inv.id + '">' + esc(w.day + " " + w.month + " " + w.date + " · " + w.start) + "</a></dd></dl></section>" : "")
-      + '<p class="ib-prov">' + (a.kind === "New release" ? "From Backstage's releases on GitHub." : a.kind === "Stage change" ? "From your HubSpot: the deal stage changed since MOAB last looked."
-        : a.kind === "Mentioned" ? "From the people mentioned on the call (your transcript or notes). MOAB looks them up and cites its sources on the call page."
+      + '<p class="ib-prov">' + (a.kind === "New release" ? "From Backstage's releases on GitHub." : a.kind === "Stage change" ? "From your HubSpot: the deal stage changed since Overture last looked."
+        : a.kind === "Mentioned" ? "From the people mentioned on the call (your transcript or notes). Overture looks them up and cites its sources on the call page."
         : a.src === "Public data" ? "From GitHub's public security advisories for Backstage. Saved copy from " + esc(fmtDate(SNAP.takenOn)) + "." : DEMO ? "Sample alert, made up for this demo. It stands in for a job-change and hiring feed."
-        : a.kind === "New person" ? "MOAB looked this guest up on its own, from their name and company only, using public work sources. Every fact on their profile names its source."
-        : "Worked out by MOAB from your Google Calendar: this invite compared with your past meetings.") + "</p></div></article>";
+        : a.kind === "New person" ? "Overture looked this guest up on its own, from their name and company only, using public work sources. Every fact on their profile names its source."
+        : "Worked out by Overture from your Google Calendar: this invite compared with your past meetings.") + "</p></div></article>";
   }
   // Draws both panes. Focus survives the redraw: the same control (data-k) gets it back, else the list heading.
   function drawAlerts(want) {
@@ -1866,7 +1868,7 @@
     const heads = [["Company", ""], ["Status", ""], ["Engineers", " co-eng"], ["People", ""], ["Backstage", " co-bs"], ["Next call", ""]];
     sec.innerHTML = '<header class="page-head co-page-head"><div class="page-head-row"><h1 class="page-title" tabindex="-1">Companies</h1>' + srcTag(SRC.records)
       + '<span class="grow"></span><button type="button" class="btn secondary sm" data-open="check">Check any company</button></div>'
-      + '<p class="page-sub">' + (DEMO ? "Spotify's records for the companies you're meeting, and the people you already know there." : "The companies on your calendar and in MOAB's records, and the people you know there.") + "</p></header>"
+      + '<p class="page-sub">' + (DEMO ? "Spotify's records for the companies you're meeting, and the people you already know there." : "The companies on your calendar and in Overture's records, and the people you know there.") + "</p></header>"
       + coStats()
       + '<div class="co-bar"><div class="co-views" role="group" aria-label="Show">'
       + CO_VIEWS.filter(([k]) => k === "all" || coCount(k)).map(([k, l]) => '<button type="button" class="co-view" data-co-view="' + k + '" aria-pressed="' + (coView === k) + '">' + l + '<span class="co-view-n">' + coCount(k) + "</span></button>").join("")
@@ -1926,7 +1928,7 @@
   function renderCompany(name) {
     const c = D.companies[name], inv = callForCompany(name), status = coStatus(name), [tag, detail, since] = coStatusParts(status);
     const { staff, alumni } = coPeople(name), bs = coBackstage(name), run = inv ? runs[inv.id] : null;
-    const meta = [c && c.engineers ? coNum(c.engineers) + " engineers" : c && c.employees ? coNum(c.employees) + " employees" : "", detail, since ? tag + " since " + since : "", bs.ver ? "Backstage " + bs.ver : bs.ad ? "Backstage adopter" : "", c ? "" : DEMO ? "Not in Spotify's records" : "Not in MOAB's records yet"].filter(Boolean);
+    const meta = [c && c.engineers ? coNum(c.engineers) + " engineers" : c && c.employees ? coNum(c.employees) + " employees" : "", detail, since ? tag + " since " + since : "", bs.ver ? "Backstage " + bs.ver : bs.ad ? "Backstage adopter" : "", c ? "" : DEMO ? "Not in Spotify's records" : "Not in Overture's records yet"].filter(Boolean);
     const actions = (inv ? (run && run.ctx && run.ctx.done ? '<a class="btn primary" href="#/calls/' + inv.id + '">Open brief</a>'
       : '<button type="button" class="btn primary" data-run="' + inv.id + '"' + (runningId ? " disabled" : "") + ">Run the agent</button>") : "")
       + '<a class="btn secondary" href="#/map">People map</a>';
@@ -1940,7 +1942,7 @@
         + '<p class="co-focus-who">' + coFaces(inv.attendees, "xs") + "<span>" + esc(names(inv)) + "</span></p></div>"
         + '<div class="co-focus-side">' + prepChip(inv.id) + "</div></div></section>";
     }
-    // What MOAB's research found about the company (profile.js): its real name, summary, key facts, news and sources.
+    // What Overture's research found about the company (profile.js): its real name, summary, key facts, news and sources.
     const about = window.CP.orgBlock(name, Object.assign({ idp: "co", level: 2 }, profileLinks));
     if (about) main += '<section class="co-sec pf-org-sec" aria-label="' + esc("About " + name) + '">' + about + "</section>";
     const gong = C.gongFor(name);
@@ -2022,7 +2024,7 @@
     }
     const n = d.node;
     const kindWord = { warm: "Warm link", moved: "Past job or talk", together: "Worked together", works: "Works there", mentioned: "Mentioned on a call" };
-    // What MOAB found about this guest or company (profile.js), above the list of links.
+    // What Overture found about this guest or company (profile.js), above the list of links.
     const guest = n.type === "person" && n.id.startsWith("p:") ? n.id.slice(2) : "";
     const found = guest ? window.CP.briefPerson(guest, profileLinks) || C.researchHtml(Object.assign({ name: n.label, email: guest }, D.people[guest] || {}))
       : n.type === "prospect" || n.type === "past" ? window.CP.orgMini(n.label, profileLinks) : "";
@@ -2079,7 +2081,7 @@
     window.CP.showLatest(dlg);
     $("#tlTitle").focus();
   }
-  // A wrong connection on the map: take it off (live: saved in MOAB's records, and never added again; demo: this page only).
+  // A wrong connection on the map: take it off (live: saved in Overture's records, and never added again; demo: this page only).
   async function removeConnection(edge) {
     if (!edge || !edge.mentionId) return;
     if (DEMO) {
@@ -2119,7 +2121,7 @@
   function renderLive() {
     const inv = inviteById(app.liveCall), skin = app.liveSkin, zoom = skin === "zoom", hostName = zoom ? "Zoom" : "Google Meet";
     if (!inv) {
-      $('[data-view="live"]').innerHTML = pageHead("video", "tag-green", "In-call panel", "", "During a call, MOAB sits in the side panel of Google Meet or Zoom: the opener, talking points, who is who, and private notes.")
+      $('[data-view="live"]').innerHTML = pageHead("video", "tag-green", "In-call panel", "", "During a call, Overture sits in the side panel of Google Meet or Zoom: the opener, talking points, who is who, and private notes.")
         + '<div class="empty-calls widget"><h2>No call to show yet</h2><p>' + (LIVE_MODE ? "When a call with an outside guest is on your calendar in the next 14 days, its panel shows here." : 'Connect your Google Calendar to see the panel for your next call. <a href="#/home">Connect</a>') + "</p></div>";
       return;
     }
@@ -2135,25 +2137,25 @@
         + '<div class="lv-group">' + btn("mic") + btn("video") + btn("present") + btn("more") + '<span class="lv-btn lv-leave">' + lvIc("leave") + "</span></div>"
         + '<div class="lv-group end">' + btn("users", "", "has-count") + btn("apps", "", "is-on") + "</div>";
     const who = inv.attendees.map((a) => a.name).join(", ");
-    $('[data-view="live"]').innerHTML = pageHead("video", "tag-green", "In-call panel", SRC.calendar, 'During the call, MOAB sits in the side panel of Google Meet or Zoom: the opener, talking points, who is who, and private notes that flow into "After the call". Only you can see it.')
+    $('[data-view="live"]').innerHTML = pageHead("video", "tag-green", "In-call panel", SRC.calendar, 'During the call, Overture sits in the side panel of Google Meet or Zoom: the opener, talking points, who is who, and private notes that flow into "After the call". Only you can see it.')
       + '<div class="lv-bar"><div class="seg" role="group" aria-label="Call app">' + [["meet", "Google Meet"], ["zoom", "Zoom"]].map(([k, l]) => '<button type="button" data-skin="' + k + '" aria-pressed="' + (skin === k) + '">' + l + "</button>").join("") + "</div>"
       + '<label class="sr-only" for="liveCall">Call</label><select id="liveCall" class="input sm">' + D.invites.map((i) => '<option value="' + i.id + '"' + (i.id === inv.id ? " selected" : "") + ">" + esc(i.company) + "</option>").join("") + "</select>"
       + '<span class="grow"></span><a class="lv-solo" href="' + src.replace("host=panel", "host=preview") + '" target="_blank" rel="noopener">Open the panel on its own' + NEW_TAB + "</a></div>"
-      + '<section class="lv-call" data-app="' + skin + '" aria-label="' + esc("Mock " + hostName + " call with " + inv.company + ": " + who + " and you, with MOAB open in the side panel") + '">'
+      + '<section class="lv-call" data-app="' + skin + '" aria-label="' + esc("Mock " + hostName + " call with " + inv.company + ": " + who + " and you, with Overture open in the side panel") + '">'
       + (zoom ? '<div class="lv-top" aria-hidden="true"><span class="lv-topic">' + esc(inv.title) + '</span><span class="lv-view">Gallery view</span></div>' : "")
       + '<div class="lv-main"><div class="lv-grid" data-n="' + n + '" aria-hidden="true">' + tiles + "</div>"
-      + '<div class="lv-side"><div class="lv-side-head" aria-hidden="true"><img src="logo.svg" alt="" width="22" height="22"><span class="lv-side-title">MOAB</span>' + lvIc("x") + "</div>"
-      + '<iframe title="MOAB in-call panel" src="' + esc(src) + '"></iframe></div></div>'
+      + '<div class="lv-side"><div class="lv-side-head" aria-hidden="true"><img src="logo.svg" alt="" width="22" height="22"><span class="lv-side-title">Overture</span>' + lvIc("x") + "</div>"
+      + '<iframe title="Overture in-call panel" src="' + esc(src) + '"></iframe></div></div>'
       + '<div class="lv-dock" aria-hidden="true">' + dock + "</div></section>"
       + '<p class="lv-note">A mock ' + hostName + (DEMO ? " screen with stock photos for the made-up people." : " screen: your guests show as initials.") + ' The side panel is the real one (panel.html): in a real call it runs as a Google Meet add-on or a Zoom App, reads the meeting code or topic to pick the call, and falls back to a call picker.</p>'
       + '<section class="lv-setup" aria-labelledby="lvSetup"><h2 id="lvSetup">Put it in a real call</h2><p class="lv-setup-sub">Installing it needs your own Google Cloud and Zoom developer accounts.</p><div class="lv-setup-grid">'
       + '<div class="lv-steps"><h3>Google Meet add-on</h3><ol>'
-      + "<li>Host MOAB on HTTPS (GitHub Pages works for Meet).</li><li>In a Google Cloud project, turn on the <b>Google Workspace Marketplace SDK</b> and add an HTTP deployment with <code>sidePanelUrl</code> set to <code>…/panel.html</code>.</li>"
-      + "<li>Put the project number in <code>panel.html</code> (<code>meetCloudProjectNumber</code>).</li><li>Install the test deployment, start a call, open <b>Activities</b>, pick MOAB.</li></ol></div>"
+      + "<li>Host Overture on HTTPS (GitHub Pages works for Meet).</li><li>In a Google Cloud project, turn on the <b>Google Workspace Marketplace SDK</b> and add an HTTP deployment with <code>sidePanelUrl</code> set to <code>…/panel.html</code>.</li>"
+      + "<li>Put the project number in <code>panel.html</code> (<code>meetCloudProjectNumber</code>).</li><li>Install the test deployment, start a call, open <b>Activities</b>, pick Overture.</li></ol></div>"
       + '<div class="lv-steps"><h3>Zoom App</h3><ol><li>Host on HTTPS with the four security headers Zoom requires (see <code>_headers</code>). GitHub Pages does not send them.</li>'
       + "<li>Create a <b>General app</b> in the Zoom App Marketplace. Set the Home URL to <code>…/panel.html?host=zoom</code> and add the host and <code>appssdk.zoom.us</code> to the domain allow list.</li>"
       + "<li>Add the in-meeting APIs (meeting context, participants) and the <code>zoomapp:inmeeting</code> scope.</li><li>Use Local Test → Add App Now, then open it from <b>Apps</b> in a meeting.</li></ol></div></div>"
-      + '<p class="list-foot">Full steps: <a href="#/guides/extension">Put MOAB beside Google Meet and Zoom</a> · <a href="#/guides/in-call">Install as a Meet add-on or Zoom App (developers)</a> ·<a href="#/guides">All setup guides</a></p></section>';
+      + '<p class="list-foot">Full steps: <a href="#/guides/extension">Put Overture beside Google Meet and Zoom</a> · <a href="#/guides/in-call">Install as a Meet add-on or Zoom App (developers)</a> ·<a href="#/guides">All setup guides</a></p></section>';
   }
 
   // ---------- data page ----------
@@ -2164,17 +2166,17 @@
     const row = (icon, name, detail, state, on, action) => '<div class="row"><span class="src-tile">' + ic(icon) + '</span><span class="src-text"><span class="row-title">' + name + '</span><span class="row-sub">' + detail + "</span></span>"
       + (action ? '<span class="src-act">' + action + "</span>" : "") + '<span class="state-word status-pill ' + (on ? "on tag-green" : "tag-gray") + '">' + esc(state) + "</span></div>";
     const saved = "Saved " + fmtDate(SNAP.takenOn);
-    // Connections: where MOAB's real data comes from, and who answers questions.
+    // Connections: where Overture's real data comes from, and who answers questions.
     let cal;
-    if (!st.server) cal = row("calendar", "Google Calendar", "MOAB's server isn't answering, or an older copy is running. Restart <code>server.py</code>, then reload.", "Offline", false);
+    if (!st.server) cal = row("calendar", "Google Calendar", "Overture's server isn't answering, or an older copy is running. Restart <code>server.py</code>, then reload.", "Offline", false);
     else if (!g.configured) cal = row("calendar", "Google Calendar", 'Sign-in isn\'t set up on this PC yet. <a href="#/guides/google">Set it up</a>' + ", then restart <code>server.py</code>.", "Not set up", false);
     else if (g.connected) cal = row("calendar", "Google Calendar", "Connected as " + esc(g.email || "your Google account") + " · read-only, the next 14 days"
       + (window.MOAB_LIVE_ERROR ? ". Last try failed: " + esc(window.MOAB_LIVE_ERROR) : ""), "Connected", !window.MOAB_LIVE_ERROR, '<button type="button" class="btn ghost sm" data-disconnect>Disconnect</button>');
-    else cal = row("calendar", "Google Calendar", "Not connected. MOAB only asks to read your calendar.", "Not connected", false, '<a class="btn secondary sm" href="/auth/google">Connect</a>');
+    else cal = row("calendar", "Google Calendar", "Not connected. Overture only asks to read your calendar.", "Not connected", false, '<a class="btn secondary sm" href="/auth/google">Connect</a>');
     const syncTime = (iso) => (iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "");
     const crmRow = (key, icon, label, what, doc) => {
       const x = st[key] || {}, how = '<a href="' + doc + '">How to connect</a>';
-      if (!st.server) return row(icon, label, "MOAB's server isn't answering. Restart <code>server.py</code>, then reload.", "Offline", false);
+      if (!st.server) return row(icon, label, "Overture's server isn't answering. Restart <code>server.py</code>, then reload.", "Offline", false);
       if (!x.configured) return row(icon, label, "Not connected. " + what + " " + how + ".", "Not set up", false);
       const who = key === "hubspot" ? (x.portal ? "Connected to " + esc(x.portal) : "Connected") : (x.workspace ? "Connected to " + esc(x.workspace) : "Connected");
       return row(icon, label, (x.connected ? who : "Set up, not checked yet") + (x.lastSync ? " · last sync " + esc(syncTime(x.lastSync)) : "")
@@ -2191,14 +2193,14 @@
     const dev = st.device === "available" ? [true, "Chrome's built-in AI is ready."]
       : /download/.test(st.device) ? [false, "Chrome can run a small AI model on this PC once it has downloaded it."]
       : [false, "needs Chrome with built-in AI (the Prompt API)."];
-    const aiNow = st.claudeOn ? "Claude answers questions and writes brief summaries." : dev[0] ? "On-device AI answers questions in the search box." : "Built-in rules answer from MOAB's records.";
+    const aiNow = st.claudeOn ? "Claude answers questions and writes brief summaries." : dev[0] ? "On-device AI answers questions in the search box." : "Built-in rules answer from Overture's records.";
     const recCount = Object.keys(D.companies).length, ppl = Object.values(D.people).filter((p) => p.known).length;
-    $('[data-view="data"]').innerHTML = pageHead("database", "tag-gray", "Data", "", DEMO ? "What's real, what's made up, and who writes the brief." : "Where MOAB's data comes from, and who answers.")
+    $('[data-view="data"]').innerHTML = pageHead("database", "tag-gray", "Data", "", DEMO ? "What's real, what's made up, and who writes the brief." : "Where Overture's data comes from, and who answers.")
       + (DEMO ? '<p class="data-note">This is the demo with made-up calls. It runs as if today is ' + esc(today().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })) + ', so the calls stay upcoming. <a href="' + esc(location.pathname) + '#/home">Leave the demo</a></p>' : "")
       + '<section class="sec">' + secHead("Connections", "") + '<div class="list src-list">' + cal + (DEMO ? "" : hubspotRow + gongRow + privacyRow)
       + row("sparkle", "AI", esc(aiNow) + " Claude: " + (st.claudeOn ? "key found on the server." : "no key (set ANTHROPIC_API_KEY before starting server.py).") + " On-device: " + esc(dev[1]),
         st.claudeOn ? "Claude" : dev[0] ? "On device" : "Rules only", st.claudeOn || dev[0])
-      + row("database", "MOAB records", "Stored on this PC in <code>centralize/.data/records.json</code>"
+      + row("database", "Overture records", "Stored on this PC in <code>centralize/.data/records.json</code>"
         + (DEMO ? "" : " · " + plural(recCount, "company", "companies") + ", " + plural(ppl, "person", "people") + " with notes"), st.server ? "On this PC" : "Offline", st.server)
       + "</div></section>"
       + '<div class="stats three data-stats">' + stat("Adopters list", C.state.adopters.length, "companies") + stat("Security notices", recent, esc((sev.critical || 0) + " critical, " + (sev.high || 0) + " high")) + stat("Latest Backstage", C.state.latest.version, esc(fmtDate(C.state.latest.date))) + "</div>"
@@ -2216,10 +2218,10 @@
         + row("bell", plural(D.watch.length, "alert"), "Stands in for a job-change and hiring feed", "Made up")
         + row("note", "Call notes", "Stands in for call recordings (Gong)", "Made up")
         + "</div></section>"
-        : '<section class="sec">' + secHead("Your data", "MOAB records") + '<div class="list src-list">'
+        : '<section class="sec">' + secHead("Your data", "Overture records") + '<div class="list src-list">'
         + row("calendar", plural(D.invites.length, "call"), "From your Google Calendar: the next 14 days, events with at least one guest from outside your company", LIVE_MODE ? "Your calendar" : "Not connected", LIVE_MODE)
-        + row("users", plural(Object.keys(D.people).length, "person", "people"), "Guests on those calls. Add titles and notes from any brief.", "MOAB records", LIVE_MODE)
-        + row("building", plural(recCount, "company", "companies"), "Status and notes you set on a company page, plus accepted after-call updates", "MOAB records", LIVE_MODE)
+        + row("users", plural(Object.keys(D.people).length, "person", "people"), "Guests on those calls. Add titles and notes from any brief.", "Overture records", LIVE_MODE)
+        + row("building", plural(recCount, "company", "companies"), "Status and notes you set on a company page, plus accepted after-call updates", "Overture records", LIVE_MODE)
         + row("bell", plural(D.watch.length, "alert"), "Job changes and first meetings, worked out from your past meetings", LIVE_MODE ? "Your calendar" : "Not connected", LIVE_MODE)
         + "</div></section>")
       + '<section class="sec">' + secHead("Who writes the brief", "") + '<div class="list src-list">'
@@ -2316,13 +2318,13 @@
     if (el && document.contains(el) && !document.querySelector("dialog[open]")) el.focus();
   }
 
-  // ---------- command palette (search and Ask MOAB) ----------
+  // ---------- command palette (search and Ask Overture) ----------
   // It opens over the top-bar search field (Asana): the field turns into the palette input in place, results drop below.
   let palItems = [], palActive = 0, palAuto = true, askSeq = 0;
   const isQuestion = (q) => /\?\s*$/.test(q) || /^(who|what|when|where|why|how|which|is|are|was|were|do|does|did|can|could|should|will|would|tell|show|list|summari[sz]e|give)\b/i.test(q.trim());
 
-  // Ask MOAB: Claude (key on the server) -> on-device AI -> MOAB's own records. The answer always says which one answered.
-  const ASK_FROM = { claude: "Answered by Claude", device: "Answered on this device", rules: "From MOAB's records" };
+  // Ask Overture: Claude (key on the server) -> on-device AI -> Overture's own records. The answer always says which one answered.
+  const ASK_FROM = { claude: "Answered by Claude", device: "Answered on this device", rules: "From Overture's records" };
   const STOP = new Set(["the", "and", "for", "with", "what", "who", "whom", "when", "where", "which", "how", "why", "is", "are", "was", "does", "did", "about", "tell", "me", "my", "our", "their", "they", "them", "next", "call", "calls", "meeting", "this", "that", "from", "know", "should", "say", "ask", "any", "have", "has", "can", "you", "your", "there", "show", "give", "list"]);
   function rulesAnswer(q) {
     const ql = q.toLowerCase(), links = [], lines = [];
@@ -2335,21 +2337,21 @@
     }));
     people.slice(0, 3).forEach(({ a, inv }) => {
       const p = D.people[a.email] || {};
-      lines.push(a.name + (p.title ? ", " + p.title : "") + ", is on your " + inv.company + " call (" + splitWhen(inv.when).day + " " + splitWhen(inv.when).start + ")." + (p.note ? " " + p.note : p.title ? "" : " No title or note in MOAB's records yet."));
+      lines.push(a.name + (p.title ? ", " + p.title : "") + ", is on your " + inv.company + " call (" + splitWhen(inv.when).day + " " + splitWhen(inv.when).start + ")." + (p.note ? " " + p.note : p.title ? "" : " No title or note in Overture's records yet."));
       links.push({ label: "Open the " + inv.company + " call", href: "#/calls/" + inv.id });
     });
     const cos = companyNames().filter((n) => ql.includes(n.toLowerCase()) || words.some((w) => n.toLowerCase().split(/\s+/).includes(w)));
     cos.slice(0, 2).forEach((n) => {
       const c = D.companies[n], inv = callForCompany(n);
-      lines.push(n + ": " + (c ? c.status : "not in MOAB's records yet") + "." + (c && c.notes ? " " + c.notes : "") + (inv ? " Next call " + splitWhen(inv.when).day + " " + splitWhen(inv.when).start + "." : " No call booked."));
+      lines.push(n + ": " + (c ? c.status : "not in Overture's records yet") + "." + (c && c.notes ? " " + c.notes : "") + (inv ? " Next call " + splitWhen(inv.when).day + " " + splitWhen(inv.when).start + "." : " No call booked."));
       links.push({ label: "Open " + n, href: "#/companies/" + slug(n) });
     });
     if (!lines.length && /\bnext\b|\bupcoming\b|\btoday\b|\btomorrow\b/.test(ql)) {
       const inv = D.invites.find((i) => !i.ended) || D.invites[0];
       if (inv) { lines.push("Your next call is " + inv.company + ", " + longDay(inv) + " at " + splitWhen(inv.when).start + ", with " + names(inv) + "."); links.push({ label: "Open the call", href: "#/calls/" + inv.id }); }
-      else lines.push(MODE === "connect" ? "No calendar is connected yet, so MOAB has no calls to look at." : "You have no calls with outside guests in the next 14 days.");
+      else lines.push(MODE === "connect" ? "No calendar is connected yet, so Overture has no calls to look at." : "You have no calls with outside guests in the next 14 days.");
     }
-    if (!lines.length) lines.push("MOAB couldn't answer that from its records. Try a person's or company's name, or ask about your next call.");
+    if (!lines.length) lines.push("Overture couldn't answer that from its records. Try a person's or company's name, or ask about your next call.");
     return { text: lines.join("\n"), source: "rules", links: links.slice(0, 3) };
   }
   async function palAsk(q) {
@@ -2378,7 +2380,7 @@
     const ql = q.toLowerCase();
     const has = (s) => !ql || String(s).toLowerCase().includes(ql);
     const groups = [];
-    if (q.length >= 2) groups.push(["Ask MOAB", [{ icon: "sparkle", label: "Ask MOAB: " + q, sub: "", ask: q }]]);
+    if (q.length >= 2) groups.push(["Ask Overture", [{ icon: "sparkle", label: "Ask Overture: " + q, sub: "", ask: q }]]);
     const calls = D.invites.filter((i) => has(i.company) || has(i.title) || (ql && i.attendees.some((a) => has(a.name))))
       .map((i) => ({ icon: "phone", label: i.company, sub: palWhen(i) + " · " + kindOf(i), inv: i, href: "#/calls/" + i.id }));
     if (calls.length) groups.push([q ? "Calls" : "Upcoming calls", calls]);
@@ -2431,7 +2433,7 @@
     else if (!q && palRecents().length) groups = [["Recent", palRecents()]].concat(groups);
     $("#palFilters").innerHTML = PAL_FILTERS.map(([k, l]) => '<button type="button" class="pal-chip" data-filter="' + k + '" aria-pressed="' + (palFilter === k) + '">' + l + "</button>").join("");
     palItems = groups.flatMap(([, items]) => items);
-    // While typing, a question highlights "Ask MOAB"; a name highlights the first search result.
+    // While typing, a question highlights "Ask Overture"; a name highlights the first search result.
     if (palAuto) palActive = palItems.length > 1 && palItems[0].ask && !isQuestion(q) ? 1 : 0;
     palActive = Math.min(palActive, Math.max(0, palItems.length - 1));
     let i = 0;
@@ -2473,7 +2475,7 @@
     const f = (app.view === "home" && $("#homeAsk")) || $("#openPalette");
     if (!f || PAL_IN.parentElement === f) return;
     f.insertBefore(PAL_IN, $("kbd", f));
-    PAL_IN.placeholder = f.id === "homeAsk" ? "Ask MOAB or search calls, people, companies" : "Search calls, people, companies";
+    PAL_IN.placeholder = f.id === "homeAsk" ? "Ask Overture or search calls, people, companies" : "Search calls, people, companies";
   }
   function palPlace() {
     const field = searchField(), pal = $("#palette");
@@ -2518,7 +2520,7 @@
     else if (it.run) it.run(opener);
   }
 
-  // The privacy switches (now in Settings > Research sources & privacy) also live in C.state, which the brief, Ask MOAB and
+  // The privacy switches (now in Settings > Research sources & privacy) also live in C.state, which the brief, Ask Overture and
   // "Read Gong's transcript" read: keep them in step with the saved settings.
   function syncPrivacyState(s) {
     if (!LIVE_MODE || !s) return;
@@ -2527,7 +2529,7 @@
 
   async function disconnectGoogle() {
     const email = ((window.MOAB_STATUS || {}).google || {}).email;
-    if (!confirm("Sign out" + (email ? " of " + email : "") + "? MOAB stops reading your calendar until you sign in again. Your saved research and notes stay on this PC.")) return;
+    if (!confirm("Sign out" + (email ? " of " + email : "") + "? Overture stops reading your calendar until you sign in again. Your saved research and notes stay " + savedWhere() + ".")) return;
     try {
       const r = await C.fetchTimeout("/auth/google/disconnect", 15000, { method: "POST", headers: { "X-MOAB": "1" } });
       if (!r.ok) throw new Error();

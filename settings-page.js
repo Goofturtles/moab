@@ -1,4 +1,4 @@
-// MOAB Settings page (#/settings and #/settings/<menu>): a list of menus on the left, the chosen menu's grouped rows on the right.
+// Overture Settings page (#/settings and #/settings/<menu>): a list of menus on the left, the chosen menu's grouped rows on the right.
 // Mobbin references: Quo "Preferences" (menu list + label/help/control rows with dividers), Snowflake "Preferences" (rows grouped
 // in bordered cards under a heading), AirOps "Notification preferences" (a table of switches), Asana "Display" settings.
 // Every change saves at once (text after a short pause) and the header says "Saved". settings.js does the storing.
@@ -28,16 +28,16 @@
     { id: "followup", label: "Follow-up emails", icon: "mail", sub: "One email template per kind of call, filled in after the call.", words: ["email", "follow-up", "followup", "template", "mail"] },
     { id: "mentions", label: "Mentions and connections", icon: "network", sub: "Looking up people and companies mentioned on a call, and what the People map shows.", words: ["mentions", "connections", "map", "relations", "quotes", "look-up", "lookup"] },
     { id: "alerts", label: "Alert rules", icon: "bell", sub: "Which changes become alerts, and when they reach you.", words: ["alerts", "digest", "quiet", "security", "notifications", "release", "stage"] },
-    { id: "research", label: "Research sources and privacy", icon: "shield", sub: "Where MOAB may look things up, sites it never uses, and what may go to AI.", words: ["research", "privacy", "sources", "gong", "hubspot", "transcripts", "blocked", "ai", "web"] },
+    { id: "research", label: "Research sources and privacy", icon: "shield", sub: "Where Overture may look things up, sites it never uses, and what may go to AI.", words: ["research", "privacy", "sources", "gong", "hubspot", "transcripts", "blocked", "ai", "web"] },
     { id: "appearance", label: "Appearance", icon: "palette", sub: "Light or dark, the accent colour, and how dense the pages are.", words: ["appearance", "theme", "dark", "light", "accent", "colour", "color", "density", "compact"] },
   ];
-  const BRIEF_LABELS = { opener: ["Opener", "The line to open the call with."], since: ["Since you last spoke", "Alerts and the last thing that happened."], lastTalk: ["Last talk and Gong", "Your last call in Gong and the history in MOAB's records."],
-    backstage: ["Backstage and version", "Their upgrade bill and Backstage details."], todos: ["To-dos", "What to do or send before the call."], people: ["People", "Who is on the call, and what MOAB found about them."],
+  const BRIEF_LABELS = { opener: ["Opener", "The line to open the call with."], since: ["Since you last spoke", "Alerts and the last thing that happened."], lastTalk: ["Last talk and Gong", "Your last call in Gong and the history in Overture's records."],
+    backstage: ["Backstage and version", "Their upgrade bill and Backstage details."], todos: ["To-dos", "What to do or send before the call."], people: ["People", "Who is on the call, and what Overture found about them."],
     security: ["Security notices", "The worst open notices for their version."], rivals: ["Rivals", "Rival tools named in the invite, with prices."], papers: ["Papers", "NDA and security pack."] };
   const PANEL_LABELS = { opener: ["Opener", "Brief tab"], points: ["Talking points", "Brief tab"], watch: ["Watch for", "Brief tab"], send: ["Still to send", "Brief tab"],
     people: ["People", "People tab"], map: ["Mini map", "People tab"], notes: ["Notes", "Notes tab"] };
   const RULE_LABELS = { engineers: ["Engineers above a number", "Bigger engineering teams feel the Backstage upkeep most."], adopter: ["On the Backstage adopters list", "They already run Backstage."],
-    deal: ["Open deal stage", "There is an open deal in HubSpot or MOAB's records."], alert: ["Recent alert", "A job change or another alert on one of their calls."], customer: ["Customer", "Already a Spotify customer (HubSpot or MOAB's records)."] };
+    deal: ["Open deal stage", "There is an open deal in HubSpot or Overture's records."], alert: ["Recent alert", "A job change or another alert on one of their calls."], customer: ["Customer", "Already a Spotify customer (HubSpot or Overture's records)."] };
   const SIGNAL_LABELS = { jobChanges: ["Job changes", "Someone you met before now has a new company address."], newInvitees: ["New invitees", "A new person on a call, or a first meeting with a company."],
     mentioned: ["People mentioned", "Someone named on a call, from a transcript or your notes."], security: ["Security notices", "New Backstage security advisories."],
     release: ["New Backstage release", "A release from the last 14 days."], hubspotStages: ["HubSpot stage changes", "A company's deal stage changed in HubSpot."] };
@@ -46,7 +46,7 @@
   const CALL_TYPES = [["intro", "Intro"], ["discovery", "Discovery"], ["demo", "Demo"], ["renewal", "Renewal"], ["other", "Other"]];
   const FILL_INS = ["first_name", "company", "my_name", "next_step", "summary", "date"];
   const ACCENTS = [["indigo", "Indigo", "#4f46e5"], ["green", "Green", "#15803d"], ["blue", "Blue", "#2563eb"], ["pink", "Pink", "#db2777"], ["orange", "Orange", "#c2410c"]];
-  const SHORTCUTS = [[["Ctrl K", "/"], "or", "Search and Ask MOAB, anywhere in the app"], [["Left", "Right"], "", "Switch tabs in a brief and in the in-call panel"],
+  const SHORTCUTS = [[["Ctrl K", "/"], "or", "Search and Ask Overture, anywhere in the app"], [["Left", "Right"], "", "Switch tabs in a brief and in the in-call panel"],
     [["J", "K"], "", "Next and previous alert (Alerts page)"], [["U"], "", "Mark an alert read or unread (Alerts page)"],
     [["Up", "Down"], "", "Move through search results and menus"], [["Esc"], "", "Close search, menus and dialogs"]];
 
@@ -133,7 +133,7 @@
           + '<p class="st-help" id="tplHelp">Fill-ins (click one to put it where the cursor is):</p><div class="st-fills" role="group" aria-label="Fill-ins">'
           + FILL_INS.map((f) => '<button type="button" class="st-fill" data-fill="' + f + '">{' + f + "}</button>").join("") + "</div>"
           + '<div class="st-actions"><button type="button" class="btn ghost sm" data-tpl-reset' + (same ? " disabled" : "") + ">" + ic("rotate") + "Reset this template</button></div></div>",
-        "MOAB picks the template from the call's title (intro, discovery, demo, renewal, anything else is Other). In After the call, <b>Draft follow-up</b> fills it in; you copy it or open it in your mail app. MOAB never sends email.")
+        "Overture picks the template from the call's title (intro, discovery, demo, renewal, anything else is Other). In After the call, <b>Draft follow-up</b> fills it in; you copy it or open it in your mail app. Overture never sends email.")
         + group("Preview", '<div class="st-pad"><p class="st-help">' + esc(previewCallLabel()) + '</p><pre class="st-mail" id="tplPreview">' + esc(previewTemplate(t)) + "</pre></div>");
     },
     mentions(s) {
@@ -163,18 +163,18 @@
         + '<button type="submit" class="btn primary sm"' + (DEMO ? " disabled" : "") + ">Save key</button>"
         + '<button type="button" class="btn ghost sm" id="claudeKeyRemove" hidden>Remove</button></div>'
         + '<p class="st-key-help">Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a> → API keys. '
-        + "It turns on web lookups (new guests, people and companies mentioned) and Ask MOAB answers. MOAB saves it on this PC and only ever sends it to Anthropic.</p></form>");
+        + "It turns on web lookups (new guests, people and companies mentioned) and Ask Overture answers. Overture saves it on this PC and only ever sends it to Anthropic.</p></form>");
       const conn = (x) => (x && x.configured ? "" : ' <span class="st-tag">Not connected</span>');
       return keyBox + group("Sources", row("srcWeb", "Web research", "Claude with web search looks up new guests and people mentioned on a call (name, role and company only; never an email address).", toggle("srcWeb", r.web, "research.web"))
           + row("srcHub", "HubSpot", "Company status, deals, notes and guests' job titles." + conn(st.hubspot), toggle("srcHub", r.hubspot, "research.hubspot"))
           + row("srcGong", "Gong", "The last call's summary, key points, topics and trackers." + conn(st.gong), toggle("srcGong", r.gong, "research.gong"))
-          + row("gongTranscripts", "Read Gong transcripts", "Off: MOAB never asks Gong for a transcript. On: After the call can read a call's transcript from Gong to find the people mentioned. Only who was mentioned and one sentence each are kept.", toggle("gongTranscripts", r.gongTranscripts, "research.gongTranscripts", !r.gong))
+          + row("gongTranscripts", "Read Gong transcripts", "Off: Overture never asks Gong for a transcript. On: After the call can read a call's transcript from Gong to find the people mentioned. Only who was mentioned and one sentence each are kept.", toggle("gongTranscripts", r.gongTranscripts, "research.gongTranscripts", !r.gong))
           + row("srcMeetily", "Meetily", "Live transcript from Meetily, read from its files on this PC while a call runs (<a href=\"#/guides/meetily\">setup guide</a>). Names and companies said go to the mentions as they come; the transcript is never kept or sent anywhere. Off by default." + (st.meetily && st.meetily.on && !st.meetily.found ? ' <span class="st-tag">Recordings folder not found</span>' : ""), toggle("srcMeetily", r.meetily, "research.meetily"))
-          + row("srcGranola", "Granola", "After a call, MOAB reads its Granola note and transcript (<a href=\"#/guides/granola\">setup guide</a>): the people and companies mentioned, and the note's summary under After the call. The transcript isn't kept. Off by default." + conn(st.granola), toggle("srcGranola", r.granola, "research.granola")))
-        + group("What may go to AI", row("aiShare", "Claude may see", "Titles only: names, titles and companies. Plus call notes: also your call notes and the notes in MOAB's records. Plus transcripts: also who was mentioned on a call and their sentence (this is the old “Use transcripts in AI answers” switch).",
+          + row("srcGranola", "Granola", "After a call, Overture reads its Granola note and transcript (<a href=\"#/guides/granola\">setup guide</a>): the people and companies mentioned, and the note's summary under After the call. The transcript isn't kept. Off by default." + conn(st.granola), toggle("srcGranola", r.granola, "research.granola")))
+        + group("What may go to AI", row("aiShare", "Claude may see", "Titles only: names, titles and companies. Plus call notes: also your call notes and the notes in Overture's records. Plus transcripts: also who was mentioned on a call and their sentence (this is the old “Use transcripts in AI answers” switch).",
             segmented("aiShare", r.aiShare, "research.aiShare", [["titles", "Titles only"], ["notes", "+ call notes"], ["transcripts", "+ transcripts"]]), { group: true })
-          + row("transcriptsInAI", "Use transcripts in AI answers", "Off: nothing from a transcript goes to Claude. On: Ask MOAB also sees who was mentioned on a call and the sentence they came up in.", toggle("transcriptsInAI", r.transcriptsInAI, "research.transcriptsInAI"))
-          + row("gongInAI", "Use Gong notes in AI answers", "Off: Gong's summaries stay on this PC and never go to Claude. On: Claude also sees them in brief summaries and Ask MOAB.", toggle("gongInAI", r.gongInAI, "research.gongInAI")))
+          + row("transcriptsInAI", "Use transcripts in AI answers", "Off: nothing from a transcript goes to Claude. On: Ask Overture also sees who was mentioned on a call and the sentence they came up in.", toggle("transcriptsInAI", r.transcriptsInAI, "research.transcriptsInAI"))
+          + row("gongInAI", "Use Gong notes in AI answers", "Off: Gong's summaries stay on this PC and never go to Claude. On: Claude also sees them in brief summaries and Ask Overture.", toggle("gongInAI", r.gongInAI, "research.gongInAI")))
         + group("Blocked sites", '<div class="st-pad">' + chipList("research.blocked", r.blocked, "e.g. people-site.com", "Block a site",
             "Web research never uses these sites, on top of the built-in list. Subdomains are blocked too.")
           + '<details class="st-fold"><summary>' + ic("chevron", "chev") + "Built-in list (" + BUILT_IN.length + " sites, can't be removed)</summary><p class=\"st-builtin\">" + BUILT_IN.map(esc).join(", ") + "</p></details></div>");
@@ -216,12 +216,12 @@
     const st = $("#claudeKeyState"); if (!st) return;
     try {
       const r = await fetch("/api/claude-key", { headers: { "X-MOAB": "1" } }), j = await r.json();
-      st.textContent = (msg ? msg + " " : "") + (j.saved ? (j.source === "env" ? "Using the key from the ANTHROPIC_API_KEY setting (ends in " + j.last4 + ")." : "Key saved on this PC (ends in " + j.last4 + "). Web lookups are on.") : "No key yet. Web lookups and Ask MOAB answers are off.");
+      st.textContent = (msg ? msg + " " : "") + (j.saved ? (j.source === "env" ? "Using the key from the ANTHROPIC_API_KEY setting (ends in " + j.last4 + ")." : "Key saved on this PC (ends in " + j.last4 + "). Web lookups are on.") : "No key yet. Web lookups and Ask Overture answers are off.");
       st.classList.toggle("ok", !!j.saved);
       // The box empties after a save so the key never sits on screen; show that it's saved instead of looking wiped.
       const inp = $("#claudeKey"); if (inp) inp.placeholder = j.saved ? "Saved, ends in " + j.last4 : "sk-ant-…";
       const rm = $("#claudeKeyRemove"); if (rm) rm.hidden = !(j.saved && j.source === "file");
-    } catch (e) { st.textContent = "MOAB's server isn't answering."; }
+    } catch (e) { st.textContent = "Overture's server isn't answering."; }
   }
   document.addEventListener("submit", async (e) => {
     if (e.target.id !== "claudeKeyForm") return;
@@ -235,11 +235,11 @@
       if (!r.ok) { $("#claudeKeyState").textContent = j.error || "Couldn't save the key."; input.focus(); return; }
       claudeKeyRefresh("Saved.");
       C.state.claudeOn = true;
-    } catch (err) { $("#claudeKeyState").textContent = "Couldn't save: MOAB's server isn't answering."; }
+    } catch (err) { $("#claudeKeyState").textContent = "Couldn't save: Overture's server isn't answering."; }
   });
   document.addEventListener("click", async (e) => {
     if (!e.target.closest("#claudeKeyRemove")) return;
-    if (!confirm("Remove the saved Claude key from this PC? Web lookups and Ask MOAB answers turn off.")) return;
+    if (!confirm("Remove the saved Claude key from this PC? Web lookups and Ask Overture answers turn off.")) return;
     await fetch("/api/claude-key/remove", { method: "POST", headers: { "X-MOAB": "1" } }).catch(() => {});
     C.state.claudeOn = false;
     claudeKeyRefresh("Removed.");
@@ -252,7 +252,7 @@
     const sec = $('[data-view="settings"]'), s = S.get();
     // The open menu's name is the page's h1 (it gets focus on arrival); with no menu open, "Settings" is.
     const nav = '<nav class="st-nav" aria-label="Settings menus">' + (m ? '<p class="st-title">Settings</p>' : '<h1 class="page-title st-title" tabindex="-1">Settings</h1>')
-      + '<p class="st-mode">' + (DEMO ? "Demo: saved in this browser only." : MODE === "live" ? "Saved in MOAB's records on this PC." : "Saved on this PC.") + "</p>"
+      + '<p class="st-mode">' + (DEMO ? "Demo: saved in this browser only." : MODE === "live" ? "Saved in Overture's records on this PC." : "Saved on this PC.") + "</p>"
       + '<ul class="st-menu" role="list">' + MENUS.map((x) => '<li><a href="#/settings/' + x.id + '"' + (x.id === page.menu ? ' aria-current="page"' : "") + ">" + ic(x.icon) + '<span class="st-menu-l">' + esc(x.label) + "</span>" + ic("chevron", "chev") + "</a></li>").join("")
       + '<li><a href="#/guides">' + ic("note") + '<span class="st-menu-l">Setup guides</span>' + ic("chevron", "chev") + "</a></li></ul></nav>";
     const body = m ? '<div class="st-panel"><header class="st-head"><a class="back st-back" href="#/settings" aria-label="Back to Settings">' + ic("chevronLeft") + "<span>Settings</span></a>"
@@ -457,7 +457,7 @@
   // ---------- the avatar menu (top bar): Settings, the theme, Data ----------
   function meMenuHtml() {
     const dark = S.get().appearance.theme === "dark";
-    // Who is signed in (your Google account), and a way to sign out: it revokes MOAB's Google access and deletes the saved sign-in.
+    // Who is signed in (your Google account), and a way to sign out: it revokes Overture's Google access and deletes the saved sign-in.
     const g = (window.MOAB_STATUS || {}).google || {}, signedIn = !DEMO && g.connected;
     const who = signedIn ? '<div class="me-who" role="presentation"><span class="me-who-l">Signed in with Google</span><span class="me-who-e">' + esc(g.email || "your Google account") + "</span></div>" : "";
     const out = signedIn ? '<div class="me-sep" role="separator"></div><button type="button" role="menuitem" data-disconnect>' + ic("logOut") + "<span>Sign out</span></button>" : "";

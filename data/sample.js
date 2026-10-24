@@ -80,13 +80,13 @@ window.SAMPLE = {
       photo: "https://images.pexels.com/photos/30004323/pexels-photo-30004323.jpeg?auto=compress&cs=tinysrgb&w=320&h=320&fit=crop", // stock photo (Pexels licence), see CREDITS.md
       title: "Director, Procurement", startedAt: "2019-08", previous: "", known: false,
       note: "First time on a call with Spotify.",
-      // What invitee research looks like once MOAB has looked a new guest up (made up, like everything here).
+      // What invitee research looks like once Overture has looked a new guest up (made up, like everything here).
       research: {
         status: "done", note: "", found: "auto", foundAt: "2026-10-19T14:00:00+00:00", confidence: "medium",
         title: "Director, Procurement", team: "Procurement", seniority: "director", tenure: "about 7 years", relationship: "employee",
         sources: [{ url: "https://northwindfreight.example/about/leadership", label: "Northwind Freight leadership page" }],
         local: { company: "Northwind Freight", adopter: false, metBefore: false, lastMet: "" },
-        // The profile MOAB's research builds (server.py's records.people[email].profile, contract v2). Made up, with made-up sources.
+        // The profile Overture's research builds (server.py's records.people[email].profile, contract v2). Made up, with made-up sources.
         profile: {
           v: 2, name: "Elena Cruz", at: "2026-10-19T14:00:00+00:00", confidence: "medium",
           summary: { text: "Elena Cruz runs procurement at Northwind Freight, where she has worked for about seven years. Her team signs off software purchases and vendor security reviews.", src: [0, 1] },
@@ -218,14 +218,14 @@ window.SAMPLE = {
       note: "",
       // What research says when the web has nothing about someone's work (it never asks you to look them up).
       research: {
-        status: "unknown", note: "MOAB searched 12 sites and found no public work information about them.", found: "", foundAt: "2026-10-19T14:08:00+00:00", confidence: "",
+        status: "unknown", note: "Overture searched 12 sites and found no public work information about them.", found: "", foundAt: "2026-10-19T14:08:00+00:00", confidence: "",
         title: "", team: "", seniority: "", tenure: "", relationship: "", sources: [],
         local: { company: "Rookery Retail", adopter: false, metBefore: false, lastMet: "" },
       },
     },
   },
 
-  // "Mentioned on the call" in the demo: a made-up transcript of the Northwind call and what MOAB would find in it.
+  // "Mentioned on the call" in the demo: a made-up transcript of the Northwind call and what Overture would find in it.
   // Grace Ito stands in for someone already in Spotify's records; Tom Hughes for someone found on the web (example.com-style sources);
   // John (a first name and a team, "from product managing") for someone found automatically from one clear match.
   // Companies: Brightwave Systems (the call explains the relation right after) and Harborline Labs (no explanation, so found on the web).
@@ -247,7 +247,7 @@ window.SAMPLE = {
         candidates: [], confirmed: false, added: false, hubspot: "", connected: true,
         explain: { kind: "person", name: "Grace Ito", title: "Head of Finance", type: "employee", typeLabel: "Employee", label: "finance", team: "Finance",
           explanation: [], since: null, evidence: [], said: null, mention: null, confidence: "", likely: false,
-          found: { call: "Northwind Freight", title: "Discovery call: Northwind Freight and Spotify Portal", via: "your transcript", time: "12:41", at: "2026-10-21T15:30:00+00:00", how: "Known to MOAB" } },
+          found: { call: "Northwind Freight", title: "Discovery call: Northwind Freight and Spotify Portal", via: "your transcript", time: "12:41", at: "2026-10-21T15:30:00+00:00", how: "Known to Overture" } },
       },
       {
         id: "sample000002", name: "Tom Hughes", role: "security", kind: "full", count: 1, source: "upload", status: "found", note: "",
@@ -318,7 +318,7 @@ window.SAMPLE = {
     ],
   },
 
-  // The People map in the demo: what MOAB adds to the connections from the sample transcript above (all made up).
+  // The People map in the demo: what Overture adds to the connections from the sample transcript above (all made up).
   mentioned: [
     { id: "m:sample000001", type: "person", label: "Grace Ito", sub: "Head of Finance", company: "Northwind Freight", callId: "northwind", mentioned: true },
     { id: "m:sample000002", type: "person", label: "Tom Hughes", sub: "Security Engineering Manager", company: "Northwind Freight", callId: "northwind", mentioned: true, auto: true },
@@ -332,7 +332,7 @@ window.SAMPLE = {
     "Northwind Freight": {
       engineers: 420, status: "Open deal: Portal", domain: "northwindfreight.example",
       history: [{ date: "2025-02", text: "Talked about the plugin bundle. Did not sign: no budget." }],
-      // The company profile MOAB's research builds (server.py's records.orgs[domain].profile, contract v2). Made up, with made-up sources.
+      // The company profile Overture's research builds (server.py's records.orgs[domain].profile, contract v2). Made up, with made-up sources.
       profile: {
         v: 2, domain: "northwindfreight.example", name: "Northwind Freight", at: "2026-10-19T14:10:00+00:00", confidence: "high",
         summary: { text: "Northwind Freight moves freight by road and rail and sells live shipment tracking to its customers. Its platform team runs Backstage as the company's developer portal.", src: [0, 1] },

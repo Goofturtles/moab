@@ -1,4 +1,4 @@
-/* The side panel is a frame for MOAB's own panel (it follows MOAB's light or dark theme); this is only for "MOAB isn't running". */
+/* The side panel is a frame for Overture's own panel (it follows Overture's light or dark theme); this is only for "Overture isn't running". */
 :root { color-scheme: light dark; --bg: #ffffff; --ink: #1e1f21; --muted: #6d6e6f; --line: #edeae9; --accent: #4f46e5; --code: #f6f5f4; }
 @media (prefers-color-scheme: dark) { :root { --bg: #1e1f21; --ink: #f5f4f3; --muted: #a2a0a2; --line: #3a3b3d; --accent: #8b85f5; --code: #2a2b2d; } }
 html, body { height: 100%; margin: 0; background: var(--bg); }

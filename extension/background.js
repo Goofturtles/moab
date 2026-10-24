@@ -1,5 +1,5 @@
-// MOAB's in-call panel in Chrome's side panel, on Google Meet and Zoom web-client tabs only.
-// This extension sends nothing anywhere: the side panel shows MOAB from this PC (http://localhost:3576), nothing else.
+// Overture's in-call panel in Chrome's side panel, on Google Meet and Zoom web-client tabs only.
+// This extension sends nothing anywhere: the side panel shows Overture from this PC (http://localhost:3576), nothing else.
 // Without the "tabs" permission Chrome only tells us the address of tabs on the sites in host_permissions, which is all we need.
 "use strict";
 

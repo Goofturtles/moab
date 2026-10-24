@@ -1,4 +1,4 @@
-# Running MOAB inside Google Meet and Zoom
+# Running Overture inside Google Meet and Zoom
 
 The in-call panel is `panel.html`: one page, fluid from 320px wide. It works on its own (preview), as a Google Meet add-on side panel, and as a Zoom App. It never shares its screen with the other people on the call.
 
@@ -12,12 +12,12 @@ How it decides where it runs (`panel.js`):
 2. Google Cloud project: enable **Google Workspace Marketplace SDK** and **Google Workspace add-ons API**. Note the project number.
 3. Marketplace SDK → HTTP deployments → new deployment with this manifest (replace HOST):
    ```json
-   {"addOns":{"common":{"name":"MOAB","logoUrl":"https://HOST/icon.png"},
+   {"addOns":{"common":{"name":"Overture","logoUrl":"https://HOST/icon.png"},
     "meet":{"web":{"sidePanelUrl":"https://HOST/centralize/panel.html","supportsScreenSharing":false,
     "addOnOrigins":["https://HOST"],"logoUrl":"https://HOST/icon.png"}}}}
    ```
 4. Put the project number in `panel.html` → `meetCloudProjectNumber`.
-5. Install the test deployment, start a call, open **Activities**, pick MOAB.
+5. Install the test deployment, start a call, open **Activities**, pick Overture.
 Limits: the SDK gives only the meeting code (no names); participant names need the Meet REST API with OAuth. Adult, non-supervised Google accounts only.
 
 ## Zoom

@@ -1,10 +1,10 @@
-// The side panel: MOAB's in-call panel (http://localhost:3576/panel.html) in a frame, told which meeting this tab is in.
+// The side panel: Overture's in-call panel (http://localhost:3576/panel.html) in a frame, told which meeting this tab is in.
 // Google Meet: meet.google.com/abc-defg-hij gives meet=abc-defg-hij. Zoom web client: app.zoom.us/wc/123456789/join (or
-// zoom.us/wc/join/123456789, zoom.us/j/123456789) gives zoom=123456789. MOAB matches that to your calendar's call.
-// Nothing leaves this PC: the only address this page talks to or shows is MOAB's own, on localhost (see the manifest's CSP).
+// zoom.us/wc/join/123456789, zoom.us/j/123456789) gives zoom=123456789. Overture matches that to your calendar's call.
+// Nothing leaves this PC: the only address this page talks to or shows is Overture's own, on localhost (see the manifest's CSP).
 "use strict";
 
-const MOAB = "http://localhost:3576";
+const Overture = "http://localhost:3576";
 const frame = document.getElementById("moab");
 const off = document.getElementById("off");
 
@@ -28,7 +28,7 @@ function panelUrl(p) {
   const q = new URLSearchParams({ host: "ext" });
   if (p.meet) q.set("meet", p.meet);
   if (p.zoom) q.set("zoom", p.zoom);
-  return MOAB + "/panel.html?" + q.toString();
+  return Overture + "/panel.html?" + q.toString();
 }
 
 async function activeTabUrl() {
@@ -39,7 +39,7 @@ async function activeTabUrl() {
 }
 
 async function moabUp() {
-  try { return (await fetch(MOAB + "/api/status", { cache: "no-store", credentials: "omit" })).ok; } catch (e) { return false; }
+  try { return (await fetch(Overture + "/api/status", { cache: "no-store", credentials: "omit" })).ok; } catch (e) { return false; }
 }
 
 let shown = "";
@@ -61,12 +61,12 @@ if (chrome.runtime && chrome.runtime.onMessage) chrome.runtime.onMessage.addList
   const meet = meetingParams(sender.tab.url || "").meet;
   if (!meet || new URL(shown).searchParams.get("meet") !== meet) return;
   if (msg.type === "moab-captions" && Array.isArray(msg.lines)) {
-    frame.contentWindow.postMessage({ type: "moab-captions", lines: msg.lines.slice(0, 50).map((l) => String(l).slice(0, 600)) }, MOAB);
+    frame.contentWindow.postMessage({ type: "moab-captions", lines: msg.lines.slice(0, 50).map((l) => String(l).slice(0, 600)) }, Overture);
   } else if (msg.type === "moab-captions-status") {
-    frame.contentWindow.postMessage({ type: "moab-captions-status", box: !!msg.box }, MOAB);
+    frame.contentWindow.postMessage({ type: "moab-captions-status", box: !!msg.box }, Overture);
   } else if (msg.type === "moab-call-ended") {
     const lines = Array.isArray(msg.lines) ? msg.lines.slice(-20000).map((l) => String(l).slice(0, 600)) : [];
-    frame.contentWindow.postMessage({ type: "moab-call-ended", lines }, MOAB);
+    frame.contentWindow.postMessage({ type: "moab-call-ended", lines }, Overture);
   }
 });
 

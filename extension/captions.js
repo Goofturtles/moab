@@ -1,6 +1,6 @@
-// MOAB on Google Meet: reads Meet's own live captions (only while you have CC turned on) and hands each finished line to MOAB's
-// side panel, which passes it to MOAB on this PC to find the people and companies mentioned. Nothing is sent anywhere else and
-// nothing is kept here: the lines live in the side panel until the call ends. It also says when you leave the call, so MOAB can
+// Overture on Google Meet: reads Meet's own live captions (only while you have CC turned on) and hands each finished line to Overture's
+// side panel, which passes it to Overture on this PC to find the people and companies mentioned. Nothing is sent anywhere else and
+// nothing is kept here: the lines live in the side panel until the call ends. It also says when you leave the call, so Overture can
 // read the whole transcript once for After the call.
 "use strict";
 (() => {
@@ -61,7 +61,7 @@
     if (leave) { inCall = true; missed = 0; }
     else if (inCall && ++missed >= 2) { // gone for 2 checks in a row (not a toolbar redraw): you left the call
       inCall = false;
-      send("moab-call-ended", { lines: all.slice() }); // MOAB reads the whole transcript for After the call
+      send("moab-call-ended", { lines: all.slice() }); // Overture reads the whole transcript for After the call
     }
     const box = captionsBox();
     if (!box) return;

@@ -1,6 +1,6 @@
 # Granola: notes and transcript after the call
 
-With Granola on, a few minutes after a call ends MOAB reads its Granola note and transcript, finds the people and companies said on
+With Granola on, a few minutes after a call ends Overture reads its Granola note and transcript, finds the people and companies said on
 the call, and shows **From Granola** (the note's title, a link to it and Granola's summary) in **After the call**.
 
 ## What it needs
@@ -14,9 +14,9 @@ the call, and shows **From Granola** (the note's title, a link to it and Granola
 2. Save it on this PC (asks with no echo, writes `centralize/.data/granola.json`):
    `tks-spotify/.venv/Scripts/python.exe -I tks-spotify/centralize/tools/connect.py granola`
    (or set `GRANOLA_API_KEY` before starting the server). Restart `server.py`.
-3. In MOAB: **Settings > Research sources and privacy > Granola**: on.
+3. In Overture: **Settings > Research sources and privacy > Granola**: on.
 
-## What MOAB does with it
+## What Overture does with it
 
 - Every 5 minutes it looks at calls that ended between 5 minutes and a day ago. For each, it lists your notes created around the
   call (`GET /v1/notes?created_after&created_before`), opens each without its transcript (`GET /v1/notes/{id}`) and takes the
@@ -27,10 +27,10 @@ the call, and shows **From Granola** (the note's title, a link to it and Granola
   as for any transcript, each mention with its sentence. The summary goes with the sentences after **Keep quotes for** in
   Settings > Mentions and connections.
 - Mentions are looked up on the web like an uploaded transcript (name, role words, company name and website only). The read
-  MOAB does by itself follows **Look up mentions automatically**: with it off, they are listed but not looked up until you press
+  Overture does by itself follows **Look up mentions automatically**: with it off, they are listed but not looked up until you press
   **Look up on the web** (**Read Granola's note** is your own action, so it still looks them up).
 - The key is only ever sent to `https://public-api.granola.ai`, never shown, logged or sent to the browser. Redirects aren't followed.
 
 **Untested against a real Granola account.** Built from Granola's API reference and tested against a fake server. Unconfirmed:
-whether `calendar_event_id` is the Google Calendar event id (MOAB falls back to the start time and guests), and how long Granola
+whether `calendar_event_id` is the Google Calendar event id (Overture falls back to the start time and guests), and how long Granola
 takes to finish a note.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MOAB · In-call panel</title>
+  <title>Overture · In-call panel</title>
   <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="base.css">
@@ -22,11 +22,11 @@
 <body>
   <!-- One document on purpose: Google Meet needs its meet_sdk URL parameter and a session on every page load,
        and Zoom ties its SDK token to the page URL, so the panel never navigates. -->
-  <main id="app" aria-label="MOAB in-call panel"></main>
+  <main id="app" aria-label="Overture in-call panel"></main>
   <div id="announce" class="sr-only" role="status" aria-live="polite"></div>
   <script src="data/snapshot.js"></script>
   <script src="data/sample.js"></script>
-  <script src="data/live.js"></script><!-- server.py: your calendar + MOAB records, or null -->
+  <script src="data/live.js"></script><!-- server.py: your calendar + Overture records, or null -->
   <script src="settings.js"></script>
   <script src="core.js"></script>
   <script src="profile.js"></script>

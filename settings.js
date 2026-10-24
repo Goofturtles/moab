@@ -1,4 +1,4 @@
-// MOAB settings (the Settings page): the defaults, where the current values come from, saving, and the appearance.
+// Overture settings (the Settings page): the defaults, where the current values come from, saving, and the appearance.
 // Loaded before core.js on both pages (index.html and panel.html).
 // Live: server.py sends every setting in data/live.js (MOAB_LIVE.appSettings) and saves them with PUT /api/settings.
 // Connect (no calendar yet): the same endpoint, read with GET /api/settings. Demo (?demo=1): this browser only, never the server.
@@ -67,7 +67,7 @@
       let r;
       try {
         r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify(patch) });
-      } catch (e) { throw new Error("Couldn't reach MOAB's server. Is server.py running?"); }
+      } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
       let j = {};
       try { j = await r.json(); } catch (e) { /* no body */ }
       if (!r.ok) throw new Error(j.error ? "Not saved: " + j.error : "Not saved (" + r.status + ")");

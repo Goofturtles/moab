@@ -4,12 +4,12 @@
 (function () {
   const C = window.C, esc = C.esc, ic = C.ic;
   const GUIDES = {
-    google: { file: "GOOGLE-SETUP.md", title: "Connect Google Calendar", icon: "calendar", blurb: "Your own Google sign-in, so MOAB can read your calls. About ten minutes." },
+    google: { file: "GOOGLE-SETUP.md", title: "Connect Google Calendar", icon: "calendar", blurb: "Your own Google sign-in, so Overture can read your calls. About ten minutes." },
     hubspot: { file: "HUBSPOT-SETUP.md", title: "Connect HubSpot", icon: "building", blurb: "Companies, deals, contacts and notes. Writes only when you press Save to HubSpot." },
     gong: { file: "GONG-SETUP.md", title: "Connect Gong", icon: "trend", blurb: "The last call's summary, key points and trackers." },
-    meetily: { file: "MEETILY-SETUP.md", title: "Live transcript with Meetily", icon: "note", blurb: "Free and on this PC: MOAB reads along while a call runs." },
-    granola: { file: "GRANOLA-SETUP.md", title: "After the call with Granola", icon: "note", blurb: "MOAB reads Granola's note and transcript when the call ends." },
-    extension: { file: "CHROME-EXTENSION.md", title: "MOAB beside Google Meet and Zoom", icon: "panel", blurb: "The Chrome side panel: load it once, then it opens next to your call." },
+    meetily: { file: "MEETILY-SETUP.md", title: "Live transcript with Meetily", icon: "note", blurb: "Free and on this PC: Overture reads along while a call runs." },
+    granola: { file: "GRANOLA-SETUP.md", title: "After the call with Granola", icon: "note", blurb: "Overture reads Granola's note and transcript when the call ends." },
+    extension: { file: "CHROME-EXTENSION.md", title: "Overture beside Google Meet and Zoom", icon: "panel", blurb: "The Chrome side panel: load it once, then it opens next to your call." },
     "in-call": { file: "IN-CALL.md", title: "Install as a Meet add-on or Zoom App", icon: "video", blurb: "For developers: publish the in-call panel inside Google Meet and Zoom (HTTPS hosting, Marketplace)." },
   };
   const FILE_TO_NAME = Object.fromEntries(Object.entries(GUIDES).map(([k, g]) => [g.file, k]));
@@ -100,7 +100,7 @@
 
   function indexHtml() {
     return crumbs("") + '<div class="gd-page"><header class="gd-head"><h1 class="page-title" tabindex="-1">Setup guides</h1>'
-      + '<p class="gd-lead">Step-by-step help for connecting MOAB to your calendar, your sales tools and your calls.</p></header>'
+      + '<p class="gd-lead">Step-by-step help for connecting Overture to your calendar, your sales tools and your calls.</p></header>'
       + '<ul class="gd-cards" role="list">' + Object.entries(GUIDES).map(([k, g]) => '<li><a class="gd-card" href="#/guides/' + k + '"><span class="gd-card-ic" aria-hidden="true">' + ic(g.icon)
         + '</span><span class="gd-card-t"><strong>' + esc(g.title) + "</strong><span>" + esc(g.blurb) + "</span></span>" + ic("chevron", "gd-chev") + "</a></li>").join("") + "</ul></div>";
   }
@@ -129,7 +129,7 @@
       // The page's heading arrived after the route tried to focus it: focus it now, unless you've moved focus yourself.
       if (document.activeElement === document.body || !document.activeElement) { const h1 = el.querySelector("h1"); if (h1) h1.focus({ preventScroll: true }); }
     }, () => {
-      if (still()) el.innerHTML = crumbs(g.title) + '<div class="gd-page"><p class="gd-p" role="alert">MOAB\'s server didn\'t send this guide. Is server.py running?</p></div>';
+      if (still()) el.innerHTML = crumbs(g.title) + '<div class="gd-page"><p class="gd-p" role="alert">Overture\'s server didn\'t send this guide. Is server.py running?</p></div>';
     });
     return g.title;
   }

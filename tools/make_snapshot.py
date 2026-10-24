@@ -1,4 +1,4 @@
-"""Save a copy of the public Backstage data MOAB uses, so the demo still works offline.
+"""Save a copy of the public Backstage data Overture uses, so the demo still works offline.
 
 Writes data/snapshot.js with:
 - the public Backstage adopters list (company name and the reason they gave; contacts left out)

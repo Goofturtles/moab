@@ -64,6 +64,6 @@
   .mn-item > .mn-co { width: 32px; height: 32px; font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .mn-drop { transition: none; } }
-/* "From Granola": the note MOAB read after the call. */
+/* "From Granola": the note Overture read after the call. */
 .mn-granola { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-lg); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .mn-granola .mn-sample { margin-top: 4px; }

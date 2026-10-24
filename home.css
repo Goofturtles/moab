@@ -124,7 +124,7 @@
 @media (prefers-reduced-motion: reduce) {
 }
 
-/* ---------- Ask MOAB: the search box lives under the greeting (Shopify home, Tana, Perplexity on Mobbin) ---------- */
+/* ---------- Ask Overture: the search box lives under the greeting (Shopify home, Tana, Perplexity on Mobbin) ---------- */
 .home-ask {
   display: flex; align-items: center; gap: 12px; width: min(640px, 100%); height: 52px; margin: 20px auto 0; padding: 0 12px 0 14px;
   background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; cursor: text; text-align: left;
@@ -155,7 +155,7 @@ body[data-page="home"]:has(#homeAsk) #openPalette { visibility: hidden; }
   .home-ask:is(:hover, :focus-visible) .logo-eyes { animation: none; }
 }
 
-/* Asana's home band: a soft tint behind the greeting (here the MOAB bot's indigo); the white cards overlap its lower edge. */
+/* Asana's home band: a soft tint behind the greeting (here the Overture bot's indigo); the white cards overlap its lower edge. */
 .home { position: relative; isolation: isolate; }
 
 
@@ -221,7 +221,7 @@ body[data-page="home"]:has(#homeAsk) #openPalette { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .hw-card, .hw-cluster { transition: none; } }
 
 /* ---------- Alive: gradient lines that draw in and carry a travelling light, cards that arrive and breathe ---------- */
-/* No gradient text: app.js still marks the greeting's name and "prepped by MOAB" with .grad-text; it reads as plain text. */
+/* No gradient text: app.js still marks the greeting's name and "prepped by Overture" with .grad-text; it reads as plain text. */
 .grad-text { color: inherit; }
 @media (min-width: 1320px) {
   /* A quiet dot grid behind the hero, fading out at the edges (Asana's canvas). */

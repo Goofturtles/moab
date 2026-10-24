@@ -1,0 +1,26 @@
+# Overture's shared site on Render, in one click: https://render.com/deploy?repo=https://github.com/Goofturtles/moab
+# A free web server plus a free Postgres that keeps each account's saved files while the server sleeps (Render deletes free
+# databases 30 days after they are made). Render asks for the two Google values (Google Cloud > Credentials > your OAuth
+# client) and keeps them to itself.
+services:
+  - type: web
+    name: overture
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.12  # the version the tests run on
+      - key: DATABASE_URL
+        fromDatabase:
+          name: overture-db
+          property: connectionString
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+databases:
+  - name: overture-db
+    plan: free
+    ipAllowList: []  # only Overture's own server can reach it

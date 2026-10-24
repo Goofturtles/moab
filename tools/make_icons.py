@@ -1,4 +1,4 @@
-"""Draw the Chrome extension's icons (16, 32, 48 and 128 px PNGs) from MOAB's bot logo (logo.svg), with the standard library only.
+"""Draw the Chrome extension's icons (16, 32, 48 and 128 px PNGs) from Overture's bot logo (logo.svg), with the standard library only.
 
 Run:  tks-spotify/.venv/Scripts/python.exe -I tks-spotify/centralize/tools/make_icons.py
 

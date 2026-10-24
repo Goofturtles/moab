@@ -1,4 +1,4 @@
-// MOAB in-call panel: one document that runs as a Google Meet add-on side panel, a Zoom App, or a plain preview.
+// Overture in-call panel: one document that runs as a Google Meet add-on side panel, a Zoom App, or a plain preview.
 // Mobbin references: Google Meet side panels, Zoom AI Companion (docked panel), Dialpad and Fireflies live assist,
 // Tana talking points, Lightfield joined-check participants, Unify "Key questions", Hotjar quick notes, Apollo insights
 // tabs, Otter AI chat tabs (full list with links at the top of live.css and panel.css).
@@ -9,10 +9,10 @@
   const CFG = window.CENTRALIZE_CONFIG || {};
   const qs = new URLSearchParams(location.search);
   // Meet first: Zoom's SDK assumes any iframe is the Zoom web client and would just wait inside Meet.
-  // host=ext: MOAB's Chrome extension side panel, which passes the tab's Meet code (meet=) or Zoom meeting number (zoom=).
+  // host=ext: Overture's Chrome extension side panel, which passes the tab's Meet code (meet=) or Zoom meeting number (zoom=).
   const HOST = qs.has("meet_sdk") ? "meet" : qs.get("host") === "ext" ? "ext" : (qs.get("host") === "zoom" || /ZoomApps/i.test(navigator.userAgent)) ? "zoom" : "preview";
   const SKIN = qs.get("skin") || (HOST === "zoom" || (HOST === "ext" && qs.has("zoom")) ? "zoom" : "meet");
-  // Inside a host (Meet, Zoom, Chrome's side panel, or the mock call on the app's In-call page) the host's frame already shows MOAB's logo and name.
+  // Inside a host (Meet, Zoom, Chrome's side panel, or the mock call on the app's In-call page) the host's frame already shows Overture's logo and name.
   const FRAMED = HOST !== "preview" || qs.get("host") === "panel";
   const HOST_NAME = (HOST === "zoom" || SKIN === "zoom") ? "Zoom" : "Google Meet";
   // The call for the extension's meeting code: Meet codes come as "abc-defg-hij" (any case, dashes or not), Zoom as digits.
@@ -72,7 +72,7 @@
       capabilities: ["getRunningContext", "getMeetingContext", "getMeetingParticipants", "getUserContext", "onParticipantChange", "expandApp", "openUrl"],
       timeout: 4000,
     }), 5000);
-    if (cfg.runningContext !== "inMeeting") { state.hostNote = "Open MOAB from inside a Zoom meeting to match the call."; return; }
+    if (cfg.runningContext !== "inMeeting") { state.hostNote = "Open Overture from inside a Zoom meeting to match the call."; return; }
     try { // host or co-host only
       const ctx = await zoomSdk.getMeetingContext();
       const match = D.invites.find((i) => (ctx.meetingTopic || "").toLowerCase().includes(i.company.toLowerCase()));
@@ -118,7 +118,7 @@
         + { brief: "Brief", people: "People", notes: "Notes" }[t] + (count[t] ? '<span class="p-count num">' + count[t] + "</span>" : "") + "</button>").join("") + "</div>";
   }
 
-  // Meetily (Settings > Research sources, off by default): MOAB's server reads its live transcript on this PC.
+  // Meetily (Settings > Research sources, off by default): Overture's server reads its live transcript on this PC.
   // "Listening via Meetily" while its lines arrive for this call; GET /api/meetily is asked every 3 s while it is on.
   const meetilyOn = () => LIVE_MODE && !!(window.MoabSettings && window.MoabSettings.get().research.meetily);
   const mt = { st: null, timer: null, lines: -1 };
@@ -130,7 +130,7 @@
       if (s.listening) return '<p class="p-listen on"><span class="live-dot" aria-hidden="true"></span>Listening via Meetily' + (s.lines ? ' · <span class="num">' + esc(plural(s.lines, "line")) + "</span>" : "") + "</p>";
       if (s.recording && s.callId === state.callId) return '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>Meetily is recording. No new words for a moment.</p>';
       if (s.recording) return '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>Meetily is recording another call. <button type="button" class="link-btn" data-mt-pick>Use it for this call</button></p>';
-      return '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>' + (s.found ? "Meetily is on. Start recording in Meetily and MOAB reads along." : "Meetily is on, but MOAB can't find its recordings folder. See the Meetily guide in MOAB: Settings > Setup guides.") + "</p>";
+      return '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>' + (s.found ? "Meetily is on. Start recording in Meetily and Overture reads along." : "Meetily is on, but Overture can't find its recordings folder. See the Meetily guide in Overture: Settings > Setup guides.") + "</p>";
     }
     return panelPrefs() && panelPrefs().listening && !meetilyOn() ? '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>Live listening needs Meetily: turn it on in Settings, Research sources.</p>' : "";
   }
@@ -174,7 +174,7 @@
     ctx.people.filter((p) => p.facts.lead).forEach((p) => asks.push({ q: "Ask " + p.name.split(" ")[0] + ": " + (p.facts.lead.src === "pub" ? "how did you use Backstage before?" : "what worked at " + p.previous + "?"), why: p.facts.lead.text }));
     if (top.name === "Xirp" && top.score > 0) asks.push({ q: "How do your AI agents find who owns a service?", why: "They use AI coding agents every day." });
     if (top.name === "Confidence" && top.score > 0) asks.push({ q: "Who signs off before a test result ships?", why: "They run A/B tests on checkout." });
-    // What MOAB's research says to bring up: each guest's profile, then the company's (five at most, so the list stays short).
+    // What Overture's research says to bring up: each guest's profile, then the company's (five at most, so the list stays short).
     const orgP = window.C.orgInfo(ctx.invite.company).profile;
     window.CP.forCallItems(ctx.people).map((x) => ({ q: x.b.text, why: "From " + x.name.split(" ")[0] + "'s profile" }))
       .concat(orgP ? orgP.forCall.map((b) => ({ q: b.text, why: "From " + (orgP.name || ctx.invite.company) + "'s profile" })) : []).slice(0, 5).forEach((a) => asks.push(a));
@@ -329,7 +329,7 @@
     : x.connected ? '<button type="button" class="link-btn" data-mn-act="remove">Remove from the map</button>' : "");
   function mentionsSec() {
     if (mn.callId !== state.callId || (!mn.items.length && !mn.orgs.length)) {
-      return LIVE_MODE ? sec("Mentioned on the call", "", '<p class="p-hint">' + (autoLookup() ? "Type a name or a company in Notes and MOAB finds who or what it is while the call runs."
+      return LIVE_MODE ? sec("Mentioned on the call", "", '<p class="p-hint">' + (autoLookup() ? "Type a name or a company in Notes and Overture finds who or what it is while the call runs."
         : "Automatic look-up is off (Settings, Mentions and connections). Find mentions in After the call instead.") + "</p>") : "";
     }
     const right = '<span class="grow"></span>' + (window.C.MODE === "demo" ? '<span class="src sample">Sample</span>' : "")
@@ -348,7 +348,7 @@
     } catch (e) { btn.disabled = false; announce(e.message); }
   }
 
-  // Notes, read as you type: only the new text goes to MOAB's own server (500 ms after you stop typing); saving the note finishes it.
+  // Notes, read as you type: only the new text goes to Overture's own server (500 ms after you stop typing); saving the note finishes it.
   // The server reads finished sentences as they come; a 1.5 s pause reads the rest, and saving the note ends it. Whatever the note
   // no longer says ("John Sm" once it reads "John Smith") is taken back, so the draft is kept when the panel redraws (draft).
   const live = { seg: "", sent: "", timer: null, idle: null, busy: false, next: null, paused: "", draft: "", source: "live" };
@@ -385,10 +385,10 @@
     if (st.next) { const [t, f, p] = st.next; st.next = null; sendLive(t, f, p, st); }
   }
 
-  // ---------- Google Meet's captions: MOAB's Chrome extension reads them while CC is on ----------
+  // ---------- Google Meet's captions: Overture's Chrome extension reads them while CC is on ----------
   // Each finished line ("Name: words") is read for people and companies as it comes, like a note you type. When you leave the
   // call (or it's past its end time), the whole caption transcript is read once more for After the call. The transcript stays in
-  // this panel: MOAB's server keeps only who and what was mentioned, with one sentence each.
+  // this panel: Overture's server keeps only who and what was mentioned, with one sentence each.
   const cc = { seg: "", sent: "", busy: false, next: null, paused: "", source: "captions", lines: [], segStart: 0, idle: null, lastAt: 0, posted: false };
   const ccText = () => cc.lines.slice(cc.segStart).join("\n");
   window.addEventListener("message", (e) => {
@@ -433,7 +433,7 @@
     try {
       const j = await window.C.postJson("/api/mentions", { callId: id, text: lines.join("\n").slice(0, 900000), source: "captions" }, 60000);
       applyMentions(id, j);
-      announce((why === "left" ? "Call ended. " : "") + "MOAB read the whole caption transcript for After the call.");
+      announce((why === "left" ? "Call ended. " : "") + "Overture read the whole caption transcript for After the call.");
     } catch (e) { cc.posted = false; announce("Couldn't read the call's captions: " + e.message); }
     refreshListen();
   }
@@ -444,12 +444,12 @@
   }, 30000);
   function captionsLine() {
     if (!LIVE_MODE) return "";
-    if (qs.get("meet") && !captionsOn()) return '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>Pick this meeting\'s call above so MOAB can read its captions.</p>';
+    if (qs.get("meet") && !captionsOn()) return '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>Pick this meeting\'s call above so Overture can read its captions.</p>';
     if (!cc.lines.length) {
       if (!qs.get("meet")) return "";
       const off = (t) => '<p class="p-listen"><span class="live-dot off" aria-hidden="true"></span>' + t + "</p>";
-      if (!cc.seenAt || Date.now() - cc.seenAt > 15000) return off(/* nothing from the reader for 15 s: it isn't running */ "MOAB's caption reader isn't running in this Meet tab yet. Reload the Meet tab once (or the MOAB extension), then turn on CC.");
-      if (!cc.box) return off("Turn on captions (CC) in Meet and MOAB finds who and what is mentioned. Let everyone know you're taking AI notes.");
+      if (!cc.seenAt || Date.now() - cc.seenAt > 15000) return off(/* nothing from the reader for 15 s: it isn't running */ "Overture's caption reader isn't running in this Meet tab yet. Reload the Meet tab once (or the Overture extension), then turn on CC.");
+      if (!cc.box) return off("Turn on captions (CC) in Meet and Overture finds who and what is mentioned. Let everyone know you're taking AI notes.");
       return '<p class="p-listen on"><span class="live-dot" aria-hidden="true"></span>Captions are on. Waiting for someone to speak…</p>';
     }
     return '<p class="p-listen on"><span class="live-dot" aria-hidden="true"></span>Reading Meet captions · <span class="num">' + esc(plural(cc.lines.length, "line")) + "</span>"
@@ -484,7 +484,7 @@
     }
     const block = window.CP.orgBlock(v.name, Object.assign({ fold: true, idp: "ppo", headTag: "h2" }, panelLinks));
     return '<div class="pp"><button type="button" class="pp-back" data-pp-back>' + ic("chevronLeft") + back + "</button>"
-      + (block || '<p class="pf-state">' + ic("circleAlert") + "<span>MOAB has no public profile for " + esc(v.name) + " yet.</span></p>") + "</div>";
+      + (block || '<p class="pf-state">' + ic("circleAlert") + "<span>Overture has no public profile for " + esc(v.name) + " yet.</span></p>") + "</div>";
   }
   function openView(v) {
     state.view = v;
@@ -505,9 +505,9 @@
   let mini = null;
   function render() {
     if (!state.ctx) {
-      $("#app").innerHTML = '<header class="p-head">' + (FRAMED ? "" : LOGO) + '<div class="p-title"><h1>MOAB</h1><p class="p-meta">No calls yet</p></div></header>'
+      $("#app").innerHTML = '<header class="p-head">' + (FRAMED ? "" : LOGO) + '<div class="p-title"><h1>Overture</h1><p class="p-meta">No calls yet</p></div></header>'
         + (state.hostNote ? '<p class="p-note">' + esc(state.hostNote) + "</p>" : "")
-        + '<p class="p-empty">' + (window.C.MODE === "connect" ? 'Connect your Google Calendar in the <a href="index.html#/home" target="_blank" rel="noopener">MOAB app' + window.C.NEW_TAB + "</a> to see your calls here." : "No calls with outside guests in the next 14 days.") + "</p>";
+        + '<p class="p-empty">' + (window.C.MODE === "connect" ? 'Connect your Google Calendar in the <a href="index.html#/home" target="_blank" rel="noopener">Overture app' + window.C.NEW_TAB + "</a> to see your calls here." : "No calls with outside guests in the next 14 days.") + "</p>";
       return;
     }
     const panes = { brief: briefPane, people: peoplePane, notes: notesPane };
@@ -550,7 +550,7 @@
     refreshPeople([email]);
     const back = $('[data-person="' + CSS.escape(email) + '"]');
     if (back) back.focus();
-    announce(confirm ? (window.C.MODE === "demo" ? "Confirmed (sample data, this panel only)." : "Confirmed. Saved to MOAB's records.") : "Looking them up.");
+    announce(confirm ? (window.C.MODE === "demo" ? "Confirmed (sample data, this panel only)." : "Confirmed. Saved to Overture's records.") : "Looking them up.");
   }
 
   // ---------- events ----------

@@ -1,4 +1,4 @@
-"""Tests for MOAB's live mode (server.py): calendar mapping, company naming, job changes, live.js escaping,
+"""Tests for Overture's live mode (server.py): calendar mapping, company naming, job changes, live.js escaping,
 OAuth state and PKCE, the records store and its write guard, invitee research, and HubSpot and Gong (fake HTTP).
 Fake data only: nothing here touches the network.
 
@@ -644,7 +644,7 @@ class Research(Fresh):
                                                                 {"url": "https://unseen.example.org/x", "label": "Not seen"}],
                "summary": {"text": "Director at TKS.", "sources": [1]},
                "people": [{"name": "Navid Nathoo", "role": "Co-founder", "org": "TKS", "how": "Leads TKS, where she is a director.", "sources": [1]},
-                          {"name": "Pat Lee", "how": "Named with her on a page MOAB never saw.", "sources": [2]},
+                          {"name": "Pat Lee", "how": "Named with her on a page Overture never saw.", "sources": [2]},
                           {"name": "Sam Kim", "how": "Her husband.", "sources": [1]},
                           {"name": "the team", "how": "Worked together.", "sources": [1]},
                           {"name": "Navid Nathoo", "how": "Again.", "sources": [1]}]}
@@ -659,13 +659,13 @@ class Research(Fresh):
         self.assertFalse(S.needs_research(dict(rec, deepV=S.DEEP_V), now))
 
     def test_name_from_the_event_description(self):
-        inv = {"title": "MOAB prototype review", "notes": "Call with Shea Kim from TKS to improve the prototype."}
+        inv = {"title": "Overture prototype review", "notes": "Call with Shea Kim from TKS to improve the prototype."}
         self.assertEqual(S.name_from_event("shea@tks.world", inv), "Shea Kim")
         self.assertEqual(S.name_from_event("shea@tks.world", {"title": "Review with Shea", "notes": "Shea will review it."}), "")
         self.assertEqual(S.name_from_event("info@tks.world", inv), "")
 
     def test_first_last_work_address_gives_a_name_and_example_domains_are_not_found(self):
-        # No name on the invite, but first.last@company: MOAB uses "Marcus Bell" and says where it came from.
+        # No name on the invite, but first.last@company: Overture uses "Marcus Bell" and says where it came from.
         meta, rec = {}, S.load_records()
         S.build_live([ev("u2", "2026-10-21T18:00:00+00:00", 30, [SELF, att("marcus.bell@northwind-freight.com")], summary="Intro")], ME, rec, NOW, meta_out=meta)
         m = meta["marcus.bell@northwind-freight.com"]
@@ -1056,7 +1056,7 @@ class DeepResearch(Fresh):
         self.assertEqual((r["status"], r["profile"]), ("done", p))
         self.assertEqual(S.research_body()["people"]["shea@tks.world"]["profile"], p)
         alert = next(w for w in live["watch"] if w["kind"] == "New person")
-        self.assertEqual(alert["text"], "MOAB looked them up: Director, Program Success, Employee, Program Success. "
+        self.assertEqual(alert["text"], "Overture looked them up: Director, Program Success, Employee, Program Success. "
                                         "Shea Kim leads Program Success at The Knowledge Society.")
         self.assertFalse(S.needs_research(rec, NOW + timedelta(days=60)))  # deep research done and a title found: not again on its own
 
@@ -1104,7 +1104,7 @@ class DeepResearch(Fresh):
         self.assertIn(S.url_key(SHEA_PROFILE), seen)                                    # the page web fetch opened
         self.assertIn(S.url_key("https://linkedin.com/in/shea-kim?trk=x"), seen)     # and the address Claude asked it to open
         self.assertNotIn(S.url_key("https://broken.example.com/page"), seen)           # a fetch that failed opened nothing
-        self.assertNotIn(S.url_key("https://printed-by-code.example/x"), seen)         # an address a code run printed isn't a page MOAB saw
+        self.assertNotIn(S.url_key("https://printed-by-code.example/x"), seen)         # an address a code run printed isn't a page Overture saw
         # a paused deep search is resent with its code container, and the pages of every part count
         f = self.fake(deep_reply("", searched=[TKS_TEAM], stop="pause_turn", container=SimpleNamespace(id="container_abc")),
                       deep_reply(SHEA, fetched=[SHEA_PROFILE]))
@@ -1145,9 +1145,9 @@ class DeepResearch(Fresh):
         # nothing found: a plain note, never "look it up"
         r = S.research_view("skim@tks.world", S.load_records()["people"]["skim@tks.world"], meta["skim@tks.world"])
         self.assertEqual((r["status"], r["profile"]), ("unknown", None))
-        self.assertEqual(r["note"], "MOAB searched 1 site and found no public work information about them.")
-        self.assertEqual(S.searched_note({"searched": 6}, "information about this company"), "MOAB searched 6 sites and found no public information about this company.")
-        self.assertEqual(S.searched_note({}, "work information about them"), "MOAB searched the web and found no public work information about them.")
+        self.assertEqual(r["note"], "Overture searched 1 site and found no public work information about them.")
+        self.assertEqual(S.searched_note({"searched": 6}, "information about this company"), "Overture searched 6 sites and found no public information about this company.")
+        self.assertEqual(S.searched_note({}, "work information about them"), "Overture searched the web and found no public work information about them.")
 
     def test_an_old_quick_record_is_looked_up_deeply_once(self):
         email = "shea@tks.world"
@@ -1239,12 +1239,12 @@ class DeepResearch(Fresh):
         self.assertTrue(S.queue_org_research(meta2, S.load_records(), NOW + timedelta(days=31)))
 
     def test_the_brief_and_answers_get_the_research_and_no_homework(self):
-        for phrase in ("what to do before the call", "what to add to MOAB"):
+        for phrase in ("what to do before the call", "what to add to Overture"):
             self.assertNotIn(phrase, S.SYSTEM + S.ASK_SYSTEM)
         self.assertIn("never tell the reader to look anything up", S.SYSTEM)
         self.assertIn("never call a fact automatic or unconfirmed", S.SYSTEM)
         self.assertIn("End with what to bring up on the call", S.SYSTEM)
-        self.assertIn("Never tell them to look something up or to add it to MOAB's records", S.ASK_SYSTEM)
+        self.assertIn("Never tell them to look something up or to add it to Overture's records", S.ASK_SYSTEM)
         homework = re.compile(r"(?i)\b(?:look (?:them|it|this|that) up|check it|confirm (?:it|their)|verify|add (?:it|them|what you learn) to)\b")
         self.fake(deep_reply(SHEA, searched=[TKS_TEAM, SHEA_TALK], fetched=[SHEA_PROFILE]), deep_reply(TKS_ORG, searched=[TKS_HOME, TKS_NEWS], fetched=[TKS_ABOUT]))
         live, meta, rec = self.build(self.SHEA_GUEST)
@@ -1273,7 +1273,7 @@ class DeepResearch(Fresh):
         other = S.brief_facts({"call": {"company": "Acme"}, "people": [{"name": "Shea Kim"}], "company": None}, S.load_records())
         self.assertNotIn("profile", other["people"][0])  # another company's call: not this Shea
         self.assertIsNone(other["company"])
-        # Ask MOAB: this call's people and company carry their research
+        # Ask Overture: this call's people and company carry their research
         ctx = json.loads(S.ask_context("who is Shea?", live["invites"][0]["id"], live, S.load_records()))
         self.assertEqual(ctx["thisCall"]["people"][0]["moabResearch"]["summary"], "Shea Kim leads Program Success at The Knowledge Society.")
         self.assertEqual(ctx["thisCall"]["companyResearch"]["name"], "The Knowledge Society (TKS)")
@@ -1338,7 +1338,7 @@ class ServerEndToEnd(ServerBase):
         st, txt, _ = self.req("GET", "/api/status")
         j = json.loads(txt)
         self.assertEqual(st, 200)
-        self.assertEqual(set(j), {"claude", "google", "ai", "hubspot", "gong", "granola", "meetily"})
+        self.assertEqual(set(j), {"hosted", "claude", "google", "ai", "hubspot", "gong", "granola", "meetily"})
         self.assertEqual((j["hubspot"]["configured"], j["hubspot"]["connected"], j["gong"]["configured"], j["gong"]["connected"]), (False, False, False, False))
         st, txt, h = self.req("GET", "/data/live.js")
         self.assertEqual(st, 200)
@@ -1688,10 +1688,10 @@ class Crm(Fresh, CrmFakes):
         with S.RQ_LOCK:
             queued = [e for e, _ in S.RQ["queue"]]
         self.assertEqual(queued, ["bo.chen@acme.com"])  # HubSpot has no title for Bo, so only Bo is looked up
-        # a title you typed in MOAB still shows (and is offered to HubSpot after the call)
+        # a title you typed in Overture still shows (and is offered to HubSpot after the call)
         rec["people"]["ann.lee@acme.com"] = {"title": "CTO"}
         live, *_ = self.fetch(rec)
-        self.assertEqual((live["people"]["ann.lee@acme.com"]["title"], live["people"]["ann.lee@acme.com"]["titleSrc"]), ("CTO", "MOAB records"))
+        self.assertEqual((live["people"]["ann.lee@acme.com"]["title"], live["people"]["ann.lee@acme.com"]["titleSrc"]), ("CTO", "Overture records"))
 
     def test_401_403_429_and_timeout(self):
         self.connect()
@@ -1825,7 +1825,7 @@ class Crm(Fresh, CrmFakes):
         p = j["plan"]
         self.assertEqual((p["company"], p["note"], p["deal"]), ("Acme Corp", note.strip(), {"name": "Portal renewal <b>", "stage": "Contract sent"}))
         self.assertEqual([x["email"] for x in p["contacts"]], ["ann.lee@acme.com", "bo.chen@acme.com"])
-        self.assertEqual(p["candidates"], [{"email": "bo.chen@acme.com", "name": "Bo Chen", "from": "", "to": "Staff Engineer", "why": "you typed it in MOAB"}])
+        self.assertEqual(p["candidates"], [{"email": "bo.chen@acme.com", "name": "Bo Chen", "from": "", "to": "Staff Engineer", "why": "you typed it in Overture"}])
         self.assertEqual(p["titleChanges"], [])
         self.assertNotIn("8001", json.dumps(p))
         self.assertNotIn('"101"', json.dumps(p))  # no HubSpot ids reach the page
@@ -2102,7 +2102,7 @@ class Crm(Fresh, CrmFakes):
         self.google()
         inv = S.live_now(S.load_records())[0]["invites"][0]
         p = S.hubspot_save({"callId": inv["id"], "note": "hello"})[1]["plan"]
-        self.assertEqual(p["preview"], inv["title"] + " · " + inv["when"] + "\n\nhello\n\nSaved from MOAB")
+        self.assertEqual(p["preview"], inv["title"] + " · " + inv["when"] + "\n\nhello\n\nSaved from Overture")
         self.assertRegex(p["planId"], r"^[0-9a-f]{16}$")
         code, j = S.hubspot_save({"callId": inv["id"], "note": "hello", "confirm": True})
         self.assertEqual(code, 400)
@@ -2410,7 +2410,7 @@ class MentionFlow(Fresh):
         self.assertEqual(f.calls, [])  # extraction is local
         items = self.by(body)
         self.assertEqual(items["Maria Gomez"]["status"], "pending")
-        self.assertEqual(items["Grace"]["status"], "pick")  # known to MOAB: no web lookup
+        self.assertEqual(items["Grace"]["status"], "pick")  # known to Overture: no web lookup
         self.assertEqual(body["found"], 4)
         while S.research_step():
             pass
@@ -2804,7 +2804,7 @@ class References(Fresh):
         o = self.orgs("Marcus Bell: We switched from Loggly last year. Datadog's team called. We partnered with Acme Robotics Inc in March. "
                       "Zephyr AI acquired us. We also looked at Port last quarter. Nimbus Labs is new.")
         self.assertEqual(set(o), {"Loggly", "Datadog", "Acme Robotics Inc", "Zephyr AI", "Port", "Nimbus Labs"})
-        self.assertEqual(o["Datadog"]["domain"], "datadoghq.com")  # a vendor MOAB knows: its website goes with the lookup
+        self.assertEqual(o["Datadog"]["domain"], "datadoghq.com")  # a vendor Overture knows: its website goes with the lookup
         self.assertEqual((o["Loggly"]["relation"]["type"], o["Loggly"]["relation"]["detail"]), ("vendor", "former"))
         self.assertEqual(o["Acme Robotics Inc"]["relation"]["type"], "partner")
         self.assertEqual(o["Zephyr AI"]["relation"]["type"], "acquirer")
@@ -3804,7 +3804,7 @@ class Explanations(Fresh):
         self.assertLessEqual(len(q0.rstrip("…").split()), 25)
         self.assertTrue(q0.endswith("…"))
         self.assertEqual(rel["sources"][1]["quote"], "Harborline and Northwind announced a partnership.")  # quote marks trimmed
-        self.assertEqual((rel["sources"][0]["date"], rel["sources"][1]["date"]), ("2026-08", ""))  # "June 2024" isn't a date MOAB shows
+        self.assertEqual((rel["sources"][0]["date"], rel["sources"][1]["date"]), ("2026-08", ""))  # "June 2024" isn't a date Overture shows
         bare = S.clean_org_relation(HARBOR_EXPLAINED, {S.url_key(u) for u in HARBOR_URLS})  # the search showed nothing of the pages
         self.assertEqual([(s["quote"], s["date"]) for s in bare["sources"]], [("", ""), ("", "")])  # Claude's quote and date alone aren't shown
         none = S.clean_org_relation(dict(HARBOR_EXPLAINED, explanation=[{"text": "x", "sources": [9]}], since={"text": "2020", "sources": [3]}),
@@ -4330,7 +4330,7 @@ class ExtensionManifest(unittest.TestCase):
             data = (EXT / path).read_bytes()
             self.assertEqual(data[:8], b"\x89PNG\r\n\x1a\n")
             self.assertEqual(struct_unpack_size(data), (int(size), int(size)))
-        # the extension's pages and scripts only ever name MOAB's own address (and the meeting sites they read)
+        # the extension's pages and scripts only ever name Overture's own address (and the meeting sites they read)
         text = "".join((EXT / f).read_text(encoding="utf-8") for f in ("background.js", "sidepanel.js", "sidepanel.html"))
         self.assertEqual(set(re.findall(r"https?://[a-z0-9.:-]+", text)), {"http://localhost:3576"})
         self.assertNotIn("eval(", text)
@@ -4436,6 +4436,167 @@ class ZoomIds(unittest.TestCase):
         for loc in ("https://zoom.us.evil.example/j/81234567890", "Room 4", "https://zoom.us/j/12"):
             e = ev("z", "2026-10-21T14:00:00+00:00", 30, base, location=loc)
             self.assertEqual(S.event_to_invite(e, ME["email"], S.empty_records())["zoomId"], "", loc)
+
+
+class SharedSite(ServerBase):
+    """The shared site (Render): each Google account sees only its own data; a signed-out visitor sees the connect screen."""
+    URL = "https://overture.example.com"
+    ENV = {"GOOGLE_CLIENT_ID": "cid", "GOOGLE_CLIENT_SECRET": "csecret"}
+
+    def setUp(self):
+        super().setUp()
+        import shutil
+        shutil.rmtree(Path(TMP) / "users", ignore_errors=True)
+        self.old = (S.HOSTED, S.PUBLIC_URL, S.HTTP, {k: os.environ.get(k) for k in list(self.ENV) + ["MOAB_ALLOWED", "DATABASE_URL"]})
+        S.HOSTED, S.PUBLIC_URL = True, self.URL
+        os.environ.update(self.ENV)
+        os.environ.pop("MOAB_ALLOWED", None)
+        S.HTTP = self.google
+
+    def tearDown(self):
+        S.HOSTED, S.PUBLIC_URL, S.HTTP, env = self.old
+        for k, v in env.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+    def google(self, method, url, form=None, headers=None, timeout=15):
+        """Google's side: the code is the email signing in."""
+        if url == S.TOKEN_URL:
+            return 200, {"access_token": "AT-" + form["code"], "refresh_token": "RT-" + form["code"], "expires_in": 3600, "scope": S.CAL_SCOPE}
+        if url == S.USERINFO_URL:
+            return 200, {"email": headers["Authorization"].split("AT-", 1)[1], "name": "Someone"}
+        return 200, {}  # revoke
+
+    def hreq(self, method, path, body=None, cookie=None, write=False, signin=None):
+        h = {"Host": "overture.example.com"}
+        jar = ([S.SESSION_COOKIE + "=" + cookie] if cookie else []) + ([S.OAUTH_COOKIE + "=" + signin] if signin else [])
+        if jar:
+            h["Cookie"] = "; ".join(jar)
+        if write:
+            h.update({"X-MOAB": "1", "Origin": self.URL})
+        return self.req(method, path, body, h)
+
+    def callback(self, email, same_browser=True):
+        st, _, h = self.hreq("GET", "/auth/google")  # the sign-in starts here: Google's address, and a cookie for this browser
+        self.assertEqual(st, 302)
+        state = dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(h["Location"]).query))["state"]
+        self.assertIn(S.OAUTH_COOKIE + "=" + state, h["Set-Cookie"])
+        return self.hreq("GET", "/auth/google/callback?state=" + state + "&code=" + urllib.parse.quote(email),
+                         signin=state if same_browser else None)
+
+    def sign_in(self, email):
+        st, txt, h = self.callback(email)
+        self.assertEqual(st, 302, txt)
+        self.assertIn("HttpOnly", h["Set-Cookie"])
+        self.assertIn("Secure", h["Set-Cookie"])
+        return h["Set-Cookie"].split(";")[0].split("=", 1)[1]
+
+    def test_signed_out_sees_only_the_connect_screen(self):
+        st, js, _ = self.hreq("GET", "/data/live.js")
+        self.assertEqual(st, 200)
+        self.assertIn("window.MOAB_LIVE = null", js)
+        self.assertIn('"hosted": true', js)
+        st, txt, _ = self.hreq("GET", "/api/status")
+        self.assertEqual((st, json.loads(txt)["google"]["connected"]), (200, False))
+        self.assertEqual(self.hreq("GET", "/api/records")[0], 401)
+        self.assertEqual(self.hreq("GET", "/api/records", cookie="made-up")[0], 401)
+        self.assertEqual(self.hreq("PUT", "/api/records/company", {"name": "Acme", "status": "New lead"}, write=True)[0], 401)
+        self.assertEqual(self.hreq("POST", "/auth/google/disconnect", {}, write=True)[0], 401)
+        self.assertEqual(self.hreq("GET", "/index.html")[0], 200)
+        self.assertEqual(self.req("GET", "/api/status", headers={"Host": "evil.example"})[0], 403)
+
+    def test_each_account_sees_only_its_own_data(self):
+        a, b = self.sign_in("chris@spotify.com"), self.sign_in("sam@example.org")
+        st, txt, _ = self.hreq("PUT", "/api/records/company", {"name": "Acme", "status": "New lead"}, cookie=a, write=True)
+        self.assertEqual(st, 200, txt)
+        self.assertIn("Acme", self.hreq("GET", "/api/records", cookie=a)[1])
+        self.assertNotIn("Acme", self.hreq("GET", "/api/records", cookie=b)[1])
+        self.assertEqual(json.loads(self.hreq("GET", "/api/status", cookie=a)[1])["google"]["email"], "chris@spotify.com")
+        self.assertEqual(json.loads(self.hreq("GET", "/api/status", cookie=b)[1])["google"]["email"], "sam@example.org")
+        folder = Path(TMP) / "users" / S.account_id("chris@spotify.com")
+        self.assertEqual(S.load_json(folder / "google-token.json", {})["access_token"], "AT-chris@spotify.com")
+        self.assertFalse((Path(TMP) / "google-token.json").exists())  # nothing lands outside an account's folder
+        self.assertNotIn(a, (Path(TMP) / "sessions.json").read_text(encoding="utf-8"))  # only hashes of the cookies are saved
+
+    def test_sign_out_ends_the_session_on_every_device(self):
+        a, phone, other = self.sign_in("chris@spotify.com"), self.sign_in("chris@spotify.com"), self.sign_in("sam@example.org")
+        st, _, h = self.hreq("POST", "/auth/google/disconnect", {}, cookie=a, write=True)
+        self.assertEqual(st, 200)
+        self.assertIn("Max-Age=0", h["Set-Cookie"])
+        self.assertEqual(self.hreq("GET", "/api/records", cookie=a)[0], 401)
+        self.assertEqual(self.hreq("GET", "/api/records", cookie=phone)[0], 401)
+        self.assertEqual(self.hreq("GET", "/api/records", cookie=other)[0], 200)
+
+    def test_sign_in_must_finish_in_the_browser_that_started_it(self):
+        st, txt, h = self.callback("eve@evil.example", same_browser=False)  # a callback link someone else sent you
+        self.assertEqual(st, 400)
+        self.assertNotIn("Set-Cookie", h)
+
+    def test_removed_account_is_signed_out(self):
+        a = self.sign_in("chris@spotify.com")
+        os.environ["MOAB_ALLOWED"] = "sam@example.org"
+        self.assertEqual(self.hreq("GET", "/api/records", cookie=a)[0], 401)
+
+    def test_environment_crm_keys_are_ignored_on_the_shared_site(self):
+        old = os.environ.get("HUBSPOT_TOKEN")
+        os.environ["HUBSPOT_TOKEN"] = "pat-operator"
+        try:
+            with S.as_user("u1"):
+                self.assertFalse(S.crm_configured("hubspot"))
+        finally:
+            os.environ.pop("HUBSPOT_TOKEN") if old is None else os.environ.__setitem__("HUBSPOT_TOKEN", old)
+
+    def test_allowed_accounts(self):
+        os.environ["MOAB_ALLOWED"] = "@spotify.com, sam@example.org"
+        self.assertTrue(S.account_allowed("Chris@Spotify.com"))
+        self.assertTrue(S.account_allowed("sam@example.org"))
+        self.assertFalse(S.account_allowed("eve@evil.example"))
+        self.assertFalse(S.account_allowed(""))
+        st, txt, h = self.callback("eve@evil.example")
+        self.assertEqual(st, 400)
+        self.assertNotIn("Set-Cookie", h)
+        self.assertFalse((Path(TMP) / "users" / S.account_id("eve@evil.example")).exists())
+
+    def test_no_account_means_no_data(self):
+        with self.assertRaises(S.NoUser):
+            S.DATA_DIR / "records.json"
+        with self.assertRaises(S.NoUser):
+            S.CACHE["at"]
+        with S.as_user("u1"):
+            S.CACHE["at"] = 5.0
+        with S.as_user("u2"):
+            self.assertEqual(S.CACHE["at"], 0.0)
+            self.assertEqual(Path(S.DATA_DIR / "x"), Path(TMP) / "users" / "u2" / "x")
+
+    def test_research_worker_takes_each_accounts_jobs_in_that_account(self):
+        with S.RQ_LOCK:
+            with S.as_user("u1"):
+                S.RQ["queue"].append(("x@acme.com", False))
+            try:
+                self.assertEqual(S._ready_user(), "u1")
+            finally:
+                with S.as_user("u1"):
+                    S.RQ["queue"].clear()
+            self.assertIsNone(S._ready_user())
+
+    def test_saved_files_kept_in_the_database(self):
+        os.environ["DATABASE_URL"] = "postgres://example"
+        calls = []
+        old = S._db_run
+        S._db_run = lambda sql, args=(), must=False: calls.append((sql.split()[0], args)) or (
+            [("users/u9/records.json", '{"a": 1}'), ("../evil.json", "x")] if sql.startswith("SELECT") else [])
+        try:
+            with S.as_user("u1"):
+                S.save_json(S.DATA_DIR / "records.json", {"a": 1})
+                S.remove_file(S.DATA_DIR / "records.json")
+            self.assertEqual([(c, a[0]) for c, a in calls], [("INSERT", "users/u1/records.json"), ("DELETE", "users/u1/records.json")])
+            self.assertEqual(S.db_restore(), 1)
+            self.assertEqual(S.load_json(Path(TMP) / "users" / "u9" / "records.json", {}), {"a": 1})
+            self.assertFalse((Path(TMP).parent / "evil.json").exists())
+        finally:
+            S._db_run = old
 
 
 if __name__ == "__main__":

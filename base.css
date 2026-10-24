@@ -1,4 +1,4 @@
-/* MOAB design system, shared by the app (index.html) and the in-call panel (panel.html).
+/* Overture design system, shared by the app (index.html) and the in-call panel (panel.html).
    Default look (data-theme="dark", accent "green"): Spotify-style. #000 frame and rail, #121212 page, #181818 cards that
    lighten to #282828, white text, #b3b3b3 secondary text, one green (#1ed760, black text on green fills), pill buttons,
    bold tight headings in Figtree. Spotify's own logo and fonts are not used.
@@ -316,7 +316,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
   .btn, .icon-btn, .input, .todo-item input, .todos input, .p-points input, .progress span { transition: none; }
 }
 
-/* MOAB logo: the bot blinks now and then, and its green "working" dot breathes. */
+/* Overture logo: the bot blinks now and then, and its green "working" dot breathes. */
 .logo { width: 28px; height: 28px; flex: none; overflow: visible; }
 .logo.sm { width: 26px; height: 26px; }
 .logo-eyes { transform-box: fill-box; transform-origin: center; } /* blinks only while the brand is hovered (motion.css) */
@@ -325,10 +325,10 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
 @keyframes breathe { 50% { transform: scale(0.78); } }
 @media (prefers-reduced-motion: reduce) { .logo-eyes, .logo-dot { animation: none; } }
 
-/* Live mode: data from your own calendar and MOAB's records (a filled dark dot, next to Public's green and Sample's ring). */
+/* Live mode: data from your own calendar and Overture's records (a filled dark dot, next to Public's green and Sample's ring). */
 .src.yours::before { background: var(--ink-2); }
 
-/* ---------- invitee research: what MOAB found automatically about a guest (brief people list and in-call panel) ---------- */
+/* ---------- invitee research: what Overture found automatically about a guest (brief people list and in-call panel) ---------- */
 .rs { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--ink-2); min-width: 0; }
 .rs-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
 .rs-wait { color: var(--muted); }
@@ -465,7 +465,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
 }
 :root[data-theme="dark"] .progress span { background: linear-gradient(90deg, var(--accent-press), var(--accent)); }
 
-/* MOAB's own bot, recoloured: green body, black eyes, white "working" dot. (Not Spotify's logo.) */
+/* Overture's own bot, recoloured: green body, black eyes, white "working" dot. (Not Spotify's logo.) */
 :root[data-theme="dark"] .logo > path { fill: #1ed760; }
 :root[data-theme="dark"] .logo-eyes { fill: #000000; }
 :root[data-theme="dark"] .logo-dot { fill: #ffffff; }

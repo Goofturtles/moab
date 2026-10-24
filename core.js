@@ -1,6 +1,6 @@
-// MOAB core: data, checks and the agent itself, shared by the full app (app.js) and the in-call panel (panel.js).
+// Overture core: data, checks and the agent itself, shared by the full app (app.js) and the in-call panel (panel.js).
 // Real public data: Backstage adopters list, Backstage releases, Backstage security notices (data/snapshot.js).
-// Three modes: "live" (server.py's data/live.js built window.MOAB_LIVE from your Google Calendar and MOAB's records),
+// Three modes: "live" (server.py's data/live.js built window.MOAB_LIVE from your Google Calendar and Overture's records),
 // "demo" (?demo=1, the made-up data in data/sample.js, clearly labelled) and "connect" (nothing connected yet: no calls).
 (function () {
   "use strict";
@@ -13,12 +13,12 @@
     : { today: etToday(), invites: [], people: {}, companies: {}, papers: {}, currentSecurityPack: "", relationships: [], watch: [], me: null };
   ["people", "companies", "papers"].forEach((k) => { if (!D[k]) D[k] = {}; });
   ["invites", "relationships", "watch", "mentioned"].forEach((k) => { if (!D[k]) D[k] = []; });
-  // A company row may arrive carrying only what MOAB found on the web (its profile): give it the fields every page reads.
+  // A company row may arrive carrying only what Overture found on the web (its profile): give it the fields every page reads.
   Object.values(D.companies).forEach((c) => { if (c && typeof c === "object") { if (typeof c.status !== "string" || !c.status) c.status = "Prospect"; if (!Array.isArray(c.history)) c.history = []; } });
   if (!D.orgs || typeof D.orgs !== "object") D.orgs = {}; // GET /api/research's orgs[domain] = { status, note, profile }
   // Honest source tags: made-up data says so in demo mode; real data names where it came from.
   const SRC = MODE === "demo" ? { calendar: "Sample data", records: "Sample data", recordsList: "Sample records" }
-    : { calendar: "Your calendar", records: "MOAB records", recordsList: "MOAB records" };
+    : { calendar: "Your calendar", records: "Overture records", recordsList: "Overture records" };
   // Who "you" are: Chris in the demo, the Google account's name when live.
   const meName = MODE === "demo" ? "Chris" : String((D.me && D.me.name) || "").trim();
   const ME = { name: meName || "You", first: meName ? meName.split(/\s+/)[0] : "", initial: (meName || "You").charAt(0).toUpperCase(), email: String((D.me && D.me.email) || "") };
@@ -253,33 +253,33 @@
     } catch (e) { state.claudeOn = false; }
   })();
 
-  // ---------- MOAB's own records (server.py keeps them in .data/records.json) ----------
+  // ---------- Overture's own records (server.py keeps them in .data/records.json) ----------
   async function saveRecord(kind, body, method) {
     let r;
     try {
       r = await fetchTimeout("/api/records/" + kind, 10000, { method: method || "PUT", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify(body) });
-    } catch (e) { throw new Error("Couldn't reach MOAB's server. Is server.py running?"); }
+    } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
     let j = {};
     try { j = await r.json(); } catch (e) { /* no body */ }
     if (!r.ok) throw new Error(j.error ? "Not saved: " + j.error : "Not saved (" + r.status + ")");
     return j.saved;
   }
 
-  // ---------- Ask MOAB: Claude (server key) -> on-device AI (Chrome's Prompt API) -> null (the page falls back to rules) ----------
+  // ---------- Ask Overture: Claude (server key) -> on-device AI (Chrome's Prompt API) -> null (the page falls back to rules) ----------
   async function deviceAvailability() {
     const LM = globalThis.LanguageModel;
     if (!LM || typeof LM.availability !== "function") return "unavailable";
     try { return String(await LM.availability()); } catch (e) { return "unavailable"; }
   }
   const deviceChecked = deviceAvailability().then((a) => { state.device = a; return a; });
-  const ASK_SYS = "You are MOAB, a call-prep assistant for a salesperson. Answer using only the facts in the JSON. "
+  const ASK_SYS = "You are Overture, a call-prep assistant for a salesperson. Answer using only the facts in the JSON. "
     + "If the facts don't answer the question, say so in one line. Plain text, at most three short sentences.";
-  // A small, plain summary of what MOAB knows, for the on-device model (its context window is small).
+  // A small, plain summary of what Overture knows, for the on-device model (its context window is small).
   function askFacts(callId) {
     const call = callId ? inviteById(callId) : null;
     const person = (a) => { const p = D.people[a.email] || {}; return [a.name, p.title, p.note].filter(Boolean).join(", "); };
     const facts = {
-      today: D.today, data: MODE === "demo" ? "made-up sample data" : "the user's calendar and MOAB's records",
+      today: D.today, data: MODE === "demo" ? "made-up sample data" : "the user's calendar and Overture's records",
       thisCall: call ? { title: call.title, when: call.when, company: call.company, invite: String(call.notes || "").slice(0, 600), people: call.attendees.map(person) } : null,
       calls: D.invites.slice(0, 12).map((i) => ({ title: i.title, company: i.company, when: i.when, people: i.attendees.map(person) })),
       companies: Object.entries(D.companies).slice(0, 20).map(([n, c]) => ({ name: n, status: c.status, engineers: c.engineers || null, notes: String(c.notes || "").slice(0, 300) })),
@@ -427,7 +427,7 @@
 
   // Papers: status for "History and papers", action (if any) for "Before the call".
   function paperStatus(name) {
-    if (MODE !== "demo" && !D.papers[name]) return []; // MOAB doesn't track papers yet: say nothing rather than guess
+    if (MODE !== "demo" && !D.papers[name]) return []; // Overture doesn't track papers yet: say nothing rather than guess
     const p = D.papers[name] || {};
     const out = [];
     if (!p.nda || !p.nda.signed) out.push({ key: "NDA", ok: false, text: "Not signed yet.", todo: "Send an NDA before sharing the roadmap." });
@@ -455,12 +455,12 @@
     const icon = { "Job change": "briefcase", "First meeting": "handshake", "New person": "users", Mentioned: "users", "Stage change": "trend" };
     const items = D.watch.filter((w) => alertOn(w.kind)).map((w, i) => ({ id: "w" + i, icon: icon[w.kind] || "trend", kind: w.kind, title: w.title,
       date: w.date, text: w.text, src: w.kind === "New person" ? SRC.records : w.kind === "Stage change" ? "HubSpot" : SRC.calendar, callId: w.callId || null, person: w.person || "" }));
-    // People mentioned on a call (MOAB's saved connections; the sample's in the demo).
+    // People mentioned on a call (Overture's saved connections; the sample's in the demo).
     if (alertOn("Mentioned")) {
       (D.mentioned || []).filter((m) => m.type === "person" && inviteById(m.callId)).slice(0, 6).forEach((m) => {
         const inv = inviteById(m.callId);
         items.push({ id: "m-" + m.id, icon: "users", kind: "Mentioned", title: "Mentioned on the " + inv.company + " call: " + m.label, date: shortDate(D.today),
-          text: m.label + (m.sub ? ", " + String(m.sub).replace(/^Mentioned · /, "") : "") + ", came up on the call. MOAB added them to the People map.",
+          text: m.label + (m.sub ? ", " + String(m.sub).replace(/^Mentioned · /, "") : "") + ", came up on the call. Overture added them to the People map.",
           src: SRC.records, callId: inv.id, person: m.label });
       });
     }
@@ -565,7 +565,7 @@
     });
     await step("papers", () => {
       ctx.papers = paperStatus(invite.company);
-      if (!ctx.papers.length) return { skip: "No papers in MOAB's records." };
+      if (!ctx.papers.length) return { skip: "No papers in Overture's records." };
       const missing = ctx.papers.filter((p) => !p.ok).length;
       return esc(missing ? plural(missing, "thing") + " to sort out." : "All in order.");
     });
@@ -607,7 +607,7 @@
     return (fact ? fact + " " : "") + ask;
   }
 
-  // Real to-dos only (papers to send, rivals to be ready for). Who the guests are is MOAB's job: its research saves itself.
+  // Real to-dos only (papers to send, rivals to be ready for). Who the guests are is Overture's job: its research saves itself.
   function todoList(ctx) {
     const out = ctx.papers.filter((p) => p.todo).map((p) => ({ text: p.todo }));
     ctx.rivals.filter((r) => r.todo).forEach((r) => out.push({ text: r.todo, link: { href: "#rivals", label: "Rival notes" }, src: "Public price" }));
@@ -642,7 +642,7 @@
     };
   }
 
-  const TAG = MODE === "demo" ? { calendar: "sample", records: "sample" } : { calendar: "user's calendar", records: "MOAB records" };
+  const TAG = MODE === "demo" ? { calendar: "sample", records: "sample" } : { calendar: "user's calendar", records: "Overture records" };
   // Claude's optional summary. Returns { text } or { error }.
   async function askClaude(ctx) {
     try {
@@ -677,10 +677,10 @@
     let r;
     try {
       r = await fetchTimeout(url, timeout || 30000, { method: "POST", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify(body) });
-    } catch (e) { throw new Error("Couldn't reach MOAB's server. Is server.py running?"); }
+    } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
     let j = {};
     try { j = await r.json(); } catch (e) { /* no body */ }
-    if (!r.ok) throw new Error(j.error || "MOAB's server answered " + r.status);
+    if (!r.ok) throw new Error(j.error || "Overture's server answered " + r.status);
     return j;
   }
   // What "Save to HubSpot" would write (nothing is written), then the write itself, only on the button press.
@@ -699,7 +699,7 @@
     opts = opts || {};
     const local = r.local || {};
     let h = "";
-    // No name on the invite: say so, and say when the name MOAB used came from their work email.
+    // No name on the invite: say so, and say when the name Overture used came from their work email.
     if ((r.nameFrom === "email" || r.nameFrom === "event") && r.nameUsed) h += '<p class="rs-note">No name on the invite. Using the name from ' + (r.nameFrom === "event" ? "the event description" : "their email") + ": <strong>" + esc(r.nameUsed) + "</strong>.</p>";
     if (r.status === "notfound") h += '<p class="rs-line"><span class="pill tag-gray">Can\'t find this person</span></p>';
     if (r.status === "pending") h += '<p class="rs-line rs-wait">' + ic("search") + "<span>Researching…</span></p>";
@@ -715,7 +715,7 @@
       if (auto && opts.actions) {
         const edit = opts.edit ? '<button type="button" class="btn ghost sm" data-edit-person="' + esc(p.email) + '" aria-label="' + esc("Edit " + p.name + "'s title and note") + '">' + ic("pencil") + "Edit</button>"
           : opts.editHref ? '<a class="btn ghost sm" href="' + esc(opts.editHref) + '" target="_blank" rel="noopener">' + ic("pencil") + "Edit" + NEW_TAB + "</a>" : "";
-        h += '<p class="rs-actions"><button type="button" class="btn secondary sm" data-rs-confirm="' + esc(p.email) + '" aria-label="' + esc("Confirm what MOAB found about " + p.name) + '">' + ic("check") + "Confirm</button>" + edit + "</p>";
+        h += '<p class="rs-actions"><button type="button" class="btn secondary sm" data-rs-confirm="' + esc(p.email) + '" aria-label="' + esc("Confirm what Overture found about " + p.name) + '">' + ic("check") + "Confirm</button>" + edit + "</p>";
       }
     } else if (r.note) {
       // The pill above already says "Can't find this person", so the note starts at the reason.
@@ -739,7 +739,7 @@
     let r;
     try {
       r = await fetchTimeout("/api/research", 10000, { method: "POST", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify({ email }) });
-    } catch (e) { throw new Error("Couldn't reach MOAB's server. Is server.py running?"); }
+    } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
     let j = {};
     try { j = await r.json(); } catch (e) { /* no body */ }
     if (!r.ok) throw new Error(j.error === "no-key" ? "Add a Claude key to look people up." : j.error || "Couldn't start the lookup (" + r.status + ")");
@@ -780,11 +780,11 @@
     setTimeout(tick, 1500);
   }
 
-  // ---------- profiles: what MOAB's research found about a guest and their company ----------
+  // ---------- profiles: what Overture's research found about a guest and their company ----------
   // A guest: D.people[email].research.profile (server.py's records.people[email].profile). A company: GET /api/research's
   // orgs[domain].profile, or D.companies[name].profile from live.js (server.py's records.orgs[domain].profile).
   // Cleaned again here, whatever the server sent: only http(s) sources count, and a bullet left with no source is dropped,
-  // so every line on screen cites a page MOAB really read. Sources are renumbered 1, 2, 3… in their own order.
+  // so every line on screen cites a page Overture really read. Sources are renumbered 1, 2, 3… in their own order.
   const pstr = (v, n) => String(v == null ? "" : v).replace(/\s+/g, " ").trim().slice(0, n || 600);
   const PCACHE = new WeakMap();
   function cleanProfile(raw, org) {
@@ -848,9 +848,9 @@
   }
   // What Claude gets for the written brief: the profile's text only (the sources stay on the page).
   const pTexts = (list) => (list || []).map((b) => b.text);
-  const profileFacts = (pr) => (pr ? { source: MODE === "demo" ? "sample" : "MOAB's web research", summary: pr.summary ? pr.summary.text : "", now: pTexts(pr.now),
+  const profileFacts = (pr) => (pr ? { source: MODE === "demo" ? "sample" : "Overture's web research", summary: pr.summary ? pr.summary.text : "", now: pTexts(pr.now),
     past: pr.past.slice(0, 3).map((r) => ({ role: r.role, org: r.org, when: r.when, points: pTexts(r.points) })), forCall: pTexts(pr.forCall) } : null);
-  const orgFacts = (pr) => (pr ? { source: MODE === "demo" ? "sample" : "MOAB's web research", name: pr.name, summary: pr.summary ? pr.summary.text : "",
+  const orgFacts = (pr) => (pr ? { source: MODE === "demo" ? "sample" : "Overture's web research", name: pr.name, summary: pr.summary ? pr.summary.text : "",
     facts: pr.facts.map((f) => f.label + ": " + f.value), what: pTexts(pr.what), forCall: pTexts(pr.forCall) } : null);
   // A short opaque id for a person's page (#/people/<key>), so an email address never goes into a URL.
   function personKey(email) {
@@ -927,7 +927,7 @@
         }
       });
     });
-    // People and companies mentioned on a call (live: MOAB's saved connections; demo: the sample's), marked as mentioned on that call.
+    // People and companies mentioned on a call (live: Overture's saved connections; demo: the sample's), marked as mentioned on that call.
     // Settings > Mentions & connections picks which kinds show (people, customers, vendors, partners, competitors, ownership, other).
     const allow = prefs() ? new Set(prefs().mentions.mapRelations) : null, hiddenIds = new Set();
     const relGroup = (t) => (["customer", "vendor", "partner", "competitor"].includes(t) ? t : ["parent", "subsidiary", "investor", "acquired", "acquirer"].includes(t) ? "ownership" : "other");
@@ -969,7 +969,7 @@
   // x is server.py's explain_view (the demo's sample carries the same shape). Every sentence on the card cites one of the
   // numbered sources under it (the server drops a sentence whose sources were dropped); with no sentence, only the relation
   // type shows. Quotes from the web are at most 25 words; "Said on the call" is the call's own words.
-  const XP_HOW = { "Said on the call": "tag-purple", "Found on the web": "tag-teal", "Likely, not confirmed": "tag-orange", "Known to MOAB": "tag-green" };
+  const XP_HOW = { "Said on the call": "tag-purple", "Found on the web": "tag-teal", "Likely, not confirmed": "tag-orange", "Known to Overture": "tag-green" };
   const xpCap = (t) => String(t || "").charAt(0).toUpperCase() + String(t || "").slice(1);
   const xpDay = (s) => {
     const m = String(s || "").match(/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?/);

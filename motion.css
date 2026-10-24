@@ -171,7 +171,7 @@
   :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) .ic-settings { rotate: 60deg; }
   :where(a, button, summary, label, [role="option"], [role="tab"], [role="button"], [role="link"], .row, .motion-host):is(:hover, :focus-visible) :is(.ic-maximize, .ic-fit, .ic-check, .ic-circleCheck) { scale: 1.12; }
 
-  /* MOAB logo: the bot blinks only while the brand is hovered or focused (once straight away, then every 2.4s). */
+  /* Overture logo: the bot blinks only while the brand is hovered or focused (once straight away, then every 2.4s). */
   .brand:is(:hover, :focus-visible) .logo-eyes { animation: logo-blink 2.4s ease-in-out infinite; }
 
   /* Palette opens with a short drop from the field, no bounce. */
@@ -223,7 +223,7 @@
 .pal-foot { border-radius: 0 0 16px 16px; }
 @media (prefers-reduced-motion: reduce) { .pal-chip { transition: none; } }
 
-/* ---------- Ask MOAB: the answer sits under the input, above the results (Raycast AI, Linear Ask) ---------- */
+/* ---------- Ask Overture: the answer sits under the input, above the results (Raycast AI, Linear Ask) ---------- */
 .pal-answer { flex: none; max-height: 45vh; overflow: auto; padding: 12px 16px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
 .pa-q { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; font-weight: 500; line-height: 1.5; color: var(--ink-2); }
 .pa-q .ic { flex: none; width: 15px; height: 15px; margin-top: 2px; color: var(--accent); }

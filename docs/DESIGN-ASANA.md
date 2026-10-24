@@ -1,4 +1,4 @@
-# MOAB: Asana restyle spec
+# Overture: Asana restyle spec
 
 Status: spec for the builder. Covers the whole app (`index.html`, `base.css`, `styles.css`, `map.css` tokens only, `panel.css`) and the small markup changes in `app.js`, `panel.js`, `core.js` and `index.html` that the look needs.
 Do not touch: `server.py`, `data/snapshot.js`, `_headers`, the edge routing and layout code in `map.js`.
@@ -441,7 +441,7 @@ Markup changes in `index.html`: move `.brand` and `#openPalette` out of `#rail` 
 ```html
 <header class="appbar">
   <button type="button" class="icon-btn" id="menuBtn" ...></button>          <!-- phone only -->
-  <a class="brand" href="#/home"><span class="mark">...</span><span class="brand-name">MOAB</span><span class="pill">Demo</span></a>
+  <a class="brand" href="#/home"><span class="mark">...</span><span class="brand-name">Overture</span><span class="pill">Demo</span></a>
   <span class="appbar-title" id="appbarTitle">Home</span>                    <!-- phone only -->
   <button type="button" id="openPalette" class="search-trigger"></button>      <!-- desktop -->
   <button type="button" class="icon-btn" id="appbarSearch" ...></button>       <!-- phone only -->
