@@ -22,10 +22,10 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 from types import SimpleNamespace
 
-TMP = tempfile.mkdtemp(prefix="moab-test-")
-os.environ["MOAB_DATA_DIR"] = TMP  # before the import: server.py reads it once
+TMP = tempfile.mkdtemp(prefix="overture-test-")
+os.environ["OVERTURE_DATA_DIR"] = TMP  # before the import: server.py reads it once
 for k in ("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "HUBSPOT_TOKEN", "GONG_ACCESS_KEY", "GONG_ACCESS_SECRET", "GONG_BASE_URL",
-          "GRANOLA_API_KEY", "MEETILY_RECORDINGS_DIR", "MOAB_EXTENSION_IDS"):
+          "GRANOLA_API_KEY", "MEETILY_RECORDINGS_DIR", "OVERTURE_EXTENSION_IDS"):
     os.environ.pop(k, None)
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server as S  # noqa: E402
@@ -246,8 +246,8 @@ class LiveScript(Fresh):
 
     def test_null_when_not_connected(self):
         out = S.live_script()
-        self.assertIn("window.MOAB_LIVE = null;", out)
-        st = json.loads(out.split("window.MOAB_STATUS = ")[1].split(";\n")[0])
+        self.assertIn("window.OVERTURE_LIVE = null;", out)
+        st = json.loads(out.split("window.OVERTURE_STATUS = ")[1].split(";\n")[0])
         self.assertEqual(st["google"], {"configured": False, "connected": False, "email": ""})
         self.assertNotIn("token", out.lower())
 
@@ -271,7 +271,7 @@ class LiveScript(Fresh):
         self.assertNotIn("AT-secret", out)
         self.assertNotIn("RT-secret", out)
         self.assertNotIn("</", out)
-        data = json.loads(out.split("window.MOAB_LIVE = ")[1].split(";\n")[0])
+        data = json.loads(out.split("window.OVERTURE_LIVE = ")[1].split(";\n")[0])
         self.assertEqual(data["invites"][0]["company"], "Acme")
         self.assertEqual(data["me"]["email"], "chris@spotify.com")
         q = urllib.parse.parse_qs(urllib.parse.urlsplit(calls[0]).query)
@@ -417,15 +417,15 @@ class Records(Fresh):
 class Guards(unittest.TestCase):
     def test_write_guard(self):
         host = "localhost:%d" % S.PORT
-        ok = {"Host": host, "X-MOAB": "1", "Origin": "http://" + host}
+        ok = {"Host": host, "X-OVERTURE": "1", "Origin": "http://" + host}
         self.assertTrue(S.write_guard_ok(ok))
-        self.assertTrue(S.write_guard_ok({"Host": host, "X-MOAB": "1", "Referer": "http://127.0.0.1:%d/#/home" % S.PORT}))
-        self.assertFalse(S.write_guard_ok({**ok, "X-MOAB": "0"}))
-        self.assertFalse(S.write_guard_ok({k: v for k, v in ok.items() if k != "X-MOAB"}))
+        self.assertTrue(S.write_guard_ok({"Host": host, "X-OVERTURE": "1", "Referer": "http://127.0.0.1:%d/#/home" % S.PORT}))
+        self.assertFalse(S.write_guard_ok({**ok, "X-OVERTURE": "0"}))
+        self.assertFalse(S.write_guard_ok({k: v for k, v in ok.items() if k != "X-OVERTURE"}))
         self.assertFalse(S.write_guard_ok({**ok, "Origin": "https://evil.example"}))
         self.assertFalse(S.write_guard_ok({**ok, "Origin": "http://" + host + ".evil.example"}))
-        self.assertFalse(S.write_guard_ok({"Host": host, "X-MOAB": "1"}))  # neither Origin nor Referer
-        self.assertFalse(S.write_guard_ok({"Host": host, "X-MOAB": "1", "Referer": "http://localhost:%d.evil.example/" % S.PORT}))
+        self.assertFalse(S.write_guard_ok({"Host": host, "X-OVERTURE": "1"}))  # neither Origin nor Referer
+        self.assertFalse(S.write_guard_ok({"Host": host, "X-OVERTURE": "1", "Referer": "http://localhost:%d.evil.example/" % S.PORT}))
         self.assertFalse(S.write_guard_ok({**ok, "Host": "evil.example"}))
 
     def test_read_guard(self):
@@ -1275,9 +1275,9 @@ class DeepResearch(Fresh):
         self.assertIsNone(other["company"])
         # Ask Overture: this call's people and company carry their research
         ctx = json.loads(S.ask_context("who is Shea?", live["invites"][0]["id"], live, S.load_records()))
-        self.assertEqual(ctx["thisCall"]["people"][0]["moabResearch"]["summary"], "Shea Kim leads Program Success at The Knowledge Society.")
+        self.assertEqual(ctx["thisCall"]["people"][0]["overtureResearch"]["summary"], "Shea Kim leads Program Success at The Knowledge Society.")
         self.assertEqual(ctx["thisCall"]["companyResearch"]["name"], "The Knowledge Society (TKS)")
-        self.assertNotIn("profile", ctx["moabRecords"]["people"]["shea@tks.world"])
+        self.assertNotIn("profile", ctx["overtureRecords"]["people"]["shea@tks.world"])
 
 
 class ServerBase(Fresh):
@@ -1320,14 +1320,14 @@ class ServerEndToEnd(ServerBase):
         origin = "http://localhost:%d" % S.PORT
         body = {"name": "Acme", "status": "New lead"}
         self.assertEqual(self.req("PUT", "/api/records/company", body)[0], 403)
-        self.assertEqual(self.req("PUT", "/api/records/company", body, {"X-MOAB": "1"})[0], 403)
-        self.assertEqual(self.req("PUT", "/api/records/company", body, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
-        self.assertEqual(self.req("PUT", "/api/records/company", body, {"X-MOAB": "1", "Origin": origin, "Content-Type": "text/plain"})[0], 403)
-        st, txt, _ = self.req("PUT", "/api/records/company", body, {"X-MOAB": "1", "Origin": origin})
+        self.assertEqual(self.req("PUT", "/api/records/company", body, {"X-OVERTURE": "1"})[0], 403)
+        self.assertEqual(self.req("PUT", "/api/records/company", body, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
+        self.assertEqual(self.req("PUT", "/api/records/company", body, {"X-OVERTURE": "1", "Origin": origin, "Content-Type": "text/plain"})[0], 403)
+        st, txt, _ = self.req("PUT", "/api/records/company", body, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 200, txt)
-        st, txt, _ = self.req("PUT", "/api/records/company", {"name": 5}, {"X-MOAB": "1", "Origin": origin})
+        st, txt, _ = self.req("PUT", "/api/records/company", {"name": 5}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 400)
-        st, txt, _ = self.req("POST", "/api/records/apply", {"callId": "e1", "company": "Acme", "accept": [{"kind": "Deal", "text": "Budget approved"}]}, {"X-MOAB": "1", "Origin": origin})
+        st, txt, _ = self.req("POST", "/api/records/apply", {"callId": "e1", "company": "Acme", "accept": [{"kind": "Deal", "text": "Budget approved"}]}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 200, txt)
         st, txt, _ = self.req("GET", "/api/records")
         self.assertEqual(json.loads(txt)["companies"]["Acme"]["status"], "New lead")
@@ -1343,10 +1343,10 @@ class ServerEndToEnd(ServerBase):
         st, txt, h = self.req("GET", "/data/live.js")
         self.assertEqual(st, 200)
         self.assertIn("text/javascript", h.get("Content-Type", ""))
-        self.assertIn("window.MOAB_LIVE = null;", txt)
+        self.assertIn("window.OVERTURE_LIVE = null;", txt)
         st, txt, _ = self.req("GET", "/data/live.js", headers={"Sec-Fetch-Site": "cross-site"})
-        self.assertEqual(txt.strip(), "window.MOAB_LIVE = null;")
-        self.assertNotIn("MOAB_STATUS", txt)
+        self.assertEqual(txt.strip(), "window.OVERTURE_LIVE = null;")
+        self.assertNotIn("OVERTURE_STATUS", txt)
         S.save_json(S.token_path(), {"access_token": "AT-secret", "refresh_token": "RT-secret", "expires_at": 0})
         for p in ("/.data/google-token.json", "/%2Edata/google-token.json", "/.DATA/google-token.json"):
             st, txt, _ = self.req("GET", p)
@@ -1358,23 +1358,23 @@ class ServerEndToEnd(ServerBase):
         # Windows also names .data "DATA~1" (8.3 short name); that spelling must not reach it either.
         long = S.HERE / ".data"
         long.mkdir(exist_ok=True)
-        probe = long / "moab-test-probe.json"
+        probe = long / "overture-test-probe.json"
         probe.write_text('{"refresh_token": "RT-secret"}')
         try:
-            paths = ["/x://.data/moab-test-probe.json"]
+            paths = ["/x://.data/overture-test-probe.json"]
             if os.name == "nt":
                 import ctypes
                 buf = ctypes.create_unicode_buffer(1024)
                 short = Path(buf.value).name if ctypes.windll.kernel32.GetShortPathNameW(str(long), buf, 1024) else ""
                 if short and short != ".data":
-                    paths += ["/" + short + "/moab-test-probe.json", "/" + short + "/", "/" + short.lower() + "/moab-test-probe.json"]
+                    paths += ["/" + short + "/overture-test-probe.json", "/" + short + "/", "/" + short.lower() + "/overture-test-probe.json"]
             for p in paths:
                 st, txt, _ = self.req("GET", p)
                 self.assertEqual(st, 404, p)
                 self.assertNotIn("RT-secret", txt, p)
-                self.assertNotIn("moab-test-probe", txt, p)
+                self.assertNotIn("overture-test-probe", txt, p)
                 self.assertEqual(self.req("HEAD", p)[0], 404, p)
-            st, txt, _ = self.req("GET", "x://.data/moab-test-probe.json")  # absolute-form target
+            st, txt, _ = self.req("GET", "x://.data/overture-test-probe.json")  # absolute-form target
             self.assertEqual(st, 403)
             self.assertNotIn("RT-secret", txt)
         finally:
@@ -1421,16 +1421,16 @@ class ServerEndToEnd(ServerBase):
             self.assertEqual(self.req("HEAD", "/api/research")[0], 404)
             body = {"email": "ann.lee@acme.com"}
             self.assertEqual(self.req("POST", "/api/research", body)[0], 403)
-            self.assertEqual(self.req("POST", "/api/research", body, {"X-MOAB": "1"})[0], 403)
-            self.assertEqual(self.req("POST", "/api/research", body, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
-            self.assertEqual(self.req("POST", "/api/research", body, {"X-MOAB": "1", "Origin": origin, "Content-Type": "text/plain"})[0], 403)
-            st, txt, _ = self.req("POST", "/api/research", body, {"X-MOAB": "1", "Origin": origin})
+            self.assertEqual(self.req("POST", "/api/research", body, {"X-OVERTURE": "1"})[0], 403)
+            self.assertEqual(self.req("POST", "/api/research", body, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
+            self.assertEqual(self.req("POST", "/api/research", body, {"X-OVERTURE": "1", "Origin": origin, "Content-Type": "text/plain"})[0], 403)
+            st, txt, _ = self.req("POST", "/api/research", body, {"X-OVERTURE": "1", "Origin": origin})
             self.assertEqual((st, json.loads(txt)), (503, {"error": "no-key"}))
             os.environ["ANTHROPIC_API_KEY"] = "test-key"
-            self.assertEqual(self.req("POST", "/api/research", {"email": "x"}, {"X-MOAB": "1", "Origin": origin})[0], 400)
-            self.assertEqual(self.req("POST", "/api/research", {"email": "a@acme.com", "x": 1}, {"X-MOAB": "1", "Origin": origin})[0], 400)
-            self.assertEqual(self.req("POST", "/api/research", {"email": "who@other.com"}, {"X-MOAB": "1", "Origin": origin})[0], 404)
-            st, txt, _ = self.req("POST", "/api/research", body, {"X-MOAB": "1", "Origin": origin})
+            self.assertEqual(self.req("POST", "/api/research", {"email": "x"}, {"X-OVERTURE": "1", "Origin": origin})[0], 400)
+            self.assertEqual(self.req("POST", "/api/research", {"email": "a@acme.com", "x": 1}, {"X-OVERTURE": "1", "Origin": origin})[0], 400)
+            self.assertEqual(self.req("POST", "/api/research", {"email": "who@other.com"}, {"X-OVERTURE": "1", "Origin": origin})[0], 404)
+            st, txt, _ = self.req("POST", "/api/research", body, {"X-OVERTURE": "1", "Origin": origin})
             self.assertEqual((st, json.loads(txt)["status"]), (202, "pending"))
             self.assertEqual(json.loads(self.req("GET", "/api/research")[1])["people"]["ann.lee@acme.com"]["status"], "pending")
         finally:
@@ -1441,10 +1441,10 @@ class ServerEndToEnd(ServerBase):
 
     def test_ask_without_key(self):
         origin = "http://localhost:%d" % S.PORT
-        st, txt, _ = self.req("POST", "/api/ask", {"question": "Who is on my next call?"}, {"X-MOAB": "1", "Origin": origin})
+        st, txt, _ = self.req("POST", "/api/ask", {"question": "Who is on my next call?"}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual((st, json.loads(txt)), (503, {"error": "no-key"}))
         self.assertEqual(self.req("POST", "/api/ask", {"question": "x"})[0], 403)
-        st, _, _ = self.req("POST", "/api/ask", {"question": ""}, {"X-MOAB": "1", "Origin": origin})
+        st, _, _ = self.req("POST", "/api/ask", {"question": ""}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 400)
 
 
@@ -1794,8 +1794,8 @@ class Crm(Fresh, CrmFakes):
         self.google()
         self.api.queued = [("/crm/v3/objects/contacts/search", (401, {"message": "token " + HS_TOKEN}, {}))]
         out = S.live_script()
-        self.assertIn("window.MOAB_LIVE = {", out)
-        st = json.loads(out.split("window.MOAB_STATUS = ")[1].split(";\n")[0])
+        self.assertIn("window.OVERTURE_LIVE = {", out)
+        st = json.loads(out.split("window.OVERTURE_STATUS = ")[1].split(";\n")[0])
         self.assertEqual(set(st["hubspot"]) >= {"configured", "connected", "portal"}, True)
         self.assertEqual(set(st["gong"]) >= {"configured", "connected"}, True)
         self.assertEqual((st["gong"]["configured"], st["gong"]["connected"], st["gong"]["workspace"]), (True, True, "Sales NA"))
@@ -2152,21 +2152,21 @@ class CrmEndToEnd(ServerBase, CrmFakes):
         origin = "http://localhost:%d" % S.PORT
         body = {"callId": "e1", "note": "hi"}
         self.assertEqual(self.req("POST", "/api/hubspot/save", body)[0], 403)
-        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-MOAB": "1"})[0], 403)
-        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
-        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-MOAB": "1", "Origin": origin, "Content-Type": "text/plain"})[0], 403)
-        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-MOAB": "1", "Origin": origin, "Host": "evil.example"})[0], 403)
-        st, txt, _ = self.req("POST", "/api/hubspot/save", body, {"X-MOAB": "1", "Origin": origin})
+        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-OVERTURE": "1"})[0], 403)
+        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
+        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-OVERTURE": "1", "Origin": origin, "Content-Type": "text/plain"})[0], 403)
+        self.assertEqual(self.req("POST", "/api/hubspot/save", body, {"X-OVERTURE": "1", "Origin": origin, "Host": "evil.example"})[0], 403)
+        st, txt, _ = self.req("POST", "/api/hubspot/save", body, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 409)  # not connected yet
         self.connect(gong=False)
         self.google()
         cid = S.live_now(S.load_records())[0]["invites"][0]["id"]
-        st, txt, _ = self.req("POST", "/api/hubspot/save", {"callId": cid, "note": "hi"}, {"X-MOAB": "1", "Origin": origin})
+        st, txt, _ = self.req("POST", "/api/hubspot/save", {"callId": cid, "note": "hi"}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 200, txt)
         self.assertIn("plan", json.loads(txt))
         self.assertEqual(self.api.writes(), [])
         pid = json.loads(txt)["plan"]["planId"]
-        st, txt, _ = self.req("POST", "/api/hubspot/save", {"callId": cid, "note": "hi", "confirm": True, "planId": pid}, {"X-MOAB": "1", "Origin": origin})
+        st, txt, _ = self.req("POST", "/api/hubspot/save", {"callId": cid, "note": "hi", "confirm": True, "planId": pid}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 200, txt)
         self.assertEqual(len(self.api.writes()), 1)
         for s in SECRETS:
@@ -2193,9 +2193,9 @@ class CrmEndToEnd(ServerBase, CrmFakes):
                 self.assertNotIn(s, text)
         origin = "http://localhost:%d" % S.PORT
         self.assertEqual(self.req("PUT", "/api/records/settings", {"gongInAI": True})[0], 403)
-        st, txt, _ = self.req("PUT", "/api/records/settings", {"gongInAI": True}, {"X-MOAB": "1", "Origin": origin})
+        st, txt, _ = self.req("PUT", "/api/records/settings", {"gongInAI": True}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual((st, json.loads(txt)["saved"]), (200, {"gongInAI": True}))
-        self.assertEqual(self.req("PUT", "/api/records/settings", {"gongInAI": 1}, {"X-MOAB": "1", "Origin": origin})[0], 400)
+        self.assertEqual(self.req("PUT", "/api/records/settings", {"gongInAI": 1}, {"X-OVERTURE": "1", "Origin": origin})[0], 400)
 
     def test_brief_drops_gong_unless_setting_is_on(self):
         os.environ["ANTHROPIC_API_KEY"] = "test-key"
@@ -2688,12 +2688,12 @@ class MentionRoutes(ServerBase, CrmFakes):
 
     def test_guards_size_limits_and_reads(self):
         origin = "http://localhost:%d" % S.PORT
-        good = {"X-MOAB": "1", "Origin": origin}
+        good = {"X-OVERTURE": "1", "Origin": origin}
         body = {"callId": "nw1", "text": VTT_T, "filename": "call.vtt"}
         for path in ("/api/mentions", "/api/mentions/pick", "/api/mentions/hubspot"):
             self.assertEqual(self.req("POST", path, body)[0], 403)
-            self.assertEqual(self.req("POST", path, body, {"X-MOAB": "1"})[0], 403)
-            self.assertEqual(self.req("POST", path, body, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
+            self.assertEqual(self.req("POST", path, body, {"X-OVERTURE": "1"})[0], 403)
+            self.assertEqual(self.req("POST", path, body, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
             self.assertEqual(self.req("POST", path, body, dict(good, **{"Content-Type": "text/plain"}))[0], 403)
             self.assertEqual(self.req("POST", path, body, dict(good, Host="evil.example"))[0], 403)
         st, txt, _ = self.req("POST", "/api/mentions", {"callId": "nw1", "text": "x" * (S.MAX_TRANSCRIPT_CHARS + 1)}, good)
@@ -3324,9 +3324,9 @@ class LiveRoute(ServerBase):
         origin = "http://localhost:%d" % S.PORT
         body = {"callId": "nw1", "segment": "seg123abc", "offset": 0, "text": "Harborline Labs called. They're a partner.", "final": True}
         self.assertEqual(self.req("POST", "/api/mentions/live", body)[0], 403)
-        self.assertEqual(self.req("POST", "/api/mentions/live", body, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
-        self.assertEqual(self.req("POST", "/api/mentions/live", dict(body, text="x" * 30_000), {"X-MOAB": "1", "Origin": origin})[0], 413)
-        st, txt, _ = self.req("POST", "/api/mentions/live", body, {"X-MOAB": "1", "Origin": origin})
+        self.assertEqual(self.req("POST", "/api/mentions/live", body, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
+        self.assertEqual(self.req("POST", "/api/mentions/live", dict(body, text="x" * 30_000), {"X-OVERTURE": "1", "Origin": origin})[0], 413)
+        st, txt, _ = self.req("POST", "/api/mentions/live", body, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 200, txt)
         o = json.loads(txt)["orgs"][0]
         self.assertEqual((o["name"], o["status"], o["relation"]["type"]), ("Harborline Labs", "said", "partner"))
@@ -3524,15 +3524,15 @@ class SettingsCrm(Fresh, CrmFakes):
 class SettingsRoutes(ServerBase):
     def test_get_and_put_with_the_guards(self):
         origin = "http://localhost:%d" % S.PORT
-        ok = {"X-MOAB": "1", "Origin": origin}
+        ok = {"X-OVERTURE": "1", "Origin": origin}
         st, txt, _ = self.req("GET", "/api/settings")
         self.assertEqual(st, 200)
         self.assertEqual(json.loads(txt)["settings"], S.default_settings())
         self.assertEqual(self.req("GET", "/api/settings", headers={"Sec-Fetch-Site": "cross-site"})[0], 403)
         self.assertEqual(self.req("GET", "/api/settings", headers={"Host": "evil.example"})[0], 403)
         body = {"appearance": {"theme": "light"}}
-        self.assertEqual(self.req("PUT", "/api/settings", body)[0], 403)                                       # no X-MOAB
-        self.assertEqual(self.req("PUT", "/api/settings", body, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
+        self.assertEqual(self.req("PUT", "/api/settings", body)[0], 403)                                       # no X-OVERTURE
+        self.assertEqual(self.req("PUT", "/api/settings", body, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
         self.assertEqual(self.req("PUT", "/api/settings", body, dict(ok, **{"Content-Type": "text/plain"}))[0], 403)
         self.assertEqual(self.req("PUT", "/api/settings", {"appearance": {"theme": "neon"}}, ok)[0], 400)
         self.assertEqual(self.req("PUT", "/api/settings", {"followup": {"templates": {"intro": {"body": "x" * 70_000}}}}, ok)[0], 413)
@@ -3545,7 +3545,7 @@ class SettingsRoutes(ServerBase):
 
     def test_web_research_off_refuses_a_lookup(self):
         S.save_settings({"research": {"web": False}})
-        st, txt, _ = self.req("POST", "/api/research", {"email": "ann.lee@acme.com"}, {"X-MOAB": "1", "Origin": "http://localhost:%d" % S.PORT})
+        st, txt, _ = self.req("POST", "/api/research", {"email": "ann.lee@acme.com"}, {"X-OVERTURE": "1", "Origin": "http://localhost:%d" % S.PORT})
         self.assertEqual(st, 403)
         self.assertIn("Web research is off", json.loads(txt)["error"])
 
@@ -4081,8 +4081,8 @@ class MeetilyRoutes(ServerBase):
         self.assertEqual(self.req("GET", "/api/meetily", headers={"Sec-Fetch-Site": "cross-site"})[0], 403)
         self.assertEqual(self.req("GET", "/api/meetily?callId=a/b")[0], 400)
         self.assertEqual(self.req("POST", "/api/meetily/pick", {"callId": "nw1"})[0], 403)
-        self.assertEqual(self.req("POST", "/api/meetily/pick", {"callId": "nw1"}, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
-        st, txt, _ = self.req("POST", "/api/meetily/pick", {"callId": "nw1"}, {"X-MOAB": "1", "Origin": origin})
+        self.assertEqual(self.req("POST", "/api/meetily/pick", {"callId": "nw1"}, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
+        st, txt, _ = self.req("POST", "/api/meetily/pick", {"callId": "nw1"}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 200, txt)
         with S.MEETILY_LOCK:
             self.assertEqual(S.MEETILY["pinned"], "nw1")
@@ -4274,9 +4274,9 @@ class GranolaRoutes(ServerBase):
     def test_fetch_route_guards(self):
         origin = "http://localhost:%d" % S.PORT
         self.assertEqual(self.req("POST", "/api/granola/fetch", {"callId": "nw1"})[0], 403)
-        self.assertEqual(self.req("POST", "/api/granola/fetch", {"callId": "nw1"}, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
-        self.assertEqual(self.req("POST", "/api/granola/fetch", {"callId": "a/b"}, {"X-MOAB": "1", "Origin": origin})[0], 400)
-        st, txt, _ = self.req("POST", "/api/granola/fetch", {"callId": "nw1"}, {"X-MOAB": "1", "Origin": origin})
+        self.assertEqual(self.req("POST", "/api/granola/fetch", {"callId": "nw1"}, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
+        self.assertEqual(self.req("POST", "/api/granola/fetch", {"callId": "a/b"}, {"X-OVERTURE": "1", "Origin": origin})[0], 400)
+        st, txt, _ = self.req("POST", "/api/granola/fetch", {"callId": "nw1"}, {"X-OVERTURE": "1", "Origin": origin})
         self.assertEqual(st, 403)  # off by default
         self.assertIn("Turn on Granola", json.loads(txt)["error"])
 
@@ -4344,11 +4344,11 @@ class ExtensionManifest(unittest.TestCase):
         self.assertEqual(S.frame_ancestors("/PANEL.html"), "'self' chrome-extension://" + eid)
         for p in ("/", "/index.html", "/index.html?x=panel.html", "/api/mentions", "/settings.js"):
             self.assertEqual(S.frame_ancestors(p), "'self'", p)
-        os.environ["MOAB_EXTENSION_IDS"] = "abcdefghijklmnopabcdefghijklmnop, *, https://evil.example, ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
+        os.environ["OVERTURE_EXTENSION_IDS"] = "abcdefghijklmnopabcdefghijklmnop, *, https://evil.example, ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
         try:
             self.assertEqual(S.frame_ancestors("/panel.html"), "'self' chrome-extension://" + eid + " chrome-extension://abcdefghijklmnopabcdefghijklmnop")
         finally:
-            os.environ.pop("MOAB_EXTENSION_IDS", None)
+            os.environ.pop("OVERTURE_EXTENSION_IDS", None)
 
     def test_meeting_codes_from_tab_addresses(self):
         import shutil
@@ -4378,7 +4378,7 @@ def struct_unpack_size(png):
 
 
 class FrameHeaders(ServerBase):
-    def test_only_moab_and_its_extension_may_frame_the_panel(self):
+    def test_only_overture_and_its_extension_may_frame_the_panel(self):
         eid = S.extension_ids()[0]
         st, _, h = self.req("GET", "/panel.html?host=ext&meet=abc-defg-hij")
         self.assertEqual(st, 200)
@@ -4396,14 +4396,14 @@ class DeepResearchRoutes(ServerBase):
         with S.RQ_LOCK:
             S.RQ.update(queue=[], pending=set(), running=set(), errors={},
                         meta={"shea@tks.world": {"name": "Shea Kim", "company": "Tks", "domain": "tks.world", "callId": "u1", "named": True, "internal": False, "local": {}}})
-        ok = {"X-MOAB": "1", "Origin": origin}
+        ok = {"X-OVERTURE": "1", "Origin": origin}
         try:
             st, txt, _ = self.req("GET", "/api/research")
             self.assertEqual((st, json.loads(txt)["orgs"]["tks.world"]["note"]), (200, S.ORG_NO_KEY_NOTE))
             body = {"domain": "tks.world"}
             self.assertEqual(self.req("POST", "/api/research/org", body)[0], 403)
-            self.assertEqual(self.req("POST", "/api/research/org", body, {"X-MOAB": "1"})[0], 403)
-            self.assertEqual(self.req("POST", "/api/research/org", body, {"X-MOAB": "1", "Origin": "https://evil.example"})[0], 403)
+            self.assertEqual(self.req("POST", "/api/research/org", body, {"X-OVERTURE": "1"})[0], 403)
+            self.assertEqual(self.req("POST", "/api/research/org", body, {"X-OVERTURE": "1", "Origin": "https://evil.example"})[0], 403)
             self.assertEqual(self.req("POST", "/api/research/org", body, dict(ok, **{"Content-Type": "text/plain"}))[0], 403)
             st, txt, _ = self.req("POST", "/api/research/org", body, ok)
             self.assertEqual((st, json.loads(txt)), (503, {"error": "no-key"}))
@@ -4447,10 +4447,10 @@ class SharedSite(ServerBase):
         super().setUp()
         import shutil
         shutil.rmtree(Path(TMP) / "users", ignore_errors=True)
-        self.old = (S.HOSTED, S.PUBLIC_URL, S.HTTP, {k: os.environ.get(k) for k in list(self.ENV) + ["MOAB_ALLOWED", "DATABASE_URL"]})
+        self.old = (S.HOSTED, S.PUBLIC_URL, S.HTTP, {k: os.environ.get(k) for k in list(self.ENV) + ["OVERTURE_ALLOWED", "DATABASE_URL"]})
         S.HOSTED, S.PUBLIC_URL = True, self.URL
         os.environ.update(self.ENV)
-        os.environ.pop("MOAB_ALLOWED", None)
+        os.environ.pop("OVERTURE_ALLOWED", None)
         S.HTTP = self.google
 
     def tearDown(self):
@@ -4475,7 +4475,7 @@ class SharedSite(ServerBase):
         if jar:
             h["Cookie"] = "; ".join(jar)
         if write:
-            h.update({"X-MOAB": "1", "Origin": self.URL})
+            h.update({"X-OVERTURE": "1", "Origin": self.URL})
         return self.req(method, path, body, h)
 
     def callback(self, email, same_browser=True):
@@ -4496,7 +4496,7 @@ class SharedSite(ServerBase):
     def test_signed_out_sees_only_the_connect_screen(self):
         st, js, _ = self.hreq("GET", "/data/live.js")
         self.assertEqual(st, 200)
-        self.assertIn("window.MOAB_LIVE = null", js)
+        self.assertIn("window.OVERTURE_LIVE = null", js)
         self.assertIn('"hosted": true', js)
         st, txt, _ = self.hreq("GET", "/api/status")
         self.assertEqual((st, json.loads(txt)["google"]["connected"]), (200, False))
@@ -4536,7 +4536,7 @@ class SharedSite(ServerBase):
 
     def test_removed_account_is_signed_out(self):
         a = self.sign_in("chris@spotify.com")
-        os.environ["MOAB_ALLOWED"] = "sam@example.org"
+        os.environ["OVERTURE_ALLOWED"] = "sam@example.org"
         self.assertEqual(self.hreq("GET", "/api/records", cookie=a)[0], 401)
 
     def test_environment_crm_keys_are_ignored_on_the_shared_site(self):
@@ -4549,7 +4549,7 @@ class SharedSite(ServerBase):
             os.environ.pop("HUBSPOT_TOKEN") if old is None else os.environ.__setitem__("HUBSPOT_TOKEN", old)
 
     def test_allowed_accounts(self):
-        os.environ["MOAB_ALLOWED"] = "@spotify.com, sam@example.org"
+        os.environ["OVERTURE_ALLOWED"] = "@spotify.com, sam@example.org"
         self.assertTrue(S.account_allowed("Chris@Spotify.com"))
         self.assertTrue(S.account_allowed("sam@example.org"))
         self.assertFalse(S.account_allowed("eve@evil.example"))

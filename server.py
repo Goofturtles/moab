@@ -36,12 +36,12 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DATA_ROOT = Path(os.environ.get("MOAB_DATA_DIR") or (HERE / ".data"))
-# The shared site (MOAB_PUBLIC_URL, or the RENDER_EXTERNAL_URL Render sets): everyone signs in with Google and each account has
+DATA_ROOT = Path(os.environ.get("OVERTURE_DATA_DIR") or (HERE / ".data"))
+# The shared site (OVERTURE_PUBLIC_URL, or the RENDER_EXTERNAL_URL Render sets): everyone signs in with Google and each account has
 # its own folder, .data/users/<account>, so one person's calendar, keys and notes are never another's. Unset: Overture on your own PC.
-PUBLIC_URL = (os.environ.get("MOAB_PUBLIC_URL") or os.environ.get("RENDER_EXTERNAL_URL") or "").rstrip("/")
+PUBLIC_URL = (os.environ.get("OVERTURE_PUBLIC_URL") or os.environ.get("RENDER_EXTERNAL_URL") or "").rstrip("/")
 HOSTED = bool(PUBLIC_URL)
-_USER = contextvars.ContextVar("moab_user", default=None)  # the signed-in account this request or lookup is for
+_USER = contextvars.ContextVar("overture_user", default=None)  # the signed-in account this request or lookup is for
 
 
 class NoUser(Exception):
@@ -49,7 +49,7 @@ class NoUser(Exception):
 
 
 def own_env(name):
-    """A key from this server's environment, for MOAB on your own PC only: on the shared site an environment key would be
+    """A key from this server's environment, for OVERTURE on your own PC only: on the shared site an environment key would be
     every account's, so each account saves its own instead."""
     return None if HOSTED else os.environ.get(name)
 
@@ -276,7 +276,7 @@ def _db_run(sql, args=(), must=False):
                 if DB["conn"] is None or DB["conn"].closed:
                     import psycopg
                     DB["conn"] = psycopg.connect(os.environ["DATABASE_URL"], autocommit=True, connect_timeout=5)
-                    DB["conn"].execute("CREATE TABLE IF NOT EXISTS moab_files (path text PRIMARY KEY, body text NOT NULL, "
+                    DB["conn"].execute("CREATE TABLE IF NOT EXISTS overture_files (path text PRIMARY KEY, body text NOT NULL, "
                                        "saved_at timestamptz NOT NULL DEFAULT now())")
                 cur = DB["conn"].execute(sql, args)
                 return cur.fetchall() if cur.description else []
@@ -293,13 +293,13 @@ def _db_run(sql, args=(), must=False):
 
 def db_saved(path, text):
     if db_on():
-        _db_run("INSERT INTO moab_files (path, body) VALUES (%s, %s) ON CONFLICT (path) DO UPDATE SET body = EXCLUDED.body, "
+        _db_run("INSERT INTO overture_files (path, body) VALUES (%s, %s) ON CONFLICT (path) DO UPDATE SET body = EXCLUDED.body, "
                 "saved_at = now()", (_db_key(path), text))
 
 
 def db_deleted(path):
     if db_on():
-        _db_run("DELETE FROM moab_files WHERE path = %s", (_db_key(path),))
+        _db_run("DELETE FROM overture_files WHERE path = %s", (_db_key(path),))
 
 
 def db_restore():
@@ -307,7 +307,7 @@ def db_restore():
     if not db_on():
         return 0
     root, n = DATA_ROOT.resolve(), 0
-    for rel, body in _db_run("SELECT path, body FROM moab_files", must=True):  # unreachable: raise, never start empty
+    for rel, body in _db_run("SELECT path, body FROM overture_files", must=True):  # unreachable: raise, never start empty
         dest = (root / rel).resolve()
         if root not in dest.parents:
             continue
@@ -492,9 +492,9 @@ def account_id(email):
 
 
 def account_allowed(email):
-    """MOAB_ALLOWED (emails or @domains, comma-separated) limits who may sign in. Unset: anyone Google lets through (while the
+    """OVERTURE_ALLOWED (emails or @domains, comma-separated) limits who may sign in. Unset: anyone Google lets through (while the
     Google app is in Testing, only its test users)."""
-    allow = [a.strip().lower() for a in os.environ.get("MOAB_ALLOWED", "").split(",") if a.strip()]
+    allow = [a.strip().lower() for a in os.environ.get("OVERTURE_ALLOWED", "").split(",") if a.strip()]
     e = email.strip().lower()
     return bool(e) and (not allow or e in allow or any(a.startswith("@") and e.endswith(a) for a in allow))
 
@@ -1178,9 +1178,9 @@ def live_script():
         except GoogleError as e:
             err = str(e)
     st = status_body()  # after the fetch, so HubSpot and Gong say how it went
-    out = "window.MOAB_STATUS = " + script_json(st) + ";\nwindow.MOAB_LIVE = " + script_json(data) + ";\n"
+    out = "window.OVERTURE_STATUS = " + script_json(st) + ";\nwindow.OVERTURE_LIVE = " + script_json(data) + ";\n"
     if err:
-        out += "window.MOAB_LIVE_ERROR = " + script_json(err) + ";\n"
+        out += "window.OVERTURE_LIVE_ERROR = " + script_json(err) + ";\n"
     return out
 
 
@@ -1808,7 +1808,7 @@ def ask_context(question, call_id, live, records):
     def who(a):
         p = people.get(a["email"]) or {}
         return {"name": a["name"], "email": a["email"], "title": p.get("title") or None, "note": p.get("note") or None, "previously": p.get("previous") or None,
-                "moabResearch": profile_for_ai((p.get("research") or {}).get("profile"))}
+                "overtureResearch": profile_for_ai((p.get("research") or {}).get("profile"))}
 
     adopters = {norm_name(a.get("org", "")): a.get("use", "") for a in snap.get("adopters", [])}
     cos = {i["company"] for i in invites}
@@ -1824,7 +1824,7 @@ def ask_context(question, call_id, live, records):
         },
         "upcomingCalls": [{"title": i["title"], "company": i["company"], "when": i["when"], "ended": bool(i.get("ended")), "people": [a["name"] for a in i["attendees"]]} for i in invites[:25]],
         "alerts": [w["title"] + ": " + w["text"] for w in live.get("watch", [])][:20],
-        "moabRecords": {
+        "overtureRecords": {
             "companies": dict(list((records.get("companies") or {}).items())[:60]),
             # research profiles are long: this call's people and company carry theirs above
             "people": {e: {k: v for k, v in r.items() if k != "profile"} if isinstance(r, dict) else r
@@ -2354,7 +2354,7 @@ def ensure_worker():
     with RQ_LOCK:
         alive = [t for t in _WORKER["threads"] if t.is_alive()]
         while len(alive) < MAX_WORKERS:
-            t = threading.Thread(target=_worker_loop, name="moab-research-" + str(len(alive) + 1), daemon=True)
+            t = threading.Thread(target=_worker_loop, name="overture-research-" + str(len(alive) + 1), daemon=True)
             alive.append(t)
             t.start()  # under the lock, so a second caller can't see them not yet alive and start more
         _WORKER["threads"] = alive
@@ -5803,7 +5803,7 @@ def _domain_contacts_cached(domain):
             with CRM_LOCK:
                 HS_WARMING.discard(domain)
     if fetch:
-        threading.Thread(target=contextvars.copy_context().run, args=(fill,), name="moab-hubspot-contacts", daemon=True).start()
+        threading.Thread(target=contextvars.copy_context().run, args=(fill,), name="overture-hubspot-contacts", daemon=True).start()
     return list(hit[1]) if hit and isinstance(hit[1], list) else []
 
 
@@ -6617,7 +6617,7 @@ def _sources_loop():
 
 def start_sources_loop():
     if MEETILY_AUTOSTART:
-        threading.Thread(target=_sources_loop, name="moab-sources", daemon=True).start()
+        threading.Thread(target=_sources_loop, name="overture-sources", daemon=True).start()
 
 
 # ---------------------------------------------------------------- request guards ----------------------------------------------------------------
@@ -6634,7 +6634,7 @@ def extension_id_from_key(key_b64):
 
 
 def extension_ids():
-    """Overture's Chrome extension (fixed by the "key" in extension/manifest.json), plus any ids in MOAB_EXTENSION_IDS."""
+    """Overture's Chrome extension (fixed by the "key" in extension/manifest.json), plus any ids in OVERTURE_EXTENSION_IDS."""
     out = []
     try:
         path = EXTENSION_DIR / "manifest.json"
@@ -6646,7 +6646,7 @@ def extension_ids():
             out.append(_EXT_CACHE["id"])
     except (OSError, ValueError, TypeError):
         pass
-    out += [x.strip() for x in os.environ.get("MOAB_EXTENSION_IDS", "").split(",") if EXT_ID_RE.match(x.strip())]
+    out += [x.strip() for x in os.environ.get("OVERTURE_EXTENSION_IDS", "").split(",") if EXT_ID_RE.match(x.strip())]
     return list(dict.fromkeys(out))
 
 
@@ -6668,8 +6668,8 @@ def read_guard_ok(headers):
 
 
 def write_guard_ok(headers):
-    """Writes: right host, the X-MOAB header (other sites can't send it without a preflight we never answer), and our own Origin."""
-    if not host_ok(headers) or headers.get("X-MOAB") != "1":
+    """Writes: right host, the X-OVERTURE header (other sites can't send it without a preflight we never answer), and our own Origin."""
+    if not host_ok(headers) or headers.get("X-OVERTURE") != "1":
         return False
     origin = headers.get("Origin")
     if origin:
@@ -6759,7 +6759,7 @@ class Handler(SimpleHTTPRequestHandler):
             if path == "/api/status":
                 self.send_json(200, st)
             else:
-                self.send_body(200, ("window.MOAB_STATUS = " + script_json(st) + ";\nwindow.MOAB_LIVE = null;\n").encode("utf-8"), "text/javascript")
+                self.send_body(200, ("window.OVERTURE_STATUS = " + script_json(st) + ";\nwindow.OVERTURE_LIVE = null;\n").encode("utf-8"), "text/javascript")
             return True
         if path.startswith("/api/") or path == "/auth/google/disconnect":
             self.send_json(401, {"error": "sign in first"})
@@ -6789,7 +6789,7 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send_json(200, status_body())
         if path == "/data/live.js":
             if not read_guard_ok(self.headers):
-                return self.send_body(200, b"window.MOAB_LIVE = null;\n", "text/javascript")
+                return self.send_body(200, b"window.OVERTURE_LIVE = null;\n", "text/javascript")
             return self.send_body(200, live_script().encode("utf-8"), "text/javascript")
         if path == "/api/records":
             if not read_guard_ok(self.headers):
@@ -6868,7 +6868,7 @@ class Handler(SimpleHTTPRequestHandler):
         if self.signed_out():
             return None
         if path == "/api/settings":
-            # Settings: only from this page (X-MOAB + our Origin), JSON only, at most 64 KB, every value checked (save_settings).
+            # Settings: only from this page (X-OVERTURE + our Origin), JSON only, at most 64 KB, every value checked (save_settings).
             if not write_guard_ok(self.headers) or self.headers.get_content_type() != "application/json":
                 return self.send_json(403, {"error": "not allowed"})
             try:
@@ -6955,7 +6955,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(403, {"error": "Web research is off in Settings > Research sources & privacy."})
             return self.send_json(*request_org_research(body["domain"]))
         if path in ("/api/meetily/pick", "/api/granola/fetch"):
-            # Meetily's call and Granola's note: only from this page (X-MOAB + our Origin), JSON only.
+            # Meetily's call and Granola's note: only from this page (X-OVERTURE + our Origin), JSON only.
             if not write_guard_ok(self.headers) or self.headers.get_content_type() != "application/json":
                 return self.send_json(403, {"error": "not allowed"})
             try:
@@ -6968,7 +6968,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(400, {"error": "send {callId}"})
             return self.send_json(*granola_fetch(body["callId"], forced=True))
         if path in ("/api/mentions", "/api/mentions/live", "/api/mentions/pick", "/api/mentions/hubspot"):
-            # People mentioned on a call: only from this page (X-MOAB + our Origin), JSON only, with a size limit.
+            # People mentioned on a call: only from this page (X-OVERTURE + our Origin), JSON only, with a size limit.
             if not write_guard_ok(self.headers) or self.headers.get_content_type() != "application/json":
                 return self.send_json(403, {"error": "not allowed"})
             try:
@@ -6983,7 +6983,7 @@ class Handler(SimpleHTTPRequestHandler):
                        "/api/mentions/hubspot": mention_hubspot}[path]
             return self.send_json(*handler(body))
         if path == "/api/hubspot/save":
-            # Writes to HubSpot: only from this page (X-MOAB + our Origin), and only with confirm: true (see hubspot_save).
+            # Writes to HubSpot: only from this page (X-OVERTURE + our Origin), and only with confirm: true (see hubspot_save).
             if not write_guard_ok(self.headers) or self.headers.get_content_type() != "application/json":
                 return self.send_json(403, {"error": "not allowed"})
             try:
@@ -7014,8 +7014,8 @@ def main(argv):
     global PORT
     if "--port" in argv:
         PORT = int(argv[argv.index("--port") + 1])
-    elif os.environ.get("MOAB_PORT"):
-        PORT = int(os.environ["MOAB_PORT"])
+    elif os.environ.get("OVERTURE_PORT"):
+        PORT = int(os.environ["OVERTURE_PORT"])
     elif HOSTED and os.environ.get("PORT"):  # Render says which port to listen on
         PORT = int(os.environ["PORT"])
     ensure_data_dir()

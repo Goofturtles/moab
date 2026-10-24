@@ -4,7 +4,7 @@
 // Every change saves at once (text after a short pause) and the header says "Saved". settings.js does the storing.
 (function () {
   "use strict";
-  const C = window.C, S = window.MoabSettings;
+  const C = window.C, S = window.OvertureSettings;
   if (!C || !S) return;
   const { $, $$, esc, ic, plural, D, MODE } = C;
   const DEMO = MODE === "demo";
@@ -52,7 +52,7 @@
 
   const page = { menu: "brief", type: "intro", status: "", timer: null, field: null };
   const draft = () => JSON.parse(JSON.stringify(S.get()));
-  const app = () => window.MoabApp || { announce() {}, go(h) { location.hash = h; } };
+  const app = () => window.OvertureApp || { announce() {}, go(h) { location.hash = h; } };
 
   // ---------- building blocks ----------
   const helpId = (id) => id + "-help";
@@ -215,7 +215,7 @@
   async function claudeKeyRefresh(msg) {
     const st = $("#claudeKeyState"); if (!st) return;
     try {
-      const r = await fetch("/api/claude-key", { headers: { "X-MOAB": "1" } }), j = await r.json();
+      const r = await fetch("/api/claude-key", { headers: { "X-OVERTURE": "1" } }), j = await r.json();
       st.textContent = (msg ? msg + " " : "") + (j.saved ? (j.source === "env" ? "Using the key from the ANTHROPIC_API_KEY setting (ends in " + j.last4 + ")." : "Key saved on this PC (ends in " + j.last4 + "). Web lookups are on.") : "No key yet. Web lookups and Ask Overture answers are off.");
       st.classList.toggle("ok", !!j.saved);
       // The box empties after a save so the key never sits on screen; show that it's saved instead of looking wiped.
@@ -230,7 +230,7 @@
     if (!key) { input.focus(); return; }
     try {
       input.value = "";  // never leave the key in the box, whatever the server answers
-      const r = await fetch("/api/claude-key", { method: "PUT", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify({ key }) });
+      const r = await fetch("/api/claude-key", { method: "PUT", headers: { "Content-Type": "application/json", "X-OVERTURE": "1" }, body: JSON.stringify({ key }) });
       const j = await r.json();
       if (!r.ok) { $("#claudeKeyState").textContent = j.error || "Couldn't save the key."; input.focus(); return; }
       claudeKeyRefresh("Saved.");
@@ -240,7 +240,7 @@
   document.addEventListener("click", async (e) => {
     if (!e.target.closest("#claudeKeyRemove")) return;
     if (!confirm("Remove the saved Claude key from this PC? Web lookups and Ask Overture answers turn off.")) return;
-    await fetch("/api/claude-key/remove", { method: "POST", headers: { "X-MOAB": "1" } }).catch(() => {});
+    await fetch("/api/claude-key/remove", { method: "POST", headers: { "X-OVERTURE": "1" } }).catch(() => {});
     C.state.claudeOn = false;
     claudeKeyRefresh("Removed.");
   });
@@ -458,7 +458,7 @@
   function meMenuHtml() {
     const dark = S.get().appearance.theme === "dark";
     // Who is signed in (your Google account), and a way to sign out: it revokes Overture's Google access and deletes the saved sign-in.
-    const g = (window.MOAB_STATUS || {}).google || {}, signedIn = !DEMO && g.connected;
+    const g = (window.OVERTURE_STATUS || {}).google || {}, signedIn = !DEMO && g.connected;
     const who = signedIn ? '<div class="me-who" role="presentation"><span class="me-who-l">Signed in with Google</span><span class="me-who-e">' + esc(g.email || "your Google account") + "</span></div>" : "";
     const out = signedIn ? '<div class="me-sep" role="separator"></div><button type="button" role="menuitem" data-disconnect>' + ic("logOut") + "<span>Sign out</span></button>" : "";
     return who + '<a role="menuitem" href="#/settings">' + ic("settings") + "<span>Settings</span></a>"
@@ -510,5 +510,5 @@
     else if (e.key === "Tab") closeMe();
   });
 
-  window.MoabSettingsPage = { MENUS, render };
+  window.OvertureSettingsPage = { MENUS, render };
 })();

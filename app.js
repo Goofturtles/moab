@@ -6,7 +6,7 @@
   const { D, SNAP, MODE, SRC, ME, $, $$, esc, ic, plural, fmtDate, splitWhen, store, NEW_TAB, MONTHS, avatar, coTile, tagFor } = C;
   const LIVE_MODE = MODE === "live", DEMO = MODE === "demo";
   // Where your data is kept: this PC, or (the shared site) your own account, which nobody else who signs in can see.
-  const savedWhere = () => (window.MOAB_STATUS && window.MOAB_STATUS.hosted ? "in your own account, which other people who sign in can't see" : "on this PC");
+  const savedWhere = () => (window.OVERTURE_STATUS && window.OVERTURE_STATUS.hosted ? "in your own account, which other people who sign in can't see" : "on this PC");
 
   Object.assign(C.ICONS, {
     menu: '<path d="M4 12h16M4 6h16M4 18h16"/>',
@@ -193,8 +193,8 @@
     else if (r.view === "people") { const email = C.emailForKey(app.personKey); if (!email) { go("#/map", true); return; } title = renderPerson(email); }
     else if (r.view === "live") renderLive();
     else if (r.view === "data") renderData();
-    else if (r.view === "settings" && window.MoabSettingsPage) title = window.MoabSettingsPage.render(r.menu) || title;
-    else if (r.view === "guides" && window.MoabGuides) title = window.MoabGuides.show(r.guide, $('[data-view="guides"]'));
+    else if (r.view === "settings" && window.OvertureSettingsPage) title = window.OvertureSettingsPage.render(r.menu) || title;
+    else if (r.view === "guides" && window.OvertureGuides) title = window.OvertureGuides.show(r.guide, $('[data-view="guides"]'));
     renderNav();
     placeSearchInput();
     document.title = (title ? title + " · " : "") + "Overture";
@@ -217,8 +217,8 @@
   // Calendly's provider row (tile, name, account line, Connect on the right), Tana's quiet "Skip for now" link under it,
   // Clockwise's plain explanation of what it reads. Refs at the top of home.css.
   function connectCard() {
-    const st = C.state, err = window.MOAB_LIVE_ERROR;
-    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/moabCut/g, "moabCutConnect");
+    const st = C.state, err = window.OVERTURE_LIVE_ERROR;
+    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/overtureCut/g, "overtureCutConnect");
     let action, note = "";
     if (!st.server) {
       action = '<span class="btn primary" aria-disabled="true">Connect Google Calendar</span>';
@@ -355,7 +355,7 @@
     const keep = document.activeElement && sec.contains(document.activeElement) ? document.activeElement.dataset.todo || document.activeElement.getAttribute("href") : null;
     const ready = D.invites.filter((i) => !i.ended && prepState(i.id) === "done").length, unread = unreadCount();
     // Shopify, Tana and Perplexity put one big ask/search box under the greeting, with quick actions under it (Mobbin).
-    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/moabCut/g, "moabCutAsk");
+    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/overtureCut/g, "overtureCutAsk");
     const chip = (attrs, label, n) => '<li><button type="button" class="home-chip" ' + attrs + ">" + label + (n != null ? '<b>' + n + "</b>" : "") + "</button></li>";
     const nextReady = prepState(next.id) === "done";
     sec.innerHTML = '<div class="home-hero">' + heroWeb(next, later) + '<header class="home-header"><p class="eyebrow">' + esc(today().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })) + "</p>"
@@ -423,7 +423,7 @@
     const card = (cls, href, top, main, foot) => '<a class="hw-card ' + cls + '" href="' + href + '" tabindex="-1"><span class="hw-top">' + top + '</span><span class="hw-main">' + main + '</span><span class="hw-foot"><span class="hw-note">' + foot + "</span></span></a>";
     const text = (t, sub) => '<span class="hw-txt"><span class="hw-t">' + t + '</span><span class="hw-s">' + sub + "</span></span>";
     const dot = (bg, icon) => '<span class="avatar lg hw-ic" style="background:' + bg + ';color:#fff">' + icon + "</span>";
-    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/moabCut/g, "moabCutHero");
+    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/overtureCut/g, "overtureCutHero");
     return '<div class="hero-web" aria-hidden="true"><svg class="hw-lines"></svg>'
       + '<a class="hw-cluster" href="#/data" tabindex="-1">' + dot("#fff", bot) + dot("#3b7ddd", ic("calendar")) + dot("#d93a4e", ic("shield")) + "</a>"
       + (LIVE_MODE
@@ -498,7 +498,7 @@
       + '<p class="auth-legal">Read-only calendar access. Your calls, notes and records stay ' + savedWhere() + '. <a href="?demo=1#/home">Look around with sample data</a></p>';
   }
   function renderHomeEmpty(sec) {
-    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/moabCut/g, "moabCutAsk");
+    const bot = ($(".brand .logo") || { outerHTML: "" }).outerHTML.replace(/overtureCut/g, "overtureCutAsk");
     const list = alerts(), unread = unreadCount();
     sec.innerHTML = '<div class="home-hero' + (LIVE_MODE ? "" : " hero-xl") + '">' + heroWebPublic() + '<header class="home-header">'
       + (LIVE_MODE ? '<p class="eyebrow">' + esc(today().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })) + "</p>"
@@ -1132,7 +1132,7 @@
   // The in-call panel runs in its own frame (and maybe another tab): when it finds or changes a connection it says so here,
   // and this page fetches that call's mentions, so the People map and After the call show it without a reload.
   if (LIVE_MODE && "BroadcastChannel" in window) {
-    new BroadcastChannel("moab-mentions").onmessage = (e) => { const id = e.data && e.data.callId; if (typeof id === "string" && inviteById(id)) loadMentions(id); };
+    new BroadcastChannel("overture-mentions").onmessage = (e) => { const id = e.data && e.data.callId; if (typeof id === "string" && inviteById(id)) loadMentions(id); };
   }
   const gongTranscriptsOn = () => LIVE_MODE && !!(C.state.gong && C.state.gong.configured) && C.state.gongTranscripts;
   // Granola (Settings > Research sources, off by default, and a key saved with tools/connect.py granola): its note after the call.
@@ -2171,7 +2171,7 @@
     if (!st.server) cal = row("calendar", "Google Calendar", "Overture's server isn't answering, or an older copy is running. Restart <code>server.py</code>, then reload.", "Offline", false);
     else if (!g.configured) cal = row("calendar", "Google Calendar", 'Sign-in isn\'t set up on this PC yet. <a href="#/guides/google">Set it up</a>' + ", then restart <code>server.py</code>.", "Not set up", false);
     else if (g.connected) cal = row("calendar", "Google Calendar", "Connected as " + esc(g.email || "your Google account") + " · read-only, the next 14 days"
-      + (window.MOAB_LIVE_ERROR ? ". Last try failed: " + esc(window.MOAB_LIVE_ERROR) : ""), "Connected", !window.MOAB_LIVE_ERROR, '<button type="button" class="btn ghost sm" data-disconnect>Disconnect</button>');
+      + (window.OVERTURE_LIVE_ERROR ? ". Last try failed: " + esc(window.OVERTURE_LIVE_ERROR) : ""), "Connected", !window.OVERTURE_LIVE_ERROR, '<button type="button" class="btn ghost sm" data-disconnect>Disconnect</button>');
     else cal = row("calendar", "Google Calendar", "Not connected. Overture only asks to read your calendar.", "Not connected", false, '<a class="btn secondary sm" href="/auth/google">Connect</a>');
     const syncTime = (iso) => (iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "");
     const crmRow = (key, icon, label, what, doc) => {
@@ -2399,7 +2399,7 @@
       .filter(([l]) => has(l)).map(([l, h, icon]) => ({ icon, label: l, sub: "", href: h }));
     if (q && pages.length) groups.push(["Pages", pages]);
     // "Settings: Brief builder" and so on, one per menu (also found by words on that menu, e.g. "dark", "tone", "email").
-    const sets = (window.MoabSettingsPage ? window.MoabSettingsPage.MENUS : []).filter((m) => q && (has("Settings: " + m.label) || m.words.some((x) => x.includes(ql))))
+    const sets = (window.OvertureSettingsPage ? window.OvertureSettingsPage.MENUS : []).filter((m) => q && (has("Settings: " + m.label) || m.words.some((x) => x.includes(ql))))
       .map((m) => ({ icon: "settings", label: "Settings: " + m.label, sub: m.sub, href: "#/settings/" + m.id }));
     if (sets.length) groups.push(["Settings", sets]);
     if (q.length >= 2) {
@@ -2528,10 +2528,10 @@
   }
 
   async function disconnectGoogle() {
-    const email = ((window.MOAB_STATUS || {}).google || {}).email;
+    const email = ((window.OVERTURE_STATUS || {}).google || {}).email;
     if (!confirm("Sign out" + (email ? " of " + email : "") + "? Overture stops reading your calendar until you sign in again. Your saved research and notes stay " + savedWhere() + ".")) return;
     try {
-      const r = await C.fetchTimeout("/auth/google/disconnect", 15000, { method: "POST", headers: { "X-MOAB": "1" } });
+      const r = await C.fetchTimeout("/auth/google/disconnect", 15000, { method: "POST", headers: { "X-OVERTURE": "1" } });
       if (!r.ok) throw new Error();
     } catch (e) { toast("Couldn't disconnect. Is server.py running?"); return; }
     location.href = location.pathname + "#/home";
@@ -2793,9 +2793,9 @@
     });
 
     // Settings (settings-page.js) reach the rest of the app through this; a change from another tab redraws the page.
-    window.MoabApp = { go, announce, toast };
-    if (window.MoabSettings) {
-      window.MoabSettings.on((s, group) => {
+    window.OvertureApp = { go, announce, toast };
+    if (window.OvertureSettings) {
+      window.OvertureSettings.on((s, group) => {
         syncPrivacyState(s);
         if (!group || group === "brief") Object.values(runs).forEach((r) => { if (r.ctx && r.ctx.done) r.ctx.opener = C.openingLine(r.ctx); });
         renderNav();

@@ -16,7 +16,7 @@ meeting number in the invite). If it can't, the panel shows the call picker.
 The extension's id is `geemcgoloailklihnpghgindneohhccc` on every PC (the manifest's `key` fixes it). Overture's server only lets
 its own pages and this extension show the in-call panel in a frame (`Content-Security-Policy: frame-ancestors 'self'
 chrome-extension://geemcgoloailklihnpghgindneohhccc`). If you change the key or load a copy with another id, add that id to
-`MOAB_EXTENSION_IDS` (comma-separated) before starting the server.
+`OVERTURE_EXTENSION_IDS` (comma-separated) before starting the server.
 
 ## What it may do
 

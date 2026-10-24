@@ -156,5 +156,5 @@
     }
   });
 
-  window.MoabGuides = { show, GUIDES, href: (name) => "#/guides/" + name };
+  window.OvertureGuides = { show, GUIDES, href: (name) => "#/guides/" + name };
 })();

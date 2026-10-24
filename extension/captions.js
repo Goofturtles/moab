@@ -6,7 +6,7 @@
 (() => {
   // One reader per Meet tab: a newer copy (the extension was reloaded mid-call) takes over and this one stops.
   const me = String(Date.now()) + Math.random().toString(36).slice(2, 8);
-  document.documentElement.dataset.moabCaptions = me;
+  document.documentElement.dataset.overtureCaptions = me;
   const POLL_MS = 1000;
   const UI_WORDS = new Set(["captions", "live captions", "english", "turn off captions", "turn on captions", "caption settings"]);
   const ICON = /^[a-z_]+$/;          // Material icon ligatures in Meet's text (arrow_downward, more_vert)
@@ -56,12 +56,12 @@
 
   function tick() {
     // Every 3 s: tell the side panel this reader is running and whether it can see Meet's captions (CC on), so it can say so.
-    if (ticks++ % 3 === 0) send("moab-captions-status", { box: !!captionsBox() });
+    if (ticks++ % 3 === 0) send("overture-captions-status", { box: !!captionsBox() });
     const leave = document.querySelector('[aria-label*="Leave call" i]');
     if (leave) { inCall = true; missed = 0; }
     else if (inCall && ++missed >= 2) { // gone for 2 checks in a row (not a toolbar redraw): you left the call
       inCall = false;
-      send("moab-call-ended", { lines: all.slice() }); // Overture reads the whole transcript for After the call
+      send("overture-call-ended", { lines: all.slice() }); // Overture reads the whole transcript for After the call
     }
     const box = captionsBox();
     if (!box) return;
@@ -75,11 +75,11 @@
       }
       finished(c, out);
     });
-    if (out.length) send("moab-captions", { lines: out });
+    if (out.length) send("overture-captions", { lines: out });
   }
   const timer = setInterval(() => {
     // replaced by a newer copy, or the extension was turned off: stop
-    if (document.documentElement.dataset.moabCaptions !== me || !(chrome.runtime && chrome.runtime.id)) { clearInterval(timer); return; }
+    if (document.documentElement.dataset.overtureCaptions !== me || !(chrome.runtime && chrome.runtime.id)) { clearInterval(timer); return; }
     tick();
   }, POLL_MS);
 })();

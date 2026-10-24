@@ -15,7 +15,7 @@ import sys
 import urllib.parse
 from pathlib import Path
 
-DATA = Path(os.environ.get("MOAB_DATA_DIR") or (Path(__file__).resolve().parent.parent / ".data"))
+DATA = Path(os.environ.get("OVERTURE_DATA_DIR") or (Path(__file__).resolve().parent.parent / ".data"))
 
 
 def load(name):

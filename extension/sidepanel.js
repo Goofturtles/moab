@@ -5,7 +5,7 @@
 "use strict";
 
 const Overture = "http://localhost:3576";
-const frame = document.getElementById("moab");
+const frame = document.getElementById("overture");
 const off = document.getElementById("off");
 
 function meetingParams(url) {
@@ -38,13 +38,13 @@ async function activeTabUrl() {
   } catch (e) { return ""; }
 }
 
-async function moabUp() {
+async function overtureUp() {
   try { return (await fetch(Overture + "/api/status", { cache: "no-store", credentials: "omit" })).ok; } catch (e) { return false; }
 }
 
 let shown = "";
 async function refresh() {
-  const up = await moabUp();
+  const up = await overtureUp();
   off.hidden = up;
   frame.hidden = !up;
   if (!up) { shown = ""; return; }
@@ -60,13 +60,13 @@ if (chrome.runtime && chrome.runtime.onMessage) chrome.runtime.onMessage.addList
   if (!msg || !sender.tab || frame.hidden || !shown || !frame.contentWindow) return;
   const meet = meetingParams(sender.tab.url || "").meet;
   if (!meet || new URL(shown).searchParams.get("meet") !== meet) return;
-  if (msg.type === "moab-captions" && Array.isArray(msg.lines)) {
-    frame.contentWindow.postMessage({ type: "moab-captions", lines: msg.lines.slice(0, 50).map((l) => String(l).slice(0, 600)) }, Overture);
-  } else if (msg.type === "moab-captions-status") {
-    frame.contentWindow.postMessage({ type: "moab-captions-status", box: !!msg.box }, Overture);
-  } else if (msg.type === "moab-call-ended") {
+  if (msg.type === "overture-captions" && Array.isArray(msg.lines)) {
+    frame.contentWindow.postMessage({ type: "overture-captions", lines: msg.lines.slice(0, 50).map((l) => String(l).slice(0, 600)) }, Overture);
+  } else if (msg.type === "overture-captions-status") {
+    frame.contentWindow.postMessage({ type: "overture-captions-status", box: !!msg.box }, Overture);
+  } else if (msg.type === "overture-call-ended") {
     const lines = Array.isArray(msg.lines) ? msg.lines.slice(-20000).map((l) => String(l).slice(0, 600)) : [];
-    frame.contentWindow.postMessage({ type: "moab-call-ended", lines }, Overture);
+    frame.contentWindow.postMessage({ type: "overture-call-ended", lines }, Overture);
   }
 });
 

@@ -31,11 +31,11 @@
 
   // Settings > In-call panel: which cards show, in what order, compact or full, and the live-listening reminder.
   const TAB_CARDS = { brief: ["opener", "points", "watch", "send"], people: ["people", "map"], notes: ["notes"] };
-  const panelPrefs = () => (window.MoabSettings ? window.MoabSettings.get().panel : null);
+  const panelPrefs = () => (window.OvertureSettings ? window.OvertureSettings.get().panel : null);
   const cardOn = (id) => { const p = panelPrefs(), c = p && p.cards.find((x) => x.id === id); return !c || c.on; };
   const inOrder = (ids) => { const p = panelPrefs(); if (!p) return ids; const o = p.cards.map((c) => c.id); return ids.slice().sort((a, b) => o.indexOf(a) - o.indexOf(b)); };
   const tabsShown = () => ["brief", "people", "notes"].filter((t) => t === "brief" || TAB_CARDS[t].some(cardOn)); // Brief always has At a glance
-  const autoLookup = () => !window.MoabSettings || window.MoabSettings.get().mentions.autoLookup !== false;
+  const autoLookup = () => !window.OvertureSettings || window.OvertureSettings.get().mentions.autoLookup !== false;
 
   // view: a guest's or a company's profile opened inside the current tab ({ kind: "person", email } or { kind: "org", name }), else null.
   const state = { callId: window.C.inviteById(qs.get("call")) ? qs.get("call") : D.invites.length ? D.invites[0].id : null, ctx: null, tab: "brief", inCall: null, startedAt: Date.now(), hostNote: "", ticks: new Set(), open: null, view: null };
@@ -101,7 +101,7 @@
   }
 
   // ---------- render ----------
-  const LOGO = '<svg class="logo sm" viewBox="0 0 48 48" aria-hidden="true"><defs><mask id="moabCut"><rect width="48" height="48" fill="#fff"/><circle cx="38.5" cy="9.5" r="8" fill="#000"/></mask></defs><path d="M24 5c11 0 19 4.2 19 17.5S36 43 24 43 5 35.8 5 22.5 13 5 24 5z" fill="#1ED760" mask="url(#moabCut)"/><g class="logo-eyes" fill="#000"><rect x="15.5" y="18" width="5.5" height="11" rx="2.75"/><rect x="27" y="18" width="5.5" height="11" rx="2.75"/></g><circle class="logo-dot" cx="38.5" cy="9.5" r="5" fill="#22C55E"/></svg>';
+  const LOGO = '<svg class="logo sm" viewBox="0 0 48 48" aria-hidden="true"><defs><mask id="overtureCut"><rect width="48" height="48" fill="#fff"/><circle cx="38.5" cy="9.5" r="8" fill="#000"/></mask></defs><path d="M24 5c11 0 19 4.2 19 17.5S36 43 24 43 5 35.8 5 22.5 13 5 24 5z" fill="#1ED760" mask="url(#overtureCut)"/><g class="logo-eyes" fill="#000"><rect x="15.5" y="18" width="5.5" height="11" rx="2.75"/><rect x="27" y="18" width="5.5" height="11" rx="2.75"/></g><circle class="logo-dot" cx="38.5" cy="9.5" r="5" fill="#22C55E"/></svg>';
   function header() {
     const inv = window.C.inviteById(state.callId);
     const live = HOST !== "preview" || FRAMED;
@@ -120,7 +120,7 @@
 
   // Meetily (Settings > Research sources, off by default): Overture's server reads its live transcript on this PC.
   // "Listening via Meetily" while its lines arrive for this call; GET /api/meetily is asked every 3 s while it is on.
-  const meetilyOn = () => LIVE_MODE && !!(window.MoabSettings && window.MoabSettings.get().research.meetily);
+  const meetilyOn = () => LIVE_MODE && !!(window.OvertureSettings && window.OvertureSettings.get().research.meetily);
   const mt = { st: null, timer: null, lines: -1 };
   function listenLine() {
     const cap = captionsLine(); // Google Meet's captions come first: they need nothing else installed
@@ -272,7 +272,7 @@
     } catch (e) { mnPoll(); } // the panel works without them; ask again in a moment while something is still being looked up
   }
   // The app around this panel (the panel runs in its own frame there) and any open People map refetch a call when its connections change.
-  const mnBus = "BroadcastChannel" in window ? new BroadcastChannel("moab-mentions") : null;
+  const mnBus = "BroadcastChannel" in window ? new BroadcastChannel("overture-mentions") : null;
   function applyMentions(id, j) {
     if (id !== state.callId || !j) return;
     const before = JSON.stringify([mn.callId, mn.items, mn.orgs]);
@@ -394,9 +394,9 @@
   window.addEventListener("message", (e) => {
     // Only the extension's side panel frames this page (the server's frame-ancestors says so), and it is our parent.
     if (e.source !== window.parent || !/^chrome-extension:\/\//.test(e.origin) || !e.data || !LIVE_MODE) return;
-    if (e.data.type === "moab-captions" && Array.isArray(e.data.lines)) captionLines(e.data.lines);
-    if (e.data.type === "moab-call-ended") captionsDone("left", e.data.lines);
-    if (e.data.type === "moab-captions-status") { // the Meet tab's reader checks in every 3 s: running, and whether CC is on
+    if (e.data.type === "overture-captions" && Array.isArray(e.data.lines)) captionLines(e.data.lines);
+    if (e.data.type === "overture-call-ended") captionsDone("left", e.data.lines);
+    if (e.data.type === "overture-captions-status") { // the Meet tab's reader checks in every 3 s: running, and whether CC is on
       const was = cc.box;
       cc.box = !!e.data.box; cc.seenAt = Date.now();
       if (was !== cc.box) refreshListen();
@@ -640,6 +640,6 @@
     }
   }
   // Settings changed (here, in the app, or in another tab): the panel follows at once.
-  if (window.MoabSettings) window.MoabSettings.on(() => { if (state.ctx) { state.ctx.opener = window.C.openingLine(state.ctx); render(); } meetilyPoll(); });
+  if (window.OvertureSettings) window.OvertureSettings.on(() => { if (state.ctx) { state.ctx.opener = window.C.openingLine(state.ctx); render(); } meetilyPoll(); });
   document.addEventListener("DOMContentLoaded", start);
 })();

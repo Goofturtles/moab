@@ -4,15 +4,15 @@ A call-prep agent for Chris (Spotify Backstage sales). It reads your real calls 
 
 ## Try it without installing
 
-https://goofturtles.github.io/moab/?demo=1 shows Overture with made-up sample calls. Nothing is connected and nothing leaves your browser.
+https://goofturtles.github.io/overture/?demo=1 shows Overture with made-up sample calls. Nothing is connected and nothing leaves your browser.
 
 ## The shared site (Render)
 
 One link where anyone signs in with Google and sees only their own calls, research and notes. Each Google account gets its own folder (`.data/users/<account>`); nothing from one account is ever read in another. Saved files are also kept in a small Postgres, because Render's free server wipes its disk when it sleeps.
 
-1. Open https://render.com/deploy?repo=https://github.com/Goofturtles/moab, sign in to Render, paste the Google OAuth client's ID and secret when asked, and press **Deploy**.
+1. Open https://render.com/deploy?repo=https://github.com/Goofturtles/overture, sign in to Render, paste the Google OAuth client's ID and secret when asked, and press **Deploy**.
 2. In Google Cloud > Credentials > your OAuth client, add `<your Render URL>/auth/google/callback` as an authorized redirect URI.
-3. While the Google app is in Testing, add each person (Chris, you) under **OAuth consent screen > Test users**. Optional: set `MOAB_ALLOWED` on Render (emails or `@domain`, comma-separated) to limit who may sign in.
+3. While the Google app is in Testing, add each person (Chris, you) under **OAuth consent screen > Test users**. Optional: set `OVERTURE_ALLOWED` on Render (emails or `@domain`, comma-separated) to limit who may sign in.
 
 Each person pastes their own Claude key in Settings. Meetily and Granola read files on your own PC, so the shared site doesn't use them, and the Chrome extension still talks to the copy on your PC. Render's free Postgres is deleted 30 days after it is made.
 
@@ -202,9 +202,9 @@ Every answer says which one answered. The brief itself is always written by buil
 | Endpoint | What |
 |---|---|
 | `GET /api/status` | `{claude, google: {configured, connected, email}, ai: {claude}, hubspot: {configured, connected, portal, lastSync, lastError}, gong: {configured, connected, workspace, lastSync, lastError}}` |
-| `GET /data/live.js` | `window.MOAB_LIVE = {...}` (same shape as `data/sample.js`) or `null` |
+| `GET /data/live.js` | `window.OVERTURE_LIVE = {...}` (same shape as `data/sample.js`) or `null` |
 | `GET /auth/google`, `GET /auth/google/callback`, `POST /auth/google/disconnect` | Google sign-in (PKCE, single-use state), and revoke |
-| `GET /api/records`, `PUT /api/records/company`, `PUT /api/records/person`, `PUT /api/records/call-notes`, `POST /api/records/apply` | Overture records. Writes need the `X-MOAB: 1` header and this page's own Origin |
+| `GET /api/records`, `PUT /api/records/company`, `PUT /api/records/person`, `PUT /api/records/call-notes`, `POST /api/records/apply` | Overture records. Writes need the `X-OVERTURE: 1` header and this page's own Origin |
 | `GET /api/research`, `POST /api/research {email}` | Invitee research status per guest (pending, done, unknown, skipped, error); ask for one guest to be looked up again. Same guards as the records |
 | `GET /api/settings`, `PUT /api/settings {group: {...}}` | Every setting (`settings`, with `defaults`); save one or more groups, partial groups merge. Each value is checked (unknown keys, wrong types, out-of-range numbers and lists that are too long get a 400), at most 64 KB (413). Same guards as the records |
 | `PUT /api/records/settings {gongInAI, gongTranscripts, transcriptsInAI}` | The Data-page settings (each off by default; send one or more). Same guards as the records |

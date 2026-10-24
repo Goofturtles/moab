@@ -1,13 +1,13 @@
 // Overture settings (the Settings page): the defaults, where the current values come from, saving, and the appearance.
 // Loaded before core.js on both pages (index.html and panel.html).
-// Live: server.py sends every setting in data/live.js (MOAB_LIVE.appSettings) and saves them with PUT /api/settings.
+// Live: server.py sends every setting in data/live.js (OVERTURE_LIVE.appSettings) and saves them with PUT /api/settings.
 // Connect (no calendar yet): the same endpoint, read with GET /api/settings. Demo (?demo=1): this browser only, never the server.
 (function () {
   "use strict";
   // Must match server.py default_settings() (tools/test_live.py compares them).
   const DEFAULTS = /*defaults*/{"brief":{"sections":[{"id":"opener","on":true},{"id":"since","on":true},{"id":"lastTalk","on":true},{"id":"backstage","on":true},{"id":"todos","on":true},{"id":"people","on":true},{"id":"security","on":true},{"id":"rivals","on":true},{"id":"papers","on":true}],"length":"full","tone":"direct"},"priorities":{"targets":[],"rules":{"engineers":{"on":true,"min":200,"weight":2},"adopter":{"on":true,"weight":2},"deal":{"on":true,"weight":3},"alert":{"on":true,"weight":1},"customer":{"on":true,"weight":1}},"target":3,"hot":5,"warm":2,"sort":true},"panel":{"cards":[{"id":"opener","on":true},{"id":"points","on":true},{"id":"watch","on":true},{"id":"send","on":true},{"id":"people","on":true},{"id":"map","on":true},{"id":"notes","on":true}],"density":"full","listening":false},"followup":{"templates":{"intro":{"subject":"Good to meet you, {first_name}","body":"Hi {first_name},\n\nThanks for making time today. What I heard:\n{summary}\n\nNext step: {next_step}\n\nBest,\n{my_name}"},"discovery":{"subject":"{company} and Spotify: notes from {date}","body":"Hi {first_name},\n\nThanks for walking me through how {company} works today. My notes:\n{summary}\n\nNext step: {next_step}\n\nBest,\n{my_name}"},"demo":{"subject":"Your demo: what we covered","body":"Hi {first_name},\n\nThanks for joining the demo on {date}. What we covered:\n{summary}\n\nNext step: {next_step}\n\nBest,\n{my_name}"},"renewal":{"subject":"{company} renewal: next steps","body":"Hi {first_name},\n\nThanks for the renewal call today. What we agreed:\n{summary}\n\nNext step: {next_step}\n\nBest,\n{my_name}"},"other":{"subject":"Following up: {company}","body":"Hi {first_name},\n\nThanks for your time on {date}.\n{summary}\n\nNext step: {next_step}\n\nBest,\n{my_name}"}}},"mentions":{"autoLookup":true,"autoAdd":"single","mapRelations":["people","customer","vendor","partner","competitor","ownership","other"],"keepDays":90},"alerts":{"signals":{"jobChanges":true,"newInvitees":true,"mentioned":true,"security":true,"release":true,"hubspotStages":true},"security":"all","delivery":"instant","quiet":{"on":false,"from":"18:00","to":"08:00"}},"research":{"web":true,"hubspot":true,"gong":true,"gongTranscripts":false,"gongInAI":false,"transcriptsInAI":false,"aiShare":"notes","blocked":[],"meetily":false,"granola":false},"appearance":{"theme":"dark","accent":"green","density":"comfortable"}}/*end*/;
   const QS = new URLSearchParams(location.search);
-  const MODE = QS.get("demo") === "1" ? "demo" : window.MOAB_LIVE ? "live" : "connect";
+  const MODE = QS.get("demo") === "1" ? "demo" : window.OVERTURE_LIVE ? "live" : "connect";
   const DEMO_KEY = "centralize:settings:demo", CACHE_KEY = "centralize:settings:cache";
   const LOOK_KEY = MODE === "demo" ? "centralize:appearance:demo" : "centralize:appearance"; // the demo keeps its own look
   const read = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
@@ -34,7 +34,7 @@
     return typeof val === typeof def ? val : def;
   }
 
-  let current = merge(DEFAULTS, MODE === "live" ? window.MOAB_LIVE.appSettings : MODE === "demo" ? read(DEMO_KEY) : read(CACHE_KEY));
+  let current = merge(DEFAULTS, MODE === "live" ? window.OVERTURE_LIVE.appSettings : MODE === "demo" ? read(DEMO_KEY) : read(CACHE_KEY));
   const listeners = new Set();
   const emit = (group) => listeners.forEach((fn) => { try { fn(current, group); } catch (e) { /* one listener never breaks the rest */ } });
 
@@ -66,7 +66,7 @@
     } else {
       let r;
       try {
-        r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify(patch) });
+        r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json", "X-OVERTURE": "1" }, body: JSON.stringify(patch) });
       } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
       let j = {};
       try { j = await r.json(); } catch (e) { /* no body */ }
@@ -93,7 +93,7 @@
     if (MODE === "demo" && e.key === DEMO_KEY) { current = merge(DEFAULTS, read(DEMO_KEY)); applyAppearance(); emit(null); }
   });
 
-  window.MoabSettings = {
+  window.OvertureSettings = {
     MODE, DEFAULTS,
     get: () => current,
     defaults: () => clone(DEFAULTS),

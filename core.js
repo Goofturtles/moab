@@ -1,15 +1,15 @@
 // Overture core: data, checks and the agent itself, shared by the full app (app.js) and the in-call panel (panel.js).
 // Real public data: Backstage adopters list, Backstage releases, Backstage security notices (data/snapshot.js).
-// Three modes: "live" (server.py's data/live.js built window.MOAB_LIVE from your Google Calendar and Overture's records),
+// Three modes: "live" (server.py's data/live.js built window.OVERTURE_LIVE from your Google Calendar and Overture's records),
 // "demo" (?demo=1, the made-up data in data/sample.js, clearly labelled) and "connect" (nothing connected yet: no calls).
 (function () {
   "use strict";
 
   const SNAP = window.SNAPSHOT;
   const QS = new URLSearchParams(location.search);
-  const MODE = QS.get("demo") === "1" ? "demo" : window.MOAB_LIVE ? "live" : "connect";
+  const MODE = QS.get("demo") === "1" ? "demo" : window.OVERTURE_LIVE ? "live" : "connect";
   const etToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-  const D = MODE === "demo" ? window.SAMPLE : MODE === "live" ? window.MOAB_LIVE
+  const D = MODE === "demo" ? window.SAMPLE : MODE === "live" ? window.OVERTURE_LIVE
     : { today: etToday(), invites: [], people: {}, companies: {}, papers: {}, currentSecurityPack: "", relationships: [], watch: [], me: null };
   ["people", "companies", "papers"].forEach((k) => { if (!D[k]) D[k] = {}; });
   ["invites", "relationships", "watch", "mentioned"].forEach((k) => { if (!D[k]) D[k] = []; });
@@ -137,7 +137,7 @@
   // Chris's own numbers (Oct 17): "maybe an hour a week in the beginning. Now five years later, 13, 15, 20 hours a week."
   const CHRIS = { startHours: 1, lowAt5: 13, highAt5: 20 };
   const ASSUME = { daysPerRelease: 1.5, daysPerSerious: 0.5 };
-  const STATUS0 = window.MOAB_STATUS || null; // what data/live.js said about the server, if it answered
+  const STATUS0 = window.OVERTURE_STATUS || null; // what data/live.js said about the server, if it answered
   const state = { adopters: SNAP.adopters, latest: SNAP.latestRelease, liveData: false, claudeOn: !!(STATUS0 && STATUS0.ai && STATUS0.ai.claude),
     server: !!STATUS0, google: STATUS0 ? STATUS0.google : { configured: false, connected: false, email: "" }, device: "checking",
     hubspot: (STATUS0 && STATUS0.hubspot) || { configured: false, connected: false }, gong: (STATUS0 && STATUS0.gong) || { configured: false, connected: false },
@@ -148,7 +148,7 @@
   // ?live=0 keeps the saved public data, so a rehearsed demo shows the same numbers.
   const LIVE = new URLSearchParams(location.search).get("live") !== "0";
   // The Settings page's values (settings.js); null only if settings.js didn't load.
-  const prefs = () => (window.MoabSettings ? window.MoabSettings.get() : null);
+  const prefs = () => (window.OvertureSettings ? window.OvertureSettings.get() : null);
 
   // ---------- versions ----------
   const cleanVer = (v) => String(v == null ? "" : v).trim().replace(/^v/i, "");
@@ -257,7 +257,7 @@
   async function saveRecord(kind, body, method) {
     let r;
     try {
-      r = await fetchTimeout("/api/records/" + kind, 10000, { method: method || "PUT", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify(body) });
+      r = await fetchTimeout("/api/records/" + kind, 10000, { method: method || "PUT", headers: { "Content-Type": "application/json", "X-OVERTURE": "1" }, body: JSON.stringify(body) });
     } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
     let j = {};
     try { j = await r.json(); } catch (e) { /* no body */ }
@@ -291,7 +291,7 @@
   async function askAI(question, callId) {
     if (MODE === "live" && state.claudeOn) {
       try {
-        const r = await fetchTimeout("/api/ask", 25000, { method: "POST", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify(callId ? { question, callId } : { question }) });
+        const r = await fetchTimeout("/api/ask", 25000, { method: "POST", headers: { "Content-Type": "application/json", "X-OVERTURE": "1" }, body: JSON.stringify(callId ? { question, callId } : { question }) });
         const j = await r.json();
         if (r.ok && j.text) return { text: j.text, source: "claude" };
       } catch (e) { /* fall through to the device */ }
@@ -676,7 +676,7 @@
   async function postJson(url, body, timeout) {
     let r;
     try {
-      r = await fetchTimeout(url, timeout || 30000, { method: "POST", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify(body) });
+      r = await fetchTimeout(url, timeout || 30000, { method: "POST", headers: { "Content-Type": "application/json", "X-OVERTURE": "1" }, body: JSON.stringify(body) });
     } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
     let j = {};
     try { j = await r.json(); } catch (e) { /* no body */ }
@@ -738,7 +738,7 @@
   async function lookUpAgain(email) {
     let r;
     try {
-      r = await fetchTimeout("/api/research", 10000, { method: "POST", headers: { "Content-Type": "application/json", "X-MOAB": "1" }, body: JSON.stringify({ email }) });
+      r = await fetchTimeout("/api/research", 10000, { method: "POST", headers: { "Content-Type": "application/json", "X-OVERTURE": "1" }, body: JSON.stringify({ email }) });
     } catch (e) { throw new Error("Couldn't reach Overture's server. Is server.py running?"); }
     let j = {};
     try { j = await r.json(); } catch (e) { /* no body */ }
